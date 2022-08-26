@@ -1,0 +1,63 @@
+KABQ,Albuquerque International Sunport Airport,New-Mexico
+KATL,Hartsfield Jackson Atlanta International Airport,Georgia
+KBNA,Nashville International Airport,Tennessee
+KBOS,General Edward Lawrence Logan International Airport,Massachusetts
+KBUR,Bob Hope Airport,California
+KBWI,Baltimore/Washington International Thurgood Marshal Airport,Maryland
+KCID,The Eastern Iowa Airport,Iowa
+KCLE,Cleveland Hopkins International Airport,Ohio
+KCLT,Charlotte Douglas International Airport,North-Carolina
+KCMH,Port Columbus International Airport,Ohio
+KCOS,City of Colorado Springs Municipal Airport,Colorado
+KCVG,Cincinnati Northern Kentucky International Airport,Kentucky
+KDAL,Dallas Love Field,Texas
+KDCA,Ronald Reagan Washington National Airport,Virginia
+KDEN,Denver International Airport,Colorado
+KDFW,Dallas Fort Worth International Airport,Texas
+KDSM,Des Moines International Airport,Iowa
+KDTW,Detroit Metropolitan Wayne County Airport,Michigan
+KELP,El Paso International Airport,Texas
+KEWR,Newark Liberty International Airport,New-Jersey
+KFAT,Fresno Yosemite International Airport,California
+KFLL,Fort Lauderdale Hollywood International Airport,Florida
+KHOU,William P Hobby Airport,Texas
+KIAD,Washington Dulles International Airport,Virginia
+KIAH,George Bush Intercontinental Houston Airport,Texas
+KIND,Indianapolis International Airport,Indiana
+KJFK,John F Kennedy International Airport,New-York
+KLAX,Los Angeles International Airport,California
+KLGA,La Guardia Airport,New-York
+KLGB,Long Beach /Daugherty Field/ Airport,California
+KLIT,Adams Field,Arkansas
+KMCI,Kansas City International Airport,Missouri
+KMCO,Orlando International Airport,Florida
+KMDW,Chicago Midway International Airport,Illinois
+KMEM,Memphis International Airport,Tennessee
+KMIA,Miami International Airport,Florida
+KMKE,General Mitchell International Airport,Wisconsin
+KMSP,Minneapolis-St Paul International/Wold-Chamberlain Airport,Minnesota
+KMSY,Louis Armstrong New Orleans International Airport,Louisiana
+KOAK,Metropolitan Oakland International Airport,California
+KOKC,Will Rogers World Airport,Oklahoma
+KONT,Ontario International Airport,California
+KORD,Chicago O'Hare International Airport,Illinois
+KPBI,Palm Beach International Airport,Florida
+KPDX,Portland International Airport,Oregon
+KPHL,Philadelphia International Airport,Pennsylvania
+KPHX,Phoenix Sky Harbor International Airport,Arizona
+KPSP,Palm Springs International Airport,California
+KRDU,Raleigh Durham International Airport,North-Carolina
+KRSW,Southwest Florida International Airport,Florida
+KSAN,San Diego International Airport,California
+KSDF,Louisville International Standiford Field,Kentucky
+KSEA,Seattle Tacoma International Airport,Washington
+KSFO,San Francisco International Airport,California
+KSJC,Norman Y. Mineta San Jose International Airport,California
+KSLC,Salt Lake City International Airport,Utah
+KSMF,Sacramento International Airport,California
+KSNA,John Wayne Airport-Orange County Airport,California
+KSTL,Lambert St Louis International Airport,Missouri
+KTPA,Tampa International Airport,Florida
+KTUL,Tulsa International Airport,Oklahoma
+KTUS,Tucson International Airport,Arizona
+KXNA,Northwest Arkansas Regional Airport,Arkansas
