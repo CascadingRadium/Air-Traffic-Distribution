@@ -135,11 +135,12 @@ void getPaths(vector<pair<int,int>> &ODPairs, int Paths[][MaxPathLen], int NumSe
 	CUDA_Init(CentroidFileName, GraphFileName, SectorTimeDict, device_centroids_x, device_centroids_y, device_arrSizes, device_graph, device_Paths, device_Paths_size, device_Fitness, device_Output, device_Output_size ,NumSectors, PopulationSize,NumODPairs);
 	for(int i=0;i<NumODPairs;i++)
 	{
-		//GeneticAlgorithm(NumSectors,PopulationSize,SelectionSize,NumberOfMutations,NumberOfGenerations,ODPairs[i].first,ODPairs[i].second,SectorTimeDict,device_centroids_x,device_centroids_y,device_arrSizes,device_graph,device_Paths,device_Fitness,device_Output[i*NumSectors],device_Output_size[i]);
+		int* output_path_ptr=device_Output+(i*NumSectors);
+		int* output_path_size_ptr=device_Output_size+i;	GeneticAlgorithm(NumSectors,PopulationSize,SelectionSize,NumberOfMutations,NumberOfGenerations,ODPairs[i].first,ODPairs[i].second,SectorTimeDict,device_centroids_x,device_centroids_y,device_arrSizes,device_graph,device_Paths,device_Fitness,output_path_ptr,output_path_size_ptr,device_Paths_size);
 		cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
 		cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
 		cudaMemset(device_Fitness,-1,sizeof(double)*PopulationSize);
-		update_SectorTimeDict<<<1,NumThreads>>>(SectorTimeDict, device_Output+(i*NumSectors), device_Output_size+i);
+		update_SectorTimeDict<<<1,NumThreads>>>(SectorTimeDict, output_path_ptr, output_path_size_ptr);
 		cudaDeviceSynchronize();
 	}
 	for(int i=0;i<NumODPairs;i++)
@@ -265,15 +266,11 @@ void readCentroids(string CentroidFileName, double host_centroids_x[], double ho
 	}
 	file.close();
 }
-//void GeneticAlgorithm(string CentroidFileName,string GraphFileName,int NumSectors,int PopulationSize, int SelectionSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End,int* SectorTimeDict, bool init,double* time_taken)
-//{	
-//	clock_t t;
-//	t = clock();
-//	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y);
-//	cudaDeviceSynchronize();
-//	t = clock() - t;
-//	(*time_taken)+= ((double)t)/CLOCKS_PER_SEC;
-//}
+void GeneticAlgorithm(int NumSectors,int PopulationSize, int SelectionSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size)
+{	
+	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y);
+	cudaDeviceSynchronize();
+}
 
 void readGraph(string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 {
