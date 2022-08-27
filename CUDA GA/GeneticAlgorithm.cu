@@ -193,13 +193,13 @@ void GeneticAlgorithm(string CentroidFileName,string GraphFileName,string Output
 			cudaMemcpy(temp, host_graph[i], sizeof(GraphNode) * host_arrSizes[i], cudaMemcpyHostToDevice);
 			cudaMemcpy(device_graph+i, &temp, sizeof(GraphNode*), cudaMemcpyHostToDevice);
 		}
-		cudaMallocManaged((void **)&(device_Paths), sizeof(int)*PopulationSize*MaxPathLen);
-		cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
-		cudaMallocManaged((void **)&(device_Paths_size), sizeof(int)* PopulationSize);
-		cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-		cudaMalloc((void **)&device_Fitness, sizeof(double)*PopulationSize);
-		cudaMemset(device_Fitness,-1,sizeof(double)*PopulationSize);
 	}
+	cudaMallocManaged((void **)&(device_Paths), sizeof(int)*PopulationSize*MaxPathLen);
+	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
+	cudaMallocManaged((void **)&(device_Paths_size), sizeof(int)* PopulationSize);
+	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
+	cudaMalloc((void **)&device_Fitness, sizeof(double)*PopulationSize);
+	cudaMemset(device_Fitness,-1,sizeof(double)*PopulationSize);
 	clock_t t;
 	t = clock();
 	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y);
