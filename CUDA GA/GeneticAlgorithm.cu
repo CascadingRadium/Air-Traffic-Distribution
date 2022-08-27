@@ -19,6 +19,7 @@ int main()
 	string GraphFileName="CppGraph.txt";
 	string CentroidFileName="CppCentroids.txt";
 	string OutputFileName="CUDA_Paths.txt";
+	string InputFileName="InputFromFrontend.txt";
 
 	/* GA Parameters*/
 	int NumSectors=1250;
@@ -31,7 +32,8 @@ int main()
 	double* time_taken = (double*)calloc(sizeof(double),1); 
 	
 	/* OD Pairs */
-	vector<pair<int,int>> ODPairs={{6,662},{1,1000}};
+	vector<pair<int,int>> ODPairs;
+	readInput(ODPairs,InputFileName);
 	bool init=false;
 	for(auto OD: ODPairs)
 	{
@@ -41,6 +43,19 @@ int main()
 	cout<<*time_taken;
 	cout<<'\n';
 	return 0;
+}
+
+void readInput(vector<pair<int,int>>& ODPairs, string InputFileName)
+{
+	fstream file(InputFileName);
+	string line="";
+	vector<string> tokens;
+	while(getline(file,line))
+	{
+		tokens.clear();
+		tokenize(line,',',tokens);
+		ODPairs.push_back({stoi(tokens[0]),stoi(tokens[1])});
+	}
 }
 
 __device__ double getAngle(int A, int B, int C,double* device_centroids_x, double* device_centroids_y)
