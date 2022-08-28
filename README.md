@@ -8,7 +8,7 @@
 <h1> Air Traffic Distribution </h1>
 Capstone project done as a part of the requirements for the bachelors degree in CS at PES University (2019 - 23) guided by Dr. Preethi P.
 <p style="text-align:right">
-  Contributors: <table align="center">
+  <p align="center">Contributors</p> <table align="center">
     <tr> 
       <th> Name </th>
       <th> SRN </th>
