@@ -1,3 +1,3 @@
 #!/bin/bash
 nvcc GeneticAlgorithm.cu
-./a.out
+time ./a.out

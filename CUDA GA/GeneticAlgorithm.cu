@@ -27,7 +27,7 @@ int main()
 	
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=4;
+	int PopulationSize=4000;
 	int SelectionSize=2000;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
@@ -264,14 +264,50 @@ void readCentroids(string CentroidFileName, double host_centroids_x[], double ho
 	}
 	file.close();
 }
+
+
+__global__ void Prelim(int* device_Paths,bool* Valid,int PopulationSize,int Cur,int*device_Paths_size)
+{
+	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
+	if(thread<PopulationSize && Valid[Cur] && Cur != thread && Valid[thread] && device_Paths_size[Cur]==device_Paths_size[thread])
+	{
+		int* BasePath=device_Paths+(Cur*MaxPathLen);
+		int* ComparePath=device_Paths+(thread*MaxPathLen);
+		int x=0;
+		for(int i=0;i<MaxPathLen;i++)
+			if(BasePath[i]==ComparePath[i])
+				x++;
+			else
+				break;
+		if(x==MaxPathLen)
+			Valid[thread]=false;
+	}
+}
+
+
 void GeneticAlgorithm(int NumSectors,int PopulationSize, int SelectionSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size)
 {	
 
 	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y);
 	cudaDeviceSynchronize();
-	
 	int genNum=0;
-	while(genNum)
+	bool* Valid;
+	cudaMallocManaged((void**)&Valid, sizeof(bool)*PopulationSize);
+	cudaMemset(Valid,1,PopulationSize);
+	while(genNum<=NumberOfGenerations)
+	{
+		//Prelim ->Eliminate duplicate chromosomes
+		for(int i=0;i<PopulationSize;i++)
+			Prelim<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths,Valid,PopulationSize,i,device_Paths_size);
+		cudaDeviceSynchronize();
+//		int x=0;
+//		for(int i=0;i<PopulationSize;i++)
+//			if(Valid[i])
+//				x++;
+//		if(x==1)
+//			break;
+		break;
+	}
 	
 	
 }
