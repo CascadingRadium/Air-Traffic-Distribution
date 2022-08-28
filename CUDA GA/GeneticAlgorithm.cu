@@ -1,6 +1,6 @@
-#include<iostream>
-#include<vector>
-#include<fstream>
+#include <iostream>
+#include <vector>
+#include <fstream>
 #include "cuda_runtime_api.h"
 #include <curand_kernel.h>
 #include <curand.h>
@@ -27,7 +27,7 @@ int main()
 	
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=4000;
+	int PopulationSize=4;
 	int SelectionSize=2000;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
@@ -101,12 +101,11 @@ void CUDA_Init(string &CentroidFileName, string &GraphFileName, int* &SectorTime
 	cudaMemset(device_Output_size,0,sizeof(int)*NumODPairs);
 	
 	//RESET PER OD PAIR
+	cudaMallocManaged((void **)&device_Fitness, sizeof(double)*PopulationSize);
 	cudaMallocManaged((void **)&(device_Paths), sizeof(int)*PopulationSize*MaxPathLen);
 	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
 	cudaMallocManaged((void **)&(device_Paths_size), sizeof(int)* PopulationSize);
 	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-	cudaMalloc((void **)&device_Fitness, sizeof(double)*PopulationSize);
-	cudaMemset(device_Fitness,-1,sizeof(double)*PopulationSize);
 }
 
 __global__ void update_SectorTimeDict(int* SectorTimeDict, int* device_Output, int* device_Output_size)
@@ -139,7 +138,6 @@ void getPaths(vector<pair<int,int>> &ODPairs, int Paths[][MaxPathLen], int NumSe
 		int* output_path_size_ptr=device_Output_size+i;	GeneticAlgorithm(NumSectors,PopulationSize,SelectionSize,NumberOfMutations,NumberOfGenerations,ODPairs[i].first,ODPairs[i].second,SectorTimeDict,device_centroids_x,device_centroids_y,device_arrSizes,device_graph,device_Paths,device_Fitness,output_path_ptr,output_path_size_ptr,device_Paths_size);
 		cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
 		cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-		cudaMemset(device_Fitness,-1,sizeof(double)*PopulationSize);
 		update_SectorTimeDict<<<1,NumThreads>>>(SectorTimeDict, output_path_ptr, output_path_size_ptr);
 		cudaDeviceSynchronize();
 	}
@@ -195,9 +193,9 @@ __device__ void PathFitness(double* device_Fitness, int* device_Paths, int* devi
 			return;
 		}
 	}
-	device_Fitness[thread]=path_length;
 	for (int i=0;i<device_Paths_size[thread]-2;i++)
 		angle+=getAngle(device_Paths[thread*MaxPathLen+i],device_Paths[thread*MaxPathLen+(i+1)],device_Paths[thread*MaxPathLen+(i+2)],device_centroids_x,device_centroids_y);
+	device_Fitness[thread]=1/(path_length)*(1/angle);
 }
 
 __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize,int seed,double* device_centroids_x, double* device_centroids_y)
@@ -268,9 +266,17 @@ void readCentroids(string CentroidFileName, double host_centroids_x[], double ho
 }
 void GeneticAlgorithm(int NumSectors,int PopulationSize, int SelectionSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size)
 {	
+
 	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y);
 	cudaDeviceSynchronize();
+	
+	int genNum=0;
+	while(genNum)
+	
+	
 }
+// SCHEDULING IDEA -> MATRIX OF SIZE POP SIZE x NUM OF OD PAIRS AS THE FITNESS MATRIX -> SELECTION CHOOSE BASED ON THE best fitness value in each row of fitness matrix.
+// TO DO LATER????
 
 void readGraph(string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 {
