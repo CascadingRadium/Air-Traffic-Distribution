@@ -8,6 +8,7 @@
 #define watcharr(x) for(auto i:x)cout<<i<<' ';cout<<'\n';
 #define NumThreads 32
 #define MaxPathLen 1250
+#define FitnessMatrixCols 12
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
 using namespace std;
@@ -28,7 +29,7 @@ int main()
 
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=4000;
+	int PopulationSize=4;
 	int SelectionSize=2000;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
@@ -81,10 +82,10 @@ void CUDA_Init(string &CentroidFileName, string &GraphFileName, int* &SectorTime
 	cudaMemset(device_Output_size,0,sizeof(int)*NumODPairs);
 
 	//RESET PER OD PAIR
-	cudaMallocManaged((void **)&device_Fitness, sizeof(double)*PopulationSize);
-	cudaMallocManaged((void **)&(device_Paths), sizeof(int)*PopulationSize*MaxPathLen);
+	cudaMallocManaged((void **)&device_Fitness, sizeof(double)*PopulationSize*FitnessMatrixCols); 
+	cudaMalloc((void **)&(device_Paths), sizeof(int)*PopulationSize*MaxPathLen);
 	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
-	cudaMallocManaged((void **)&(device_Paths_size), sizeof(int)* PopulationSize);
+	cudaMalloc((void **)&(device_Paths_size), sizeof(int)* PopulationSize);
 	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
 }
 
@@ -107,7 +108,7 @@ void getPaths(vector<pair<int,int>> &ODPairs, int Paths[][MaxPathLen], int NumSe
 	GraphNode** device_graph;
 	int* device_Paths; //2D
 	int* device_Paths_size;
-	double* device_Fitness;
+	double* device_Fitness; //2D
 	int* device_Output; //2D
 	int* device_Output_size;
 	int NumODPairs=ODPairs.size();
@@ -135,7 +136,7 @@ __device__ double getAngle(int A, int B, int C,double* device_centroids_x, doubl
 		return 180-(abs(b-a));
 }
 
-__device__ void PathFitness(double* device_Fitness, int* device_Paths, int* device_Paths_size, int thread,GraphNode** device_graph,int* device_arrSizes, double* device_centroids_x, double* device_centroids_y)
+__device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* device_Paths_size, int thread,GraphNode** device_graph,int* device_arrSizes, double* device_centroids_x, double* device_centroids_y, int* SectorTimeDict)
 {
 	double angle = 1;
 	double path_length=0;
@@ -161,10 +162,21 @@ __device__ void PathFitness(double* device_Fitness, int* device_Paths, int* devi
 	}
 	for (int i=0;i<device_Paths_size[thread]-2;i++)
 		angle+=getAngle(device_Paths[thread*MaxPathLen+i],device_Paths[thread*MaxPathLen+(i+1)],device_Paths[thread*MaxPathLen+(i+2)],device_centroids_x,device_centroids_y);
-	device_Fitness[thread]=1/(path_length)*(1/angle);
+	double StaticFitness=(1/path_length)*(1/angle);
+	double TrafficFactor=1;
+	for(int i=0;i<FitnessMatrixCols;i++)
+	{
+		TrafficFactor=1;
+		for(int j=0;j<device_Paths_size[thread];j++)
+		{
+			TrafficFactor+=SectorTimeDict[device_Paths[thread*MaxPathLen+j]*MaxPathLen+(j+i)];
+		}
+		
+		device_Fitness[thread*FitnessMatrixCols+i]=StaticFitness*(1/TrafficFactor)*(1/(double)(device_Paths_size[thread]-2+i));
+	}
 }
 
-__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize,int seed,double* device_centroids_x, double* device_centroids_y)
+__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize,int seed,double* device_centroids_x, double* device_centroids_y,int* SectorTimeDict)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
 	if(thread<PopulationSize)
@@ -205,13 +217,13 @@ __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes
 					device_Paths[thread*MaxPathLen+ptr_pos++]=cur;
 					if(cur==end)
 						InitPath=true;
-
+					
 				}
 
 			}
 		}
 		device_Paths_size[thread]=ptr_pos;
-		PathFitness(device_Fitness,device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_centroids_x,device_centroids_y);
+		InitPathFitness(device_Fitness,device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
 	}
 }
 
@@ -229,16 +241,26 @@ __global__ void Prelim(int* device_Paths,bool* Valid,int PopulationSize,int Cur,
 			else
 				break;
 		if(x==MaxPathLen)
+		{
+			printf("LOL");
 			Valid[thread]=false;
+		}
 	}
 }
 
 
 void GeneticAlgorithm(int NumSectors,int PopulationSize, int SelectionSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size)
 {	
-
-	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y);
+	cout.precision(10);
+	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict);
 	cudaDeviceSynchronize();
+	for(int i=0;i<PopulationSize;i++)
+	{
+		for(int j=0;j<FitnessMatrixCols;j++)
+			cout<<device_Fitness[i*FitnessMatrixCols+j]<<' ';
+		printf("\n");
+	}
+	return;
 	int genNum=0;
 	bool* Valid;
 	cudaMallocManaged((void**)&Valid, sizeof(bool)*PopulationSize);
@@ -248,18 +270,12 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int SelectionSize, int 
 		//Prelim ->Eliminate duplicate chromosomes
 		for(int i=0;i<PopulationSize;i++)
 			Prelim<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths,Valid,PopulationSize,i,device_Paths_size);
-		cudaDeviceSynchronize();
-		//		int x=0;
-		//		for(int i=0;i<PopulationSize;i++)
-		//			if(Valid[i])
-		//				x++;
-		//		if(x==1)
-		//			break;
 		break;
+		
 	}
 
 
 }
 // SCHEDULING IDEA -> MATRIX OF SIZE POP SIZE x NUM OF OD PAIRS AS THE FITNESS MATRIX -> SELECTION CHOOSE BASED ON THE best fitness value in each row of fitness matrix.
 // TO DO LATER????
-
+//
