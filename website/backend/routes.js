@@ -1,8 +1,7 @@
 const router = require('express').Router();
 const execSync = require('child_process').execSync;
 const fs = require('fs');
-const Flight = require('./Models/flightSchema');
-const airportsData = '../some-trial/src/airports.txt'
+const airportsData = '../src/airports.txt'
 
 
 var airportSectorMapping={}
