@@ -28,33 +28,6 @@ data.map((airportInfo)=>{
 })
 
 
-const prettifyDate=(date)=>{
-
-  const hours=date.getHours();
-  const minutes=date.getMinutes();
-  let subString="AM";
-  let hourString,minuteString=minutes.toString();
-  if(minutes < 10)
-  {
-    minuteString="0" + minutes.toString();
-  }
-  if(hours >=12)
-  {
-     if(hours!==12)
-     {
-        hours-=12;
-        subString="PM";
-     }
-  }
-  hourString=hours.toString();
-  return `${hourString}:${minuteString} ${subString}`
-
-
-
-}
-
-
-
 router.post("/submit",(req,res)=>{
     console.log(req.body)
     console.log(`./a.out ${req.body.firstNumber} ${req.body.secondNumber}`)
@@ -132,8 +105,14 @@ router.get("/get-times",(req,res)=>{
     let endDate=addMinutes(d,endTime)
     let sourceAirport=flightIDToAirportMapping[id].sourceAirport
     let destinationAirport=flightIDToAirportMapping[id].destinationAirport
-    startDate=prettifyDate(startDate)
-    endDate=prettifyDate(endDate)
+    if(startDate.getMinutes() < 10)
+      startDate=startDate.getHours().toString() +":0" + startDate.getMinutes().toString()
+    else 
+      startDate=startDate.getHours().toString() +":" + startDate.getMinutes().toString()
+    if(endDate.getMinutes() < 10)
+        endDate=endDate.getHours().toString() +":0" + endDate.getMinutes().toString()
+    else 
+      endDate=endDate.getHours().toString() +":" + endDate.getMinutes().toString()
     timeObj={ id,sourceAirport,destinationAirport,startDate,endDate}
     timeList.push(timeObj)
   })

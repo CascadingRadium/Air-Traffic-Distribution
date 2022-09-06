@@ -28,8 +28,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function createData(id,source,destination,flights) {
-  return { id,source,destination,flights};
+function createData(id,source,destination,startTime) {
+  return { id,source,destination,startTime};
 }
 
 
