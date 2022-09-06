@@ -4,6 +4,9 @@ import { useState , useEffect} from 'react';
 import airportsData from './airports.txt'
 import CustomizedTables from './components/AddTableRows';
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import {useNavigate} from 'react-router-dom';
+
+
 function App() {
   const [firstNumber,setfirstNumber]=useState(0);
   const [secondNumber,setsecondNumber]=useState(0);
@@ -13,13 +16,18 @@ function App() {
   const [sourceAirport,setsourceAirport]=useState("")
   const [destinationAirport,setdestinationAirport]=useState("")
   const [numberOfFlights,setNumberOfFlights]=useState(1)
-
+  const [startTime,setStartTime]=useState("")
   const [items,setItems]=useState([])
   const [simulatorData,setsimulatorData]=useState({})
+  const [pathData,setPathData]=useState([])
+
+  const navigate=useNavigate()
 
   useEffect(()=>{
     getAirportData()
   },[])
+
+
 
   const getAirportData=()=>{
     fetch(airportsData)
@@ -58,21 +66,25 @@ function App() {
 
   }
 
-  const getPathHelper=(e)=>{
+  const getPathHelper=async(e)=>{
     e.preventDefault();
-    axios.post("http://localhost:5000/api/get-paths",items)
+    await axios.post("http://localhost:5000/api/get-paths",items)
     .then(({data})=>{
       console.log(data.data)
       setItems([])
     })
+    navigate("/paths")
 
   }
   const addFlight=(e)=>{
     e.preventDefault();
     const sourceAirportName=sourceAirport.split(",")[0]
     const destinationAirportName=destinationAirport.split(",")[0]
-    const data={sourceAirportName,destinationAirportName,numberOfFlights};
-    setItems(items=>[...items,data])
+    let dataList=[];
+    const data={sourceAirportName,destinationAirportName,startTime};
+    for(let i=0;i<numberOfFlights;i++)
+      dataList.push(data)
+    setItems(items=>[...items,...dataList])
   }
 
   const deleteEntry=(idx,e)=>{
@@ -132,6 +144,10 @@ function App() {
         Number of flights:
         <input type="number" value={numberOfFlights} onChange={(e)=> setNumberOfFlights(e.target.value)}/>
         <br/>
+        &emsp;
+        Start Time:
+        <input type="text" value={startTime} onChange={(e)=> setStartTime(e.target.value)}/>
+        <br/>
         <button type='submit' class="btn btn-primary" onClick={addFlight}>Add flight</button>
       </form>
       
@@ -145,6 +161,7 @@ function App() {
           <button className='btn btn-primary' onClick={getPathHelper}>Get Paths</button>
           </>
           //mpld3.draw_figure("hello",simulation)
+          //<PathTable pathData={pathData}/>
           
       }
     </div>
@@ -160,8 +177,8 @@ function App() {
   //   }
   //   <div id={fig_name}></div>
   // </div>
-
   );
+
 
   
 
