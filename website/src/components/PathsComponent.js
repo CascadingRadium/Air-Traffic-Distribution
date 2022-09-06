@@ -53,8 +53,8 @@ export default function PathTable() {
       setPathData(data.data)
     })
   }
-  const rows=pathData.map((item)=>{
-     return createData(item.id,item.sourceAirport,item.destinationAirport,item.startDate,item.endDate)
+  const rows=pathData.map((item,id)=>{
+     return createData(id,item.sourceAirport,item.destinationAirport,item.startDate,item.endDate)
   });
 
   const goToSim=()=>{
