@@ -28,15 +28,15 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function createData(id,source,destination,flights) {
-  return { id,source,destination,flights};
+function createData(id,source,destination,startTime) {
+  return { id,source,destination,startTime};
 }
 
 
 export default function CustomizedTables({items,deleteEntry}) {
   
     const rows=items.map((item)=>{
-       return createData(item._id,item.sourceAirportName,item.destinationAirportName,item.numberOfFlights)
+       return createData(item._id,item.sourceAirportName,item.destinationAirportName,item.startTime)
     });
 
    
@@ -47,21 +47,18 @@ export default function CustomizedTables({items,deleteEntry}) {
       <Table sx={{ minWidth: 700 }} aria-label="customized table">
         <TableHead>
           <TableRow>
+          <StyledTableCell>Flight ID</StyledTableCell>
             <StyledTableCell>Source Airport</StyledTableCell>
-            <StyledTableCell align="right">Destination Airport</StyledTableCell>
-            <StyledTableCell align="right">Number Of Flights</StyledTableCell>
+            <StyledTableCell>Destination Airport</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
         {
           rows.map((row,idx) => (
             <StyledTableRow key={idx}>
-                <div className='icon' onClick={(e)=>deleteEntry(idx,e)}>
-                    <MdDelete/>
-                </div>
-              <StyledTableCell align="right">{row.source}</StyledTableCell>
-              <StyledTableCell align="right">{row.destination}</StyledTableCell>
-              <StyledTableCell align="right">{row.flights}</StyledTableCell>
+              <StyledTableCell>{idx}</StyledTableCell>
+              <StyledTableCell>{row.source}</StyledTableCell>
+              <StyledTableCell>{row.destination}</StyledTableCell>
             </StyledTableRow>
           ))
         }

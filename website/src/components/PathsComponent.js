@@ -9,7 +9,6 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '../../node_modules/@mui/material/Paper'
 import '../App.css'
 import { useEffect ,useState} from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -40,8 +39,6 @@ export default function PathTable() {
   
   const [pathData,setPathData]=useState([])
 
-  const navigate=useNavigate() 
-
   useEffect(()=>{
     getPathData()
   },[])
@@ -56,13 +53,6 @@ export default function PathTable() {
   const rows=pathData.map((item)=>{
      return createData(item.id,item.sourceAirport,item.destinationAirport,item.startDate,item.endDate)
   });
-
-  const goToSim=()=>{
-    navigate("/sim")
-  }
-
-
-
     return (
         <>
         <h1 align="center">Flights Generated</h1>
@@ -92,7 +82,7 @@ export default function PathTable() {
         </TableBody>
       </Table>
     </TableContainer>
-    <button className='btn btn-primary' onClick={goToSim}>Go to Sim</button>
+    
     </>
     
   );
