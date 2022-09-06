@@ -192,7 +192,6 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 		{
 			TrafficFactor+=SectorTimeDict[device_Paths[thread*MaxPathLen+j]*MaxPathLen+(j+i)];
 		}
-
 		device_Fitness[thread*FitnessMatrixCols+i]=StaticFitness*(1/TrafficFactor)*(1/(double)(device_Paths_size[thread]-2+i));
 	}
 }
@@ -348,6 +347,6 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 		cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize,cudaMemcpyHostToDevice);
 		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedTime,PopSizeNoDupli);
 		cudaDeviceSynchronize();
-		
+		break;
 	}
 }
