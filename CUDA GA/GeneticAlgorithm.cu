@@ -29,7 +29,7 @@ int main()
 
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=7;
+	int PopulationSize=49;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
 
@@ -292,17 +292,16 @@ __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device
 				t2=i;
 			}
 		}
-		printf("%d,%d,%d\n",thread,2*thread,2*thread+1);
-//		if(max1<max2)
-//		{
-//			Selected[thread]=SelectionPool[2*thread+1];
-//			SelectedTime[thread]=t2;
-//		}
-//		else
-//		{
-//			Selected[thread]=SelectionPool[2*thread];
-//			SelectedTime[thread]=t1;
-//		}
+		if(max1<max2)
+		{
+			Selected[thread]=SelectionPool[2*thread+1];
+			SelectedTime[thread]=t2;
+		}
+		else
+		{
+			Selected[thread]=SelectionPool[2*thread];
+			SelectedTime[thread]=t1;
+		}
 	}
 }
 
@@ -349,7 +348,6 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 		cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize,cudaMemcpyHostToDevice);
 		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedTime,PopSizeNoDupli);
 		cudaDeviceSynchronize();
-		break;		
+		break;
 	}
 }
-
