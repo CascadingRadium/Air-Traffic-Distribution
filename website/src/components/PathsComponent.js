@@ -7,8 +7,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '../../node_modules/@mui/material/Paper'
-import { MdDelete } from 'react-icons/md' 
 import '../App.css'
+import { useEffect ,useState} from 'react';
+import axios from 'axios';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.common.black,
@@ -28,28 +29,42 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function createData(id,source,destination,startTime) {
-  return { id,source,destination,startTime};
+function createData(id,sourceAirport,destinationAirport,startDate,endDate) {
+  return {id,sourceAirport,destinationAirport,startDate,endDate}
 }
 
 
-export default function CustomizedTables({items,deleteEntry}) {
+export default function PathTable() {
   
-    const rows=items.map((item)=>{
-       return createData(item._id,item.sourceAirportName,item.destinationAirportName,item.startTime)
-    });
+  
+  const [pathData,setPathData]=useState([])
 
-   
+  useEffect(()=>{
+    getPathData()
+  },[])
 
+  const getPathData=()=>{
+    axios.get("http://localhost:5000/api/get-times")
+    .then(({data})=>{
+      console.log(data.data)
+      setPathData(data.data)
+    })
+  }
+  const rows=pathData.map((item)=>{
+     return createData(item.id,item.sourceAirport,item.destinationAirport,item.startDate,item.endDate)
+  });
     return (
         <>
+        <h1 align="center">Flights Generated</h1>
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
+      <Table sx={{ minWidth: 900 }} aria-label="customized table">
         <TableHead>
           <TableRow>
           <StyledTableCell>Flight ID</StyledTableCell>
             <StyledTableCell>Source Airport</StyledTableCell>
             <StyledTableCell>Destination Airport</StyledTableCell>
+            <StyledTableCell>Departure Time</StyledTableCell>
+            <StyledTableCell>Arrival Time</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -57,8 +72,10 @@ export default function CustomizedTables({items,deleteEntry}) {
           rows.map((row,idx) => (
             <StyledTableRow key={idx}>
               <StyledTableCell>{idx}</StyledTableCell>
-              <StyledTableCell>{row.source}</StyledTableCell>
-              <StyledTableCell>{row.destination}</StyledTableCell>
+              <StyledTableCell>{row.sourceAirport}</StyledTableCell>
+              <StyledTableCell>{row.destinationAirport}</StyledTableCell>
+              <StyledTableCell>{row.startDate}</StyledTableCell>
+              <StyledTableCell>{row.endDate}</StyledTableCell>
             </StyledTableRow>
           ))
         }
