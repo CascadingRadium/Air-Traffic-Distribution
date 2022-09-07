@@ -68,7 +68,7 @@ function App() {
 
   const getPathHelper=async(e)=>{
     e.preventDefault();
-    let waiting=await axios.post("http://localhost:5000/api/get-paths",items)
+    await axios.post("http://localhost:5000/api/get-paths",items)
     .then(({data})=>{
       console.log(data.data)
       setItems([])

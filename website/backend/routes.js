@@ -9,13 +9,39 @@ var airportSectorMapping={}
 
 let flightIDToAirportMapping={}
 
-// flightIDToAirportMapping[0]={sourceAirport:"Adam Fields",destinationAirport:"Dallas Love Field"}
-// flightIDToAirportMapping[1]={sourceAirport:"Denver International Airport",destinationAirport:"El Paso International Airport"}
-// flightIDToAirportMapping[2]={sourceAirport:"Dallas Fort Worth International Airport",destinationAirport:"Fresno Yosemite International Airport"}
 
 const data = fs.readFileSync(airportsData).toString().split("\n");
 
 const pathsFile=fs.readFileSync(paths).toString().split("\n")
+
+
+const prettifyDate=(date)=>{
+
+  const hours=date.getHours()
+  const minutes=date.getMinutes();
+  let hourString,minuteString=minutes.toString();
+  let subString="AM";
+  if(minutes < 10)
+  {
+    minuteString="0" + minuteString;
+  }
+  if(hours >=12)
+  {
+    if(hours!==12)
+    {
+      hours-=12
+    }
+    subString="PM";
+  }
+  hourString=hours.toString();
+  return `${hourString}:${minuteString} ${subString}` 
+
+}
+
+
+
+
+
 
 function addMinutes(date, minutes) {
   return new Date(date.getTime() + minutes*60000);
@@ -105,14 +131,8 @@ router.get("/get-times",(req,res)=>{
     let endDate=addMinutes(d,endTime)
     let sourceAirport=flightIDToAirportMapping[id].sourceAirport
     let destinationAirport=flightIDToAirportMapping[id].destinationAirport
-    if(startDate.getMinutes() < 10)
-      startDate=startDate.getHours().toString() +":0" + startDate.getMinutes().toString()
-    else 
-      startDate=startDate.getHours().toString() +":" + startDate.getMinutes().toString()
-    if(endDate.getMinutes() < 10)
-        endDate=endDate.getHours().toString() +":0" + endDate.getMinutes().toString()
-    else 
-      endDate=endDate.getHours().toString() +":" + endDate.getMinutes().toString()
+    startDate=prettifyDate(startDate)
+    endDate=prettifyDate(endDate)
     timeObj={ id,sourceAirport,destinationAirport,startDate,endDate}
     timeList.push(timeObj)
   })
