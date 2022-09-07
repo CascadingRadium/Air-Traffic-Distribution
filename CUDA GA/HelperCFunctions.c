@@ -1,8 +1,8 @@
-typedef struct GraphNode
-{
-	int vertexID;
-	double weight;
-}GraphNode;
+/*typedef struct GraphNode*/
+/*{*/
+/*	int vertexID;*/
+/*	double weight;*/
+/*}GraphNode;*/
 void tokenize(string &str, char delim, vector<string> &out)
 {
 	size_t start;
