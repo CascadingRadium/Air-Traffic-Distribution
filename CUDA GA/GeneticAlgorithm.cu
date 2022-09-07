@@ -29,7 +29,7 @@ int main()
 
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=49;
+	int PopulationSize=12;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
 
@@ -99,7 +99,7 @@ void CUDA_Init(string &CentroidFileName, string &GraphFileName, int* &SectorTime
 	cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize);
 	cudaMalloc((void**)&Selected, sizeof(int)*SelectionSize);
 	cudaMalloc((void**)&SelectedTime, sizeof(int)*SelectionSize);
-	cudaMallocManaged((void**)&PopSizeNoDupli, sizeof(int));
+	cudaMalloc((void**)&PopSizeNoDupli, sizeof(int));
 }
 
 __global__ void update_SectorTimeDict(int* SectorTimeDict, int* device_Output, int* device_Output_size)
@@ -293,6 +293,7 @@ __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device
 		}
 		if(max1<max2)
 		{
+			
 			Selected[thread]=SelectionPool[2*thread+1];
 			SelectedTime[thread]=t2;
 		}
@@ -321,14 +322,18 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 	int SelectionPoolSize=PopulationSize;
 	int SelectionSize=PopulationSize/2;
 	int* host_SelectionPool = (int*)malloc(sizeof(int)*SelectionPoolSize);
-	*PopSizeNoDupli=PopulationSize;
+	int* host_Selected = (int*)malloc(sizeof(int)*SelectionSize);
+	int* host_SelectedTime = (int*) malloc(sizeof(int)*SelectionSize);
+	int* host_PopSizeNoDupli=(int*)calloc(sizeof(int),1);
+	*host_PopSizeNoDupli=PopulationSize; 
+	cudaMemcpy(PopSizeNoDupli,host_PopSizeNoDupli,sizeof(int)*1,cudaMemcpyHostToDevice);
 	int tempforPool=0;
 	while(genNum<=NumberOfGenerations)
 	{
 		//Prelim ->Eliminate duplicate chromosomes
 		for(int i=0;i<PopulationSize;i++)
 			Prelim<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths,Valid,PopulationSize,i,device_Paths_size,PopSizeNoDupli);
-		cudaDeviceSynchronize();
+		cudaMemcpy(host_PopSizeNoDupli,PopSizeNoDupli,sizeof(int)*1,cudaMemcpyDevicetoHost);
 		SelectionSize=*PopSizeNoDupli/2;
 		if(SelectionSize&1)
 			SelectionSize+=1;
@@ -343,10 +348,14 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 			if(Valid[i])
 				host_SelectionPool[tempforPool++]=i;	
 		}
-		shuffle(host_SelectionPool,SelectionPoolSize);
-		cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize,cudaMemcpyHostToDevice);
+		Shuffle(host_SelectionPool,SelectionPoolSize);
+		cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize*sizeof(int),cudaMemcpyHostToDevice);
 		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedTime,PopSizeNoDupli);
-		cudaDeviceSynchronize();
+		cudaMemcpy(host_Selected,Selected,sizeof(int)*SelectionSize,cudaMemcpyDeviceToHost);
+		cudaMemcpy(host_SelectedTime,SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyDeviceToHost);
+		CrossoverShuffle(host_Selected,host_SelectedTime,SelectionSize);
+		cudaMemcpy(Selected,host_Selected,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
+		cudaMemcpy(SelectedTime,host_SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
 		break;
 	}
 }
