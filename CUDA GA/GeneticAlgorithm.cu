@@ -30,7 +30,7 @@ int main()
 
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=8000;
+	int PopulationSize=40;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
 
@@ -313,6 +313,27 @@ __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device
 	}
 }
 
+//__global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Paths, int* device_Paths_size, double* device_Fitness, int CrossoverSize)
+//{
+//	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
+//	if(thread<CrossoverSize)
+//	{
+//		int t1=SelectedTime[thread];
+//		int t2=SelectedTime[thread+1];
+//		int Base=thread;
+//		int toSkipInOther=t1-t2;
+//		if(t2>t1)
+//		{
+//			toSkipInOther=t2-t1;
+//			Base=thread+1;
+//		}
+////		for(int i=0;i<device_Paths_size[Base];i++)
+////		{
+////			
+////		}
+//	}
+//	
+//}
 
 void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size, bool* &Valid,int* &SelectionPool, int* &Selected,int* &SelectedTime,int* &PopSizeNoDupli,double &InitPopTime,double &PrelimTime, double& SelectionTime)
 {	
@@ -342,6 +363,7 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 	int tempforPool=0;
 	while(genNum<=NumberOfGenerations)
 	{
+		genNum+=1;
 		t=clock();
 		//Prelim ->Eliminate duplicate chromosomes
 		for(int i=0;i<PopulationSize;i++)
@@ -376,6 +398,9 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 		cudaMemcpy(SelectedTime,host_SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
 		t=clock()-t;
 		SelectionTime += ((double)t)/CLOCKS_PER_SEC;
+		
+		//int CrossoverSize=SelectionSize/2;
+		//CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,SelectedTime,device_Paths,device_Paths_size,device_Fitness,CrossoverSize);
 		break;
 	}
 }
