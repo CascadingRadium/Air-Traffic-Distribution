@@ -4,6 +4,7 @@
 #include "cuda_runtime_api.h"
 #include <curand_kernel.h>
 #include <curand.h>
+#include <time.h>
 #define watch(x) cout << boolalpha << (#x) << " is " << (x) <<'\n'
 #define watcharr(x) for(auto i:x)cout<<i<<' ';cout<<'\n';
 #define NumThreads 32
@@ -29,7 +30,7 @@ int main()
 
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=12;
+	int PopulationSize=40;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
 
@@ -44,7 +45,7 @@ int main()
 	getPaths(ODPairs,Paths,NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,GraphFileName,CentroidFileName);// Input,Output
 
 	/*Output all Paths to Output File*/
-	writeOutput(Paths,OutputFileName,NumODPairs);
+	//writeOutput(Paths,OutputFileName,NumODPairs);
 	cout<<'\n';
 	return 0;
 }
@@ -94,7 +95,7 @@ void CUDA_Init(string &CentroidFileName, string &GraphFileName, int* &SectorTime
 	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
 	cudaMalloc((void **)&(device_Paths_size), sizeof(int)* PopulationSize);
 	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-	cudaMallocManaged((void**)&Valid, sizeof(bool)*PopulationSize);
+	cudaMalloc((void**)&Valid, sizeof(bool)*PopulationSize);
 	cudaMemset(Valid,1,PopulationSize);
 	cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize);
 	cudaMalloc((void**)&Selected, sizeof(int)*SelectionSize);
@@ -132,19 +133,26 @@ void getPaths(vector<pair<int,int>> &ODPairs, int Paths[][MaxPathLen], int NumSe
 	int* PopSizeNoDupli;
 	int SelectionSize=PopulationSize/2;
 	
+	double InitPopTime=0;
+	double PrelimTime=0;
+	double SelectionTime=0;
+	
 	int NumODPairs=ODPairs.size();
 	CUDA_Init(CentroidFileName, GraphFileName, SectorTimeDict, device_centroids_x, device_centroids_y, device_arrSizes, device_graph, device_Paths, device_Paths_size, device_Fitness, device_Output, device_Output_size ,NumSectors, PopulationSize,NumODPairs,Valid,SelectionPool,Selected,SelectedTime,PopSizeNoDupli,SelectionSize);
 	for(int i=0;i<NumODPairs;i++)
 	{
 		int* output_path_ptr=device_Output+(i*NumSectors);
-		int* output_path_size_ptr=device_Output_size+i;	GeneticAlgorithm(NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,ODPairs[i].first,ODPairs[i].second,SectorTimeDict,device_centroids_x,device_centroids_y,device_arrSizes,device_graph,device_Paths,device_Fitness,output_path_ptr,output_path_size_ptr,device_Paths_size,Valid,SelectionPool,Selected,SelectedTime,PopSizeNoDupli);
+		int* output_path_size_ptr=device_Output_size+i;	GeneticAlgorithm(NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,ODPairs[i].first,ODPairs[i].second,SectorTimeDict,device_centroids_x,device_centroids_y,device_arrSizes,device_graph,device_Paths,device_Fitness,output_path_ptr,output_path_size_ptr,device_Paths_size,Valid,SelectionPool,Selected,SelectedTime,PopSizeNoDupli,InitPopTime,PrelimTime,SelectionTime);
 		cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
 		cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
 		update_SectorTimeDict<<<1,NumThreads>>>(SectorTimeDict, output_path_ptr, output_path_size_ptr);
 		cudaDeviceSynchronize();
 	}
-	for(int i=0;i<NumODPairs;i++)
-		cudaMemcpy(Paths[i],device_Paths+i,MaxPathLen*sizeof(int),cudaMemcpyDeviceToHost);
+	cout<<"initial population time "<<InitPopTime<<'\n';
+	cout<<"prelim time "<<PrelimTime<<'\n';
+	cout<<"selection time "<<SelectionTime<<'\n';
+//	for(int i=0;i<NumODPairs;i++)
+//		cudaMemcpy(Paths[i],device_Paths+i,MaxPathLen*sizeof(int),cudaMemcpyDeviceToHost);
 }
 
 __device__ double getAngle(int A, int B, int C,double* device_centroids_x, double* device_centroids_y)
@@ -305,12 +313,34 @@ __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device
 	}
 }
 
+//__global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Paths, int* device_Paths_size, double* device_Fitness, int CrossoverSize)
+//{
+//	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
+//	if(thread<CrossoverSize)
+//	{
+//		int t1=SelectedTime[thread];
+//		int t2=SelectedTime[thread+1];
+//		int Base=thread;
+//		int toSkipInOther=t1-t2;
+//		if(t2>t1)
+//		{
+//			toSkipInOther=t2-t1;
+//			Base=thread+1;
+//		}
+////		for(int i=0;i<device_Paths_size[Base];i++)
+////		{
+////			
+////		}
+//	}
+//	
+//}
 
-void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size, bool* &Valid,int* &SelectionPool, int* &Selected,int* &SelectedTime,int* &PopSizeNoDupli)
+void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size, bool* &Valid,int* &SelectionPool, int* &Selected,int* &SelectedTime,int* &PopSizeNoDupli,double &InitPopTime,double &PrelimTime, double& SelectionTime)
 {	
-	cout.precision(10);
+	//cout.precision(10);
+	clock_t t;
+	t=clock();
 	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict);
-	cudaDeviceSynchronize();
 	//	for(int i=0;i<PopulationSize;i++)
 	//	{
 	//		for(int j=0;j<FitnessMatrixCols;j++)
@@ -325,19 +355,29 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 	int* host_Selected = (int*)malloc(sizeof(int)*SelectionSize);
 	int* host_SelectedTime = (int*) malloc(sizeof(int)*SelectionSize);
 	int* host_PopSizeNoDupli=(int*)calloc(sizeof(int),1);
+	bool* host_Valid =(bool*)calloc(sizeof(bool),PopulationSize);
 	*host_PopSizeNoDupli=PopulationSize; 
 	cudaMemcpy(PopSizeNoDupli,host_PopSizeNoDupli,sizeof(int)*1,cudaMemcpyHostToDevice);
+	t=clock()-t;
+	InitPopTime += ((double)t)/CLOCKS_PER_SEC;
 	int tempforPool=0;
 	while(genNum<=NumberOfGenerations)
 	{
+		genNum+=1;
+		t=clock();
 		//Prelim ->Eliminate duplicate chromosomes
 		for(int i=0;i<PopulationSize;i++)
 			Prelim<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths,Valid,PopulationSize,i,device_Paths_size,PopSizeNoDupli);
-		cudaMemcpy(host_PopSizeNoDupli,PopSizeNoDupli,sizeof(int)*1,cudaMemcpyDevicetoHost);
-		SelectionSize=*PopSizeNoDupli/2;
+		cudaMemcpy(host_Valid,Valid,sizeof(bool)*1,cudaMemcpyDeviceToHost);
+		cudaMemcpy(host_PopSizeNoDupli,PopSizeNoDupli,sizeof(int)*1,cudaMemcpyDeviceToHost);
+		t=clock()-t;
+		PrelimTime += ((double)t)/CLOCKS_PER_SEC;
+		SelectionSize=*host_PopSizeNoDupli/2;
 		if(SelectionSize&1)
 			SelectionSize+=1;
-		SelectionPoolSize=*PopSizeNoDupli;
+		SelectionPoolSize=*host_PopSizeNoDupli;
+		
+		t=clock();
 		memset(host_SelectionPool,-1,SelectionPoolSize*sizeof(int));
 		cudaMemset(SelectionPool,-1,SelectionPoolSize*sizeof(int));
 		cudaMemset(Selected,-1,SelectionSize*sizeof(int)); 
@@ -345,7 +385,7 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 		tempforPool=0;
 		for(int i=0;i<SelectionPoolSize;i++)
 		{
-			if(Valid[i])
+			if(host_Valid[i])
 				host_SelectionPool[tempforPool++]=i;	
 		}
 		Shuffle(host_SelectionPool,SelectionPoolSize);
@@ -356,6 +396,11 @@ void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, 
 		CrossoverShuffle(host_Selected,host_SelectedTime,SelectionSize);
 		cudaMemcpy(Selected,host_Selected,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
 		cudaMemcpy(SelectedTime,host_SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
+		t=clock()-t;
+		SelectionTime += ((double)t)/CLOCKS_PER_SEC;
+		
+		//int CrossoverSize=SelectionSize/2;
+		//CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,SelectedTime,device_Paths,device_Paths_size,device_Fitness,CrossoverSize);
 		break;
 	}
 }
