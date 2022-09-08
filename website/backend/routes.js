@@ -2,22 +2,19 @@ const router = require('express').Router();
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const airportsData = '../src/airports.txt'
-const paths='./example.txt'
+const paths='./OutputToSimulator.txt'
 
 var airportSectorMapping={}
 
 
-let flightIDToAirportMapping={}
+var flightIDToAirportMapping={}
 
 
 const data = fs.readFileSync(airportsData).toString().split("\n");
 
-const pathsFile=fs.readFileSync(paths).toString().split("\n")
-
-
 const prettifyDate=(date)=>{
 
-  const hours=date.getHours()
+  let hours=date.getHours()
   const minutes=date.getMinutes();
   let hourString,minuteString=minutes.toString();
   let subString="AM";
@@ -37,11 +34,6 @@ const prettifyDate=(date)=>{
   return `${hourString}:${minuteString} ${subString}` 
 
 }
-
-
-
-
-
 
 function addMinutes(date, minutes) {
   return new Date(date.getTime() + minutes*60000);
@@ -77,6 +69,7 @@ router.post("/submit-subtraction",(req,res)=>{
         console.error(err);
       }
 })
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 router.post("/get-paths",async(req,res)=>{
     
@@ -90,11 +83,11 @@ router.post("/get-paths",async(req,res)=>{
       const sourceSector=airportSectorMapping[sourceAirport]
       const destinationSector=airportSectorMapping[destinationAirport]
       flightIDToAirportMapping[id]={startTime,sourceAirport,destinationAirport}
-      console.log(flightIDToAirportMapping)
       content+=`${sourceSector},${destinationSector}\n`
     })
   try {
-    fs.writeFileSync('od_pairs.txt', content);
+    fs.writeFileSync('InputFromFrontend.txt', content);
+    execSync('./a.out')
     res.status(200).json({"data":"Paths generated"})
   } catch (err) {
     console.error(err);
@@ -115,11 +108,12 @@ router.get("/simulator",(req,res)=>{
   }
 })
 
-router.get("/get-times",(req,res)=>{
+router.get("/get-times",async(req,res)=>{
 
   try{
   timeObj={}
   let timeList=[]
+  const pathsFile=fs.readFileSync(paths).toString().split("\n")
   pathsFile.forEach((path,id)=>{
     const start=flightIDToAirportMapping[id].startTime.split(":")
     let d=new Date();
@@ -136,7 +130,7 @@ router.get("/get-times",(req,res)=>{
     timeObj={ id,sourceAirport,destinationAirport,startDate,endDate}
     timeList.push(timeObj)
   })
-  res.status(200).json({"data":timeList})
+  res.status(200).json({"data":timeList}) 
 }
  catch(e)
  {
