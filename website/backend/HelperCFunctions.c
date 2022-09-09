@@ -31,7 +31,8 @@ void writeOutput(vector<vector<int>>& Paths,vector<pair<int,int>>& Times, string
 		line+=to_string(Times[i].first);
 		line.push_back(' ');
 		line+=to_string(Times[i].second);
-		line.push_back('\n');
+		if(i!=NumODPairs-1)
+			line.push_back('\n');
 		file<<line;
 	}
 	file.close();
