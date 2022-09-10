@@ -231,7 +231,7 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 	}
 }
 
-__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize,int seed,double* device_centroids_x, double* device_centroids_y,int* SectorTimeDict)
+__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize, int seed, double* device_centroids_x, double* device_centroids_y, int* SectorTimeDict, bool* VisitedForInit)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
 	if(thread<PopulationSize)
@@ -242,15 +242,14 @@ __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes
 		int ptr_pos=0;
 		device_Paths[thread*MaxPathLen+ptr_pos++]=start;
 		bool InitPath=false;
-		bool visited[1250];
 		int validIndex[20];
 		int validIndexSize=0;
 		int num_neighbors;
 		int cur;
 		while(!InitPath)
 		{
-			memset(visited,0,1250);
-			visited[start]=true;
+			memset(VisitedForInit+(thread*MaxPathLen),0,MaxPathLen);
+			VisitedForInit[thread*MaxPathLen+start]=true;
 			ptr_pos=0;
 			device_Paths[thread*MaxPathLen+ptr_pos++]=start;
 			cur=start;
@@ -260,7 +259,7 @@ __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes
 				num_neighbors=device_arrSizes[cur];
 				for(int i=0;i<num_neighbors;i++)
 				{
-					if(!visited[device_graph[cur][i].vertexID])
+					if(!VisitedForInit[thread*MaxPathLen+(device_graph[cur][i].vertexID)])
 						validIndex[validIndexSize++]=i;
 				}
 				if(validIndexSize==0)
@@ -268,7 +267,7 @@ __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes
 				else
 				{
 					cur=device_graph[cur][validIndex[abs((int)curand(&state))%validIndexSize]].vertexID;
-					visited[cur]=true;
+					VisitedForInit[thread*MaxPathLen+cur]=true;
 					device_Paths[thread*MaxPathLen+ptr_pos++]=cur;
 					if(cur==end)
 						InitPath=true;
@@ -401,7 +400,7 @@ __global__ void CrossoverShuffle(int* Selection,int* SelectedTime,int SelectionS
 
 void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, int* & device_Paths_size, double* &device_Fitness, int* &device_Output, int* &device_Output_size, bool* &VisitedForInit, int* &SelectionPool, int* &Selected, int* &SelectedTime, double &InitPopTime, double &PrelimTime, double& SelectionTime, double& CrossoverTime)
 {	
-	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict);
+	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict,VisitedForInit);
 	int genNum=0;
 	int SelectionPoolSize=PopulationSize;
 	int CrossoverSize=SelectionSize/2;
