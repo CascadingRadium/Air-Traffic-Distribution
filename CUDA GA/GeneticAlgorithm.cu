@@ -9,6 +9,7 @@
 #define watcharr(x) for(auto i:x)cout<<i<<' ';cout<<'\n';
 #define NumThreads 32
 #define MaxPathLen 1250
+#define RAND_MAX 2147483647
 #define FitnessMatrixCols 1
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
@@ -30,7 +31,7 @@ int main()
 
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=4000;
+	int PopulationSize=40;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
 
@@ -245,7 +246,7 @@ __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes
 					break;
 				else
 				{
-					cur=device_graph[cur][validIndex[curand(&state)%validIndexSize]].vertexID;
+					cur=device_graph[cur][validIndex[abs((int)curand(&state))%validIndexSize]].vertexID;
 					visited[cur]=true;
 					device_Paths[thread*MaxPathLen+ptr_pos++]=cur;
 					if(cur==end)
@@ -260,26 +261,26 @@ __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes
 	}
 }
 
-__global__ void Prelim(int* device_Paths,bool* Valid,int PopulationSize,int Cur,int*device_Paths_size,int* PopSizeNoDupli)
-{
-	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-	if(thread<PopulationSize && Valid[Cur] && Cur != thread && Valid[thread] && device_Paths_size[Cur]==device_Paths_size[thread])
-	{
-		int* BasePath=device_Paths+(Cur*MaxPathLen);
-		int* ComparePath=device_Paths+(thread*MaxPathLen);
-		int x=0;
-		for(int i=0;i<MaxPathLen;i++)
-			if(BasePath[i]==ComparePath[i])
-				x++;
-			else
-				break;
-		if(x==MaxPathLen)
-		{
-			Valid[thread]=false;
-			atomicSub(PopSizeNoDupli,1);
-		}
-	}
-}
+//__global__ void Prelim(int* device_Paths,bool* Valid,int PopulationSize,int Cur,int*device_Paths_size,int* PopSizeNoDupli)
+//{
+//	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
+//	if(thread<PopulationSize && Valid[Cur] && Cur != thread && Valid[thread] && device_Paths_size[Cur]==device_Paths_size[thread])
+//	{
+//		int* BasePath=device_Paths+(Cur*MaxPathLen);
+//		int* ComparePath=device_Paths+(thread*MaxPathLen);
+//		int x=0;
+//		for(int i=0;i<MaxPathLen;i++)
+//			if(BasePath[i]==ComparePath[i])
+//				x++;
+//			else
+//				break;
+//		if(x==MaxPathLen)
+//		{
+//			Valid[thread]=false;
+//			atomicSub(PopSizeNoDupli,1);
+//		}
+//	}
+//}
 
 __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device_Fitness,int SelectionSize,int*SelectedTime,int* PopSizeNoDupli)
 {
@@ -334,15 +335,15 @@ __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device
 	}
 }
 
-__global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Paths, int* device_Paths_size, double* device_Fitness, int CrossoverSize,int seed)
+__global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Paths, int* device_Paths_size, double* device_Fitness, int CrossoverSize,int seed,GraphNode** device_graph, int* device_arrSizes,double* device_centroids_x,double* device_centroids_y,int* SectorTimeDict)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
 	if(thread<CrossoverSize)
 	{
 		curandState_t state;
 		curand_init(seed, thread, 0, &state);
-		int t1=SelectedTime[2*thread]+2;
-		int t2=SelectedTime[2*thread+1]+6;
+		int t1=SelectedTime[2*thread];
+		int t2=SelectedTime[2*thread+1];
 		
 		int Base=Selected[2*thread];
 		int Other=Selected[2*thread+1];
@@ -364,7 +365,7 @@ __global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Pa
 		}
 		if(CommonIndecesLen!=0)
 		{	
-			int ChosenIndexBase=CommonIndeces[curand(&state)%CommonIndecesLen];
+			int ChosenIndexBase=CommonIndeces[abs((int)curand(&state))%CommonIndecesLen];
 			int ChosenIndexOther=ChosenIndexBase+OtherStartIndex;
 			OtherPos=ChosenIndexBase+1;
 			CommonIndecesLen=0;
@@ -381,88 +382,68 @@ __global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Pa
 			for(int i=OtherPos;i<device_Paths[Other];i++)
 				device_Paths[Other*MaxPathLen+i]=-1;
 			device_Paths_size[Other]=OtherPos;
+			InitPathFitness(device_Fitness,device_Paths,device_Paths_size,Base,device_graph,device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
+			InitPathFitness(device_Fitness,device_Paths,device_Paths_size,Other,device_graph,device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
 		}
 		
 	}
 	
 }
+__global__ void Shuffle(int* SelectionPool,int SelectionPoolSize,int seed)
+{
+	curandState_t state;
+	curand_init(seed, 0, 0, &state);
+	for (int i = 0; i < SelectionPoolSize - 1; i++) 
+	{
+		int j = i + abs((int)curand(&state)) / (RAND_MAX / (SelectionPoolSize - i) + 1);
+		int t = SelectionPool[j];
+		SelectionPool[j] = SelectionPool[i];
+		SelectionPool[i] = t;
+	}
+}
+__global__ void CrossoverShuffle(int* Selection,int* SelectedTime,int SelectionSize,int seed)
+{
+	curandState_t state;
+	curand_init(seed, 0, 0, &state);
+	for (int i = 0; i < SelectionSize - 1; i++) 
+	{
+		int j = i + abs((int)curand(&state)) / (RAND_MAX / (SelectionSize - i) + 1);
+		int c = Selection[j];
+		int t = SelectedTime[j];
+		Selection[j] = Selection[i];
+		Selection[i] = c;
+		SelectedTime[j]=SelectedTime[i];
+		SelectedTime[i]=t;
+	}
+}
+
 
 void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size, bool* &Valid,int* &SelectionPool, int* &Selected,int* &SelectedTime,int* &PopSizeNoDupli,double &InitPopTime,double &PrelimTime, double& SelectionTime, double& CrossoverTime)
 {	
-	//cout.precision(10);
 	clock_t t;
 	t=clock();
 	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict);
-	//	for(int i=0;i<PopulationSize;i++)
-	//	{
-	//		for(int j=0;j<FitnessMatrixCols;j++)
-	//			cout<<device_Fitness[i*FitnessMatrixCols+j]<<' ';
-	//		printf("\n");
-	//	}
-	int genNum=0;
-	cudaMemset(Valid,1,PopulationSize);
-	int SelectionPoolSize=PopulationSize;
-	int SelectionSize=PopulationSize/2;
-	int* host_SelectionPool = (int*)malloc(sizeof(int)*SelectionPoolSize);
-	int* host_Selected = (int*)calloc(sizeof(int),SelectionSize);
-	int* host_SelectedTime = (int*) malloc(sizeof(int)*SelectionSize);
-	int* host_PopSizeNoDupli=(int*)calloc(sizeof(int),1);
-	bool* host_Valid =(bool*)calloc(sizeof(bool),PopulationSize);
-	*host_PopSizeNoDupli=PopulationSize; 
-	cudaMemcpy(PopSizeNoDupli,host_PopSizeNoDupli,sizeof(int)*1,cudaMemcpyHostToDevice);
+	cudaDeviceSynchronize();
 	t=clock()-t;
 	InitPopTime += ((double)t)/CLOCKS_PER_SEC;
-	int tempforPool=0;
+	
+	int genNum=0;
+	int SelectionPoolSize=PopulationSize;
+	int SelectionSize=PopulationSize/2;
+	if(SelectionSize&1)
+		SelectionSize+=1;
+	int CrossoverSize=SelectionSize/2;
+	int host_SelectionPool[SelectionPoolSize];
+	for(int i=0;i<SelectionPoolSize;i++)
+		host_SelectionPool[i]=i;
+	cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize*sizeof(int),cudaMemcpyHostToDevice);
 	while(genNum<=NumberOfGenerations)
 	{
 		genNum+=1;
-		t=clock();
-		//Prelim ->Eliminate duplicate chromosomes
-		for(int i=0;i<PopulationSize;i++)
-			Prelim<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths,Valid,PopulationSize,i,device_Paths_size,PopSizeNoDupli);
-		cudaMemcpy(host_Valid,Valid,sizeof(bool)*PopulationSize,cudaMemcpyDeviceToHost);
-		cudaMemcpy(host_PopSizeNoDupli,PopSizeNoDupli,sizeof(int)*1,cudaMemcpyDeviceToHost);
-		cout<<*host_PopSizeNoDupli<<'\n';
-		if(*host_PopSizeNoDupli<=2)
-		{
-			printf("\nbreak\n");
-			break;
-		}
-		t=clock()-t;
-		PrelimTime += ((double)t)/CLOCKS_PER_SEC;
-		
-		SelectionPoolSize=*host_PopSizeNoDupli;	
-		SelectionSize=SelectionPoolSize/2;
-		if(SelectionSize&1)
-			SelectionSize+=1;
-		//cout<<SelectionPoolSize<<' '<<SelectionSize<<'\n';
-		t=clock();
-		memset(host_SelectionPool,-1,SelectionPoolSize*sizeof(int));
-		cudaMemset(SelectionPool,-1,SelectionPoolSize*sizeof(int));
-		cudaMemset(Selected,-1,SelectionSize*sizeof(int)); 
-		cudaMemset(SelectedTime,-1,SelectionSize*sizeof(int));
-		tempforPool=0;
-		for(int i=0;i<SelectionPoolSize;i++)
-		{
-			if(host_Valid[i])
-				host_SelectionPool[tempforPool++]=i;	
-		}
-		Shuffle(host_SelectionPool,SelectionPoolSize);
-		cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize*sizeof(int),cudaMemcpyHostToDevice);
-		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedTime,PopSizeNoDupli);
-		cudaMemcpy(host_Selected,Selected,sizeof(int)*SelectionSize,cudaMemcpyDeviceToHost);
-		cudaMemcpy(host_SelectedTime,SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyDeviceToHost);
-		CrossoverShuffle(host_Selected,host_SelectedTime,SelectionSize);
-		cudaMemcpy(Selected,host_Selected,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
-		cudaMemcpy(SelectedTime,host_SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
-		t=clock()-t;
-		SelectionTime += ((double)t)/CLOCKS_PER_SEC;
-		
-		t=clock();
-		int CrossoverSize=SelectionSize/2;
-		CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,SelectedTime,device_Paths,device_Paths_size,device_Fitness,CrossoverSize,time(NULL));
-		cudaDeviceSynchronize();
-		t=clock()-t;
-		CrossoverTime += ((double)t)/CLOCKS_PER_SEC;
+		Shuffle<<<1,1>>>(SelectionPool,SelectionPoolSize,time(NULL));
+		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedTime,PopSizeNoDupli);	
+		CrossoverShuffle<<<1,1>>>(Selected,SelectedTime,SelectionSize,time(NULL));
+		CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,SelectedTime,device_Paths,device_Paths_size,device_Fitness,CrossoverSize,time(NULL),device_graph, device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
+
 	}
 }
