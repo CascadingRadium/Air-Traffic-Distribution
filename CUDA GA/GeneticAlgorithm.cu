@@ -9,47 +9,39 @@
 #define watcharr(x) for(auto i:x)cout<<i<<' ';cout<<'\n';
 #define NumThreads 32
 #define MaxPathLen 1250
-#define FitnessMatrixCols 12
+#define RAND_MAX 2147483647
+#define FitnessMatrixCols 1
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
 using namespace std;
 #include "GeneticAlgorithm.h"
 #include "HelperCFunctions.c"
-
 int main()
 {	
 	/*Input File Name*/
 	string InputFileName="InputFromFrontend.txt";
-
 	/*Output File Name*/
 	string OutputFileName="OutputToSimulator.txt";
-
 	/*Supplementary Files */
 	string GraphFileName="CppGraph.txt";
 	string CentroidFileName="CppCentroids.txt";
-
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=40;
+	int PopulationSize=4000;
 	int NumberOfMutations=1;
 	int NumberOfGenerations=50;
-
-
 	/* Read OD Pairs */
 	vector<pair<int,int>> ODPairs;
 	readInput(ODPairs,InputFileName);
-
 	/* Call CUDA Genetic Algorithm to solve the Congestion Game*/
 	int NumODPairs=ODPairs.size();
 	int Paths[NumODPairs][MaxPathLen];
 	getPaths(ODPairs,Paths,NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,GraphFileName,CentroidFileName);// Input,Output
-
 	/*Output all Paths to Output File*/
 	//writeOutput(Paths,OutputFileName,NumODPairs);
 	cout<<'\n';
 	return 0;
 }
-
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -59,9 +51,10 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 		if (abort) exit(code);
 	}
 }
-void CUDA_Init(string &CentroidFileName, string &GraphFileName, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &device_Output, int* &device_Output_size,int NumSectors, int PopulationSize, int NumODPairs, bool* &Valid, int* &SelectionPool, int* &Selected, int* &SelectedTime,int* &PopSizeNoDupli,int SelectionSize)
+void CUDA_Init(string &CentroidFileName, string &GraphFileName, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &host_Output, int* &host_Output_size, bool* &VisitedForInit, int* &SelectionPool, int* &Selected, int* &SelectedTime, int SelectionSize, int NumSectors, int PopulationSize, int NumODPairs)
 {
 	//ONE TIME
+	srand(time(NULL));
 	GraphNode* host_graph[NumSectors];
 	int host_arrSizes[NumSectors];
 	double host_centroids_x[NumSectors];
@@ -84,35 +77,43 @@ void CUDA_Init(string &CentroidFileName, string &GraphFileName, int* &SectorTime
 	}
 	cudaMalloc((void**)&SectorTimeDict,sizeof(int)*NumSectors*NumSectors);
 	cudaMemset(SectorTimeDict,0,sizeof(int)*NumSectors*NumSectors);
-	cudaMalloc((void**)&device_Output,sizeof(int)*NumODPairs*NumSectors);
-	cudaMemset(device_Output,-1,sizeof(int)*NumODPairs*NumSectors);
-	cudaMalloc((void **)&device_Output_size, sizeof(int)*NumODPairs);
-	cudaMemset(device_Output_size,0,sizeof(int)*NumODPairs);
-
 	//RESET PER OD PAIR
+	cudaMalloc((void **)&VisitedForInit, sizeof(bool)*PopulationSize*MaxPathLen);
+	cudaMemset(VisitedForInit,0,sizeof(bool)*PopulationSize*MaxPathLen);
 	cudaMalloc((void **)&device_Fitness, sizeof(double)*PopulationSize*FitnessMatrixCols); 
-	cudaMalloc((void **)&(device_Paths), sizeof(int)*PopulationSize*MaxPathLen);
+	cudaMemset(device_Fitness,0,sizeof(int)*sizeof(double)*PopulationSize*FitnessMatrixCols);
+	cudaMalloc((void **)&device_Paths, sizeof(int)*PopulationSize*MaxPathLen);
 	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
-	cudaMalloc((void **)&(device_Paths_size), sizeof(int)* PopulationSize);
+	cudaMalloc((void **)&device_Paths_size, sizeof(int)* PopulationSize);
 	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-	cudaMalloc((void**)&Valid, sizeof(bool)*PopulationSize);
-	cudaMemset(Valid,1,PopulationSize);
 	cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize);
+	cudaMemset(SelectionPool,0,sizeof(int)*PopulationSize);
 	cudaMalloc((void**)&Selected, sizeof(int)*SelectionSize);
+	cudaMemset(Selected,0,sizeof(int)*SelectionSize);
 	cudaMalloc((void**)&SelectedTime, sizeof(int)*SelectionSize);
-	cudaMalloc((void**)&PopSizeNoDupli, sizeof(int));
+	cudaMemset(SelectedTime,0,sizeof(int)*SelectionSize);
+	host_Output=(int*)calloc(sizeof(int),PopulationSize*MaxPathLen);
+	host_Output_size=(int*)calloc(sizeof(int),PopulationSize*MaxPathLen);
 }
-
-__global__ void update_SectorTimeDict(int* SectorTimeDict, int* device_Output, int* device_Output_size)
+void resetForNextPair(bool* &VisitedForInit, double* &device_Fitness, int* &device_Paths, int* &device_Paths_size, int* &SelectionPool, int* &Selected, int* &SelectedTime, int* &host_Output, int* &host_Output_size,  int PopulationSize, int SelectionSize)
 {
-	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-	if(thread < *device_Output_size)
-	{
-		int sector = device_Output[thread];
-		SectorTimeDict[sector*MaxPathLen+thread]+=1;
-	}
+	cudaMemset(VisitedForInit,0,sizeof(bool)*PopulationSize*MaxPathLen);
+	cudaMemset(device_Fitness,0,sizeof(int)*sizeof(double)*PopulationSize*FitnessMatrixCols);
+	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
+	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
+	cudaMemset(SelectionPool,0,sizeof(int)*PopulationSize);
+	cudaMemset(Selected,0,sizeof(int)*SelectionSize);
+	cudaMemset(SelectedTime,0,sizeof(int)*SelectionSize);
 }
-
+//__global__ void update_SectorTimeDict(int* SectorTimeDict, int* device_Output, int* device_Output_size)
+//{
+//	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
+//	if(thread < *device_Output_size)
+//	{
+//		int sector = device_Output[thread];
+//		SectorTimeDict[sector*MaxPathLen+thread]+=1;
+//	}
+//}
 void getPaths(vector<pair<int,int>> &ODPairs, int Paths[][MaxPathLen], int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, string& GraphFileName, string& CentroidFileName)
 {	
 	int* SectorTimeDict; //2D
@@ -123,38 +124,33 @@ void getPaths(vector<pair<int,int>> &ODPairs, int Paths[][MaxPathLen], int NumSe
 	int* device_Paths; //2D
 	int* device_Paths_size;
 	double* device_Fitness; //2D
-	int* device_Output; //2D
-	int* device_Output_size;
-	
-	bool* Valid;
+	int* host_Output; //2D
+	int* host_Output_size;
+	bool* VisitedForInit;
 	int* SelectionPool;
 	int* Selected;
 	int* SelectedTime;
-	int* PopSizeNoDupli;
 	int SelectionSize=PopulationSize/2;
-	
+	if(SelectionSize&1==1)
+		SelectionSize+=1;
 	double InitPopTime=0;
 	double PrelimTime=0;
 	double SelectionTime=0;
-	
+	double CrossoverTime=0;
 	int NumODPairs=ODPairs.size();
-	CUDA_Init(CentroidFileName, GraphFileName, SectorTimeDict, device_centroids_x, device_centroids_y, device_arrSizes, device_graph, device_Paths, device_Paths_size, device_Fitness, device_Output, device_Output_size ,NumSectors, PopulationSize,NumODPairs,Valid,SelectionPool,Selected,SelectedTime,PopSizeNoDupli,SelectionSize);
+	CUDA_Init(CentroidFileName, GraphFileName, SectorTimeDict, device_centroids_x, device_centroids_y, device_arrSizes, device_graph, device_Paths, device_Paths_size, device_Fitness, host_Output, host_Output_size, VisitedForInit, SelectionPool, Selected, SelectedTime, SelectionSize, NumSectors, PopulationSize, NumODPairs);
 	for(int i=0;i<NumODPairs;i++)
-	{
-		int* output_path_ptr=device_Output+(i*NumSectors);
-		int* output_path_size_ptr=device_Output_size+i;	GeneticAlgorithm(NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,ODPairs[i].first,ODPairs[i].second,SectorTimeDict,device_centroids_x,device_centroids_y,device_arrSizes,device_graph,device_Paths,device_Fitness,output_path_ptr,output_path_size_ptr,device_Paths_size,Valid,SelectionPool,Selected,SelectedTime,PopSizeNoDupli,InitPopTime,PrelimTime,SelectionTime);
-		cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
-		cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-		update_SectorTimeDict<<<1,NumThreads>>>(SectorTimeDict, output_path_ptr, output_path_size_ptr);
+	{	
+		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first, ODPairs[i].second, SectorTimeDict, device_centroids_x, device_centroids_y, device_arrSizes, device_graph, device_Paths, device_Paths_size, device_Fitness, host_Output, host_Output_size, VisitedForInit, SelectionPool, Selected, SelectedTime,  InitPopTime, PrelimTime, SelectionTime, CrossoverTime);
+		resetForNextPair(VisitedForInit, device_Fitness, device_Paths, device_Paths_size, SelectionPool, Selected, SelectedTime, host_Output, host_Output_size,  PopulationSize, SelectionSize);		
+		//update_SectorTimeDict<<<1,NumThreads>>>(SectorTimeDict, output_path_ptr, output_path_size_ptr);
 		cudaDeviceSynchronize();
 	}
-	cout<<"initial population time "<<InitPopTime<<'\n';
-	cout<<"prelim time "<<PrelimTime<<'\n';
-	cout<<"selection time "<<SelectionTime<<'\n';
-//	for(int i=0;i<NumODPairs;i++)
-//		cudaMemcpy(Paths[i],device_Paths+i,MaxPathLen*sizeof(int),cudaMemcpyDeviceToHost);
+	//cout<<"initial population time "<<InitPopTime<<'\n';
+	//cout<<"prelim time "<<PrelimTime<<'\n';
+	//cout<<"selection time "<<SelectionTime<<'\n';
+	//cout<<"crossver time "<<CrossoverTime<<'\n';
 }
-
 __device__ double getAngle(int A, int B, int C,double* device_centroids_x, double* device_centroids_y)
 {
 	double a = atan2(-(device_centroids_y[B]-device_centroids_y[A]),device_centroids_x[B]-device_centroids_x[A])*RadConvFactorToMultiply;
@@ -164,7 +160,6 @@ __device__ double getAngle(int A, int B, int C,double* device_centroids_x, doubl
 	else
 		return 180-(abs(b-a));
 }
-
 __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* device_Paths_size, int thread,GraphNode** device_graph,int* device_arrSizes, double* device_centroids_x, double* device_centroids_y, int* SectorTimeDict)
 {
 	double angle = 1;
@@ -203,27 +198,24 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 		device_Fitness[thread*FitnessMatrixCols+i]=StaticFitness*(1/TrafficFactor)*(1/(double)(device_Paths_size[thread]-2+i));
 	}
 }
-
-__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize,int seed,double* device_centroids_x, double* device_centroids_y,int* SectorTimeDict)
+__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize, int seed, double* device_centroids_x, double* device_centroids_y, int* SectorTimeDict, bool* VisitedForInit)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
 	if(thread<PopulationSize)
 	{	
 		curandState_t state;
 		curand_init(seed, thread, 0, &state);
-
 		int ptr_pos=0;
 		device_Paths[thread*MaxPathLen+ptr_pos++]=start;
 		bool InitPath=false;
-		bool visited[1250];
 		int validIndex[20];
 		int validIndexSize=0;
 		int num_neighbors;
 		int cur;
 		while(!InitPath)
 		{
-			memset(visited,0,1250);
-			visited[start]=true;
+			memset(VisitedForInit+(thread*MaxPathLen),0,MaxPathLen);
+			VisitedForInit[thread*MaxPathLen+start]=true;
 			ptr_pos=0;
 			device_Paths[thread*MaxPathLen+ptr_pos++]=start;
 			cur=start;
@@ -233,50 +225,26 @@ __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes
 				num_neighbors=device_arrSizes[cur];
 				for(int i=0;i<num_neighbors;i++)
 				{
-					if(!visited[device_graph[cur][i].vertexID])
+					if(!VisitedForInit[thread*MaxPathLen+(device_graph[cur][i].vertexID)])
 						validIndex[validIndexSize++]=i;
 				}
 				if(validIndexSize==0)
 					break;
 				else
 				{
-					cur=device_graph[cur][validIndex[curand(&state)%validIndexSize]].vertexID;
-					visited[cur]=true;
+					cur=device_graph[cur][validIndex[abs((int)curand(&state))%validIndexSize]].vertexID;
+					VisitedForInit[thread*MaxPathLen+cur]=true;
 					device_Paths[thread*MaxPathLen+ptr_pos++]=cur;
 					if(cur==end)
 						InitPath=true;
-
 				}
-
 			}
 		}
 		device_Paths_size[thread]=ptr_pos;
 		InitPathFitness(device_Fitness,device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
 	}
 }
-
-__global__ void Prelim(int* device_Paths,bool* Valid,int PopulationSize,int Cur,int*device_Paths_size,int* PopSizeNoDupli)
-{
-	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-	if(thread<PopulationSize && Valid[Cur] && Cur != thread && Valid[thread] && device_Paths_size[Cur]==device_Paths_size[thread])
-	{
-		int* BasePath=device_Paths+(Cur*MaxPathLen);
-		int* ComparePath=device_Paths+(thread*MaxPathLen);
-		int x=0;
-		for(int i=0;i<MaxPathLen;i++)
-			if(BasePath[i]==ComparePath[i])
-				x++;
-			else
-				break;
-		if(x==MaxPathLen)
-		{
-			Valid[thread]=false;
-			atomicSub(PopSizeNoDupli,1);
-		}
-	}
-}
-
-__global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device_Fitness,int SelectionSize,int*SelectedTime,int* PopSizeNoDupli)
+__global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device_Fitness,int SelectionSize,int*SelectedTime,int PopulationSize)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
 	if(thread<SelectionSize)
@@ -301,7 +269,6 @@ __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device
 		}
 		if(max1<max2)
 		{
-			
 			Selected[thread]=SelectionPool[2*thread+1];
 			SelectedTime[thread]=t2;
 		}
@@ -312,95 +279,106 @@ __global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device
 		}
 	}
 }
-
-//__global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Paths, int* device_Paths_size, double* device_Fitness, int CrossoverSize)
-//{
-//	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-//	if(thread<CrossoverSize)
-//	{
-//		int t1=SelectedTime[thread];
-//		int t2=SelectedTime[thread+1];
-//		int Base=thread;
-//		int toSkipInOther=t1-t2;
-//		if(t2>t1)
-//		{
-//			toSkipInOther=t2-t1;
-//			Base=thread+1;
-//		}
-////		for(int i=0;i<device_Paths_size[Base];i++)
-////		{
-////			
-////		}
-//	}
-//	
-//}
-
-void GeneticAlgorithm(int NumSectors,int PopulationSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, double* &device_Fitness, int* &device_Output, int* &device_Output_size, int* & device_Paths_size, bool* &Valid,int* &SelectionPool, int* &Selected,int* &SelectedTime,int* &PopSizeNoDupli,double &InitPopTime,double &PrelimTime, double& SelectionTime)
+__global__ void CrossoverKernel(int* Selected, int* SelectedTime, int* device_Paths, int* device_Paths_size, double* device_Fitness, int CrossoverSize,int seed,GraphNode** device_graph, int* device_arrSizes,double* device_centroids_x,double* device_centroids_y,int* SectorTimeDict)
+{
+	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
+	if(thread<CrossoverSize)
+	{
+		curandState_t state;
+		curand_init(seed, thread, 0, &state);
+		int t1=SelectedTime[2*thread];
+		int t2=SelectedTime[2*thread+1];
+		int Base=Selected[2*thread];
+		int Other=Selected[2*thread+1];
+		int OtherStartIndex=t1-t2;
+		if(t2>t1)
+		{
+			OtherStartIndex=t2-t1;
+			Base=Selected[2*thread+1];
+			Other=Selected[2*thread];
+		}
+		int CommonIndeces[MaxPathLen]={-1};
+		int CommonIndecesLen=0;
+		int OtherPos=OtherStartIndex+1;
+		for(int i=1;i<device_Paths_size[Base]-1&& OtherPos<device_Paths_size[Other];i++)
+		{
+			if(device_Paths[Base*MaxPathLen+i]==device_Paths[Other*MaxPathLen+OtherPos])
+				CommonIndeces[CommonIndecesLen++]=i;
+			OtherPos++;
+		}
+		if(CommonIndecesLen!=0)
+		{	
+			int ChosenIndexBase=CommonIndeces[abs((int)curand(&state))%CommonIndecesLen];
+			int ChosenIndexOther=ChosenIndexBase+OtherStartIndex;
+			OtherPos=ChosenIndexBase+1;
+			CommonIndecesLen=0;
+			for(int i=OtherPos;i<device_Paths_size[Base];i++)
+				CommonIndeces[CommonIndecesLen++]=device_Paths[Base*MaxPathLen+i];
+			for(int i=ChosenIndexOther+1;i<device_Paths_size[Other];i++)
+				device_Paths[Base*MaxPathLen+OtherPos++]=device_Paths[Other*MaxPathLen+i];
+			for(int i=OtherPos;i<device_Paths[Base];i++)
+				device_Paths[Base*MaxPathLen+i]=-1;
+			device_Paths_size[Base]=OtherPos;
+			OtherPos=ChosenIndexOther+1;
+			for(int i=0;i<CommonIndecesLen;i++)
+				device_Paths[Other*MaxPathLen+OtherPos++]=CommonIndeces[i];
+			for(int i=OtherPos;i<device_Paths[Other];i++)
+				device_Paths[Other*MaxPathLen+i]=-1;
+			device_Paths_size[Other]=OtherPos;
+			InitPathFitness(device_Fitness,device_Paths,device_Paths_size,Base,device_graph,device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
+			InitPathFitness(device_Fitness,device_Paths,device_Paths_size,Other,device_graph,device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
+		}
+	}
+}
+__global__ void Shuffle(int* SelectionPool,int SelectionPoolSize,int seed)
+{
+	curandState_t state;
+	curand_init(seed, 0, 0, &state);
+	for (int i = 0; i < SelectionPoolSize - 1; i++) 
+	{
+		int j = i + abs((int)curand(&state)) / (RAND_MAX / (SelectionPoolSize - i) + 1);
+		int t = SelectionPool[j];
+		SelectionPool[j] = SelectionPool[i];
+		SelectionPool[i] = t;
+	}
+}
+__global__ void CrossoverShuffle(int* Selection,int* SelectedTime,int SelectionSize,int seed)
+{
+	curandState_t state;
+	curand_init(seed, 0, 0, &state);
+	for (int i = 0; i < SelectionSize - 1; i++) 
+	{
+		int j = i + abs((int)curand(&state)) / (RAND_MAX / (SelectionSize - i) + 1);
+		int c = Selection[j];
+		int t = SelectedTime[j];
+		Selection[j] = Selection[i];
+		Selection[i] = c;
+		SelectedTime[j]=SelectedTime[i];
+		SelectedTime[i]=t;
+	}
+}
+void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, int* &device_arrSizes, GraphNode** &device_graph, int* &device_Paths, int* & device_Paths_size, double* &device_Fitness, int* &host_Output, int* &host_Output_size, bool* &VisitedForInit, int* &SelectionPool, int* &Selected, int* &SelectedTime, double &InitPopTime, double &PrelimTime, double& SelectionTime, double& CrossoverTime)
 {	
-	//cout.precision(10);
-	clock_t t;
-	t=clock();
-	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict);
-	//	for(int i=0;i<PopulationSize;i++)
-	//	{
-	//		for(int j=0;j<FitnessMatrixCols;j++)
-	//			cout<<device_Fitness[i*FitnessMatrixCols+j]<<' ';
-	//		printf("\n");
-	//	}
+	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict,VisitedForInit);
 	int genNum=0;
-	cudaMemset(Valid,1,PopulationSize);
 	int SelectionPoolSize=PopulationSize;
-	int SelectionSize=PopulationSize/2;
-	int* host_SelectionPool = (int*)malloc(sizeof(int)*SelectionPoolSize);
-	int* host_Selected = (int*)malloc(sizeof(int)*SelectionSize);
-	int* host_SelectedTime = (int*) malloc(sizeof(int)*SelectionSize);
-	int* host_PopSizeNoDupli=(int*)calloc(sizeof(int),1);
-	bool* host_Valid =(bool*)calloc(sizeof(bool),PopulationSize);
-	*host_PopSizeNoDupli=PopulationSize; 
-	cudaMemcpy(PopSizeNoDupli,host_PopSizeNoDupli,sizeof(int)*1,cudaMemcpyHostToDevice);
-	t=clock()-t;
-	InitPopTime += ((double)t)/CLOCKS_PER_SEC;
-	int tempforPool=0;
+	int CrossoverSize=SelectionSize/2;
+	int host_SelectionPool[SelectionPoolSize];
+	for(int i=0;i<SelectionPoolSize;i++)
+		host_SelectionPool[i]=i;
+	cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize*sizeof(int),cudaMemcpyHostToDevice);
 	while(genNum<=NumberOfGenerations)
 	{
 		genNum+=1;
-		t=clock();
-		//Prelim ->Eliminate duplicate chromosomes
-		for(int i=0;i<PopulationSize;i++)
-			Prelim<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths,Valid,PopulationSize,i,device_Paths_size,PopSizeNoDupli);
-		cudaMemcpy(host_Valid,Valid,sizeof(bool)*1,cudaMemcpyDeviceToHost);
-		cudaMemcpy(host_PopSizeNoDupli,PopSizeNoDupli,sizeof(int)*1,cudaMemcpyDeviceToHost);
-		t=clock()-t;
-		PrelimTime += ((double)t)/CLOCKS_PER_SEC;
-		SelectionSize=*host_PopSizeNoDupli/2;
-		if(SelectionSize&1)
-			SelectionSize+=1;
-		SelectionPoolSize=*host_PopSizeNoDupli;
-		
-		t=clock();
-		memset(host_SelectionPool,-1,SelectionPoolSize*sizeof(int));
-		cudaMemset(SelectionPool,-1,SelectionPoolSize*sizeof(int));
-		cudaMemset(Selected,-1,SelectionSize*sizeof(int)); 
-		cudaMemset(SelectedTime,-1,SelectionSize*sizeof(int));
-		tempforPool=0;
-		for(int i=0;i<SelectionPoolSize;i++)
-		{
-			if(host_Valid[i])
-				host_SelectionPool[tempforPool++]=i;	
-		}
-		Shuffle(host_SelectionPool,SelectionPoolSize);
-		cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize*sizeof(int),cudaMemcpyHostToDevice);
-		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedTime,PopSizeNoDupli);
-		cudaMemcpy(host_Selected,Selected,sizeof(int)*SelectionSize,cudaMemcpyDeviceToHost);
-		cudaMemcpy(host_SelectedTime,SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyDeviceToHost);
-		CrossoverShuffle(host_Selected,host_SelectedTime,SelectionSize);
-		cudaMemcpy(Selected,host_Selected,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
-		cudaMemcpy(SelectedTime,host_SelectedTime,sizeof(int)*SelectionSize,cudaMemcpyHostToDevice);
-		t=clock()-t;
-		SelectionTime += ((double)t)/CLOCKS_PER_SEC;
-		
-		//int CrossoverSize=SelectionSize/2;
-		//CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,SelectedTime,device_Paths,device_Paths_size,device_Fitness,CrossoverSize);
-		break;
+		Shuffle<<<1,1>>>(SelectionPool,SelectionPoolSize,time(NULL));
+		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedTime,PopulationSize);
+		CrossoverShuffle<<<1,1>>>(Selected,SelectedTime,SelectionSize,time(NULL));
+		CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,SelectedTime,device_Paths,device_Paths_size,device_Fitness,CrossoverSize,time(NULL),device_graph, device_arrSizes,device_centroids_x,device_centroids_y,SectorTimeDict);
 	}
+	cudaMemcpy(host_Output,device_Paths,sizeof(int)*PopulationSize*MaxPathLen,cudaMemcpyDeviceToHost);
+	cudaMemcpy(host_Output_size,device_Paths_size,sizeof(int)*PopulationSize,cudaMemcpyDeviceToHost);
+	//	for(int i=0;i<10;i++)
+	//		cout<<host_Output_size[i]<<'\n';
 }
+
+

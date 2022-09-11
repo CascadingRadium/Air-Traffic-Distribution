@@ -1,19 +1,32 @@
 #include<bits/stdc++.h>
 using namespace std;
-#include"HelperCFunctions.c"
 
 #define watch(x) cout << boolalpha << (#x) << " is " << (x) <<'\n'
 #define watcharr(x) for(auto i:x)cout<<i<<' ';cout<<'\n';
+void Shuffle(int *array, size_t n)
+{
+	if (n > 1) 
+	{
+		size_t i;
+		for (i = 0; i < n - 1; i++) 
+		{
+			size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+			int t = array[j];
+			array[j] = array[i];
+			array[i] = t;
+		}
+	}
+}
 int main()
 {
-	int paths[]={1,2,3,4,5,6,7,8,9};
-	int times[]={1,2,3,4,5,6,7,8,9};
-	CrossoverShuffle(paths,times,9);
-	for(int i=0;i<9;i++)
-		cout<<paths[i]<<' ';
-	cout<<'\n';
-	for(int i=0;i<9;i++)
-		cout<<times[i]<<' ';
-	cout<<'\n';
+	srand(time(NULL));
+	int paths[]={0,1,2,3,4,5,6,7,8,9};
+	for(int i=0;i<10;i++)
+	{
+		Shuffle(paths,10);
+		for(int j=0;j<10;j++)
+			cout<<paths[j]<<' ';
+		cout<<"\n\n\n";
+	}
 	return 0;
 }
