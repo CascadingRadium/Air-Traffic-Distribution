@@ -13,6 +13,8 @@ function App() {
   const [answer,setAnswer]=useState(0)
   const [answer1,setAnswer1]=useState(0)
   const [airports,setAirports]=useState([])
+  const [sourceAirports,setsourceAirports]=useState([])
+  const [destinatonAirports,setdestinationAirports]=useState([])
   const [sourceAirport,setsourceAirport]=useState("")
   const [destinationAirport,setdestinationAirport]=useState("")
   const [numberOfFlights,setNumberOfFlights]=useState(1)
@@ -20,31 +22,28 @@ function App() {
   const [items,setItems]=useState([])
   const [simulatorData,setsimulatorData]=useState({})
   const [pathData,setPathData]=useState([])
-
+  const [states,setStates]=useState([])
+  const [stateToAirport,setStateToAirport]=useState({})
   const navigate=useNavigate()
 
   useEffect(()=>{
-    getAirportData()
+    getStates()
   },[])
 
-
-
-  const getAirportData=()=>{
-    fetch(airportsData)
-  .then(r => r.text())
-  .then(text => {
-    let airportList=text.split("\n")
-    let airportData=airportList.map(airport=>{
-      const airportName=airport.split(",")[1]
-      const airportState=airport.split(",")[2]
-      return airportName + "," + airportState;
-    });
-    airportData=airportData.slice(0,airportData.length-1)
-    //console.log(airports)
-    airportData.sort()  
-    setAirports(airportData)
-  });
+  const getStates=()=>{
+    axios.get("http://localhost:5000/api/get-states")
+    .then(({data})=>{
+      //console.log(data.data)
+      const stateToAirportMapping=data.data
+      console.log(stateToAirportMapping)
+      let stateList=Object.keys(stateToAirportMapping)
+      stateList.sort()
+      setStates(stateList)
+      setStateToAirport(stateToAirportMapping)
+    })
   }
+
+
   const calculateSum=(e)=>{
     e.preventDefault();
     const data={firstNumber,secondNumber}
@@ -52,16 +51,6 @@ function App() {
     .then(({data})=>{
       console.log(data.data)
       setAnswer(data.data)
-    })
-
-  }
-  const calculateDifference=(e)=>{
-    e.preventDefault();
-    const data={firstNumber,secondNumber}
-    axios.post("http://localhost:5000/api/submit-subtraction",data)
-    .then(({data})=>{
-      console.log(data.data)
-      setAnswer1(data.data)
     })
 
   }
@@ -114,12 +103,22 @@ function App() {
     <div className="App">
       <h1>Lol let's try</h1>
       <form>
+      <label>
+          Select State:
+        <select onChange={(e)=>setsourceAirports(stateToAirport[e.target.value])}>
+        {
+          states.map((state)=>(
+            <option key={state} value={state}>{state}</option>
+          ))
+        }
+        </select>
+        </label>
         <label>
           Select Source Airport:
         <select onChange={(e)=>setsourceAirport(e.target.value)}>
         <option value=""> Select an airport </option>
         {
-          airports.map((airport)=>(
+          sourceAirports.map((airport)=>(
             <option key={airport} value={airport}>{airport}</option>
           ))
         }
@@ -129,11 +128,21 @@ function App() {
         &emsp;
         &emsp;
         <label>
+          Select State:
+        <select onChange={(e)=>setdestinationAirports(stateToAirport[e.target.value])}>
+        {
+          states.map((state)=>(
+            <option key={state} value={state}>{state}</option>
+          ))
+        }
+        </select>
+        </label>
+        <label>
           Select Destination Airport:
         <select onChange={(e)=>setdestinationAirport(e.target.value)}>
         <option value=""> Select an airport </option>
         {
-          airports.map((airport)=>(
+          destinatonAirports.map((airport)=>(
             <option key={airport} value={airport}>{airport}</option>
           ))
         }
