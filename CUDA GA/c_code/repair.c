@@ -3,37 +3,25 @@
 #include<string.h>
 // IDX is the thread id , thread is the formula being used 
 void repair(int * device_Paths,int * device_Paths_size,int* dict,int idx)
-
 {
 	// int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-
 	int thread=idx*10;
 	int new_path_index=thread,index=thread;
-
+	
 	for(int i=thread;i<thread+device_Paths_size[idx];i++)
-	{
-
-
 		dict[device_Paths[i]]=i;
-	}	
-
 	while(index<device_Paths_size[idx]+thread)
 	{
 		device_Paths[new_path_index]=device_Paths[index];
 		new_path_index++;
 		index=dict[device_Paths[index]]+1;
-
 	}
-
 	int new_len=new_path_index-thread;
-
-	while(new_path_index<device_Paths_size[idx]+thread)device_Paths[new_path_index++]=-1;
+	while(new_path_index<device_Paths_size[idx]+thread)
+		device_Paths[new_path_index++]=-1;
 	device_Paths_size[idx]=new_len;
-
-
 	for(int i=0;i<30;i++)
-	{printf("%d",device_Paths[i]);
-	}
+		printf("%d",device_Paths[i]);
 	printf("\n");
 
 }
@@ -64,4 +52,5 @@ int main()
 	repair(device_Paths,device_Paths_size,dict,1);
 	repair(device_Paths,device_Paths_size,dict,2);
 }
+
 
