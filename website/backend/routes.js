@@ -9,6 +9,7 @@ var airportSectorMapping={}
 
 var flightIDToAirportMapping={}
 
+var stateToAirports={}
 
 const data = fs.readFileSync(airportsData).toString().split("\n");
 
@@ -106,6 +107,26 @@ router.get("/simulator",(req,res)=>{
   {
     return res.status(500).json({"data":"Something is wrong"})
   }
+})
+
+router.get("/get-states",(req,res)=>{
+
+  try{
+  data.forEach((airportData)=>{
+    const airportName=airportData.split(",")[1]
+    const state=airportData.split(",")[2]
+    if(stateToAirports[state]===undefined)
+        stateToAirports[state]=[airportName]
+    else if(!stateToAirports[state].includes(airportName))
+        stateToAirports[state].push(airportName)
+  })
+  res.status(200).json({"data":stateToAirports})
+}
+ catch(e)
+ {
+    res.status(500).json({"data":e})
+ }
+
 })
 
 router.get("/get-times",async(req,res)=>{
