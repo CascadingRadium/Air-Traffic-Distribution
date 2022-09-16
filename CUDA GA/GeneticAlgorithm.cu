@@ -28,7 +28,7 @@ int main()
 	/* GA Parameters*/
 	int NumSectors=1250;
 	int PopulationSize=4000;
-	int NumberOfMutations=50;
+	int NumberOfMutations=10;
 	int NumberOfGenerations=50;
 	/* Read OD Pairs */
 	vector<pair<int,int>> ODPairs;
@@ -149,7 +149,7 @@ void getPaths(vector<pair<int,int>> &ODPairs, int Paths[][MaxPathLen], int NumSe
 	//cout<<"initial population time "<<InitPopTime<<'\n';
 	//cout<<"prelim time "<<PrelimTime<<'\n';
 	//cout<<"selection time "<<SelectionTime<<'\n';
-	cout<<"crossver time "<<CrossoverTime<<'\n';
+	//cout<<"crossver time "<<CrossoverTime<<'\n';
 }
 __device__ double getAngle(int A, int B, int C,double* device_centroids_x, double* device_centroids_y)
 {
