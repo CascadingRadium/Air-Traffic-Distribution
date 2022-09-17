@@ -1,8 +1,3 @@
-/*typedef struct GraphNode*/
-/*{*/
-/*	int vertexID;*/
-/*	double weight;*/
-/*}GraphNode;*/
 void tokenize(string &str, char delim, vector<string> &out)
 {
 	size_t start;
@@ -14,23 +9,25 @@ void tokenize(string &str, char delim, vector<string> &out)
 		out.push_back(s);
 	}
 }
-void writeOutput(vector<vector<int>>& Paths,vector<pair<int,int>>& Times, string OutputFileName, int NumODPairs)
+void writeOutput(vector<pair<vector<int>,int>>&Paths, string OutputFileName, int NumODPairs)
 {
 	ofstream file(OutputFileName);
 	string line="";
 	for(int i=0;i<NumODPairs;i++)
 	{
 		line="";
-		for(int j=0;j<Paths[i].size();j++)
+		for(int j=0;j<Paths[i].first.size();j++)
 		{
-			line+=to_string(Paths[i][j])+",";
+			line+=to_string(Paths[i].first[j])+",";
 		}
 		if(line.length()>0)
 			line.pop_back();
 		line.push_back(' ');
-		line+=to_string(Times[i].first);
+		int st=Paths[i].second;
+		int en=st+Paths[i].first.size();
+		line+=to_string(st);
 		line.push_back(' ');
-		line+=to_string(Times[i].second);
+		line+=to_string(en);
 		line.push_back('\n');
 		file<<line;
 	}
