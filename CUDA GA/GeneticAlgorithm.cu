@@ -30,7 +30,7 @@ int main()
 	int NumSectors=1250;
 	int PopulationSize=4000;
 	int NumberOfMutations=10;
-	int NumberOfGenerations=50;
+	int NumberOfGenerations=250;
 	/* Read OD Pairs */
 	vector<pair<int,int>> ODPairs;
 	readInput(ODPairs,InputFileName);
@@ -227,7 +227,7 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 		{
 			TrafficFactor+=SectorTimeDict[device_Paths[thread*MaxPathLen+j]*MaxPathLen+(j+i)];
 		}
-		device_Fitness[thread*FitnessMatrixCols+i]=StaticFitness*(1/TrafficFactor)*(1/(double)(device_Paths_size[thread]-2+i));
+		device_Fitness[thread*FitnessMatrixCols+i]=StaticFitness*(1/TrafficFactor)*(1/(double)(device_Paths_size[thread]-2))*(1/(double)(i+1));
 	}
 }
 
