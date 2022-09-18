@@ -15,7 +15,6 @@ for line in opfile:
 	x = [eval(i) for i in x]
 	Paths.append(x)
 	Times.append(int(A[1]))
-print(Times)
 position=0
 prevX=[deque() for _ in range(len(Paths))]
 prevY=[deque() for _ in range(len(Paths))]
@@ -26,9 +25,6 @@ def TraceFunction(event):
 	global MaxSectorCountDict
 	global axTab
 	tempDict=defaultdict(int)
-	data = {'Sector':[],
-	'SectorCount':[],
-	'MaxSectorCount':[]}
 	if position == 0:
 		for pathIdx in range(len(Paths)):
 			point=CentroidDict[Paths[pathIdx][position]]
@@ -50,10 +46,5 @@ def TraceFunction(event):
 				prevY[pathIdx].popleft()
 		fig.canvas.draw()
 		position+=1
-		for key in tempDict :
-			data['Sector'].append(key)
-			data['SectorCount'].append(tempDict[key])
-			MaxSectorCountDict[key]=max(MaxSectorCountDict[key],tempDict[key])
-			data['MaxSectorCount'].append(MaxSectorCountDict[key])
 cid = fig.canvas.mpl_connect('button_press_event', TraceFunction)
 plt.show()
