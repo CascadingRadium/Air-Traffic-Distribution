@@ -135,6 +135,7 @@ router.get("/get-times",async(req,res)=>{
   timeObj={}
   let timeList=[]
   const pathsFile=fs.readFileSync(paths).toString().split("\n")
+  console.log(pathsFile)
   pathsFile.forEach((path,id)=>{
     const start=flightIDToAirportMapping[id].startTime.split(":")
     let d=new Date();

@@ -28,7 +28,8 @@ void writeOutput(std::vector<std::pair<std::vector<int>,int>>&Paths, std::string
 		line+=std::to_string(st);
 		line.push_back(' ');
 		line+=std::to_string(en);
-		line.push_back('\n');
+		if(i!=NumODPairs-1)
+			line.push_back('\n');
 		file<<line;
 	}
 	file.close();
@@ -115,7 +116,8 @@ void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<in
 			line+=std::to_string(i.StartPoint)+","+std::to_string(i.EndPoint)+","+std::to_string(i.PathIndex)+" ";
 		if(line.length()!=0)
 			line.pop_back();
-		line+="\n";
+		if(i!=maxTime-1)
+			line+="\n";
 		file<<line;
 	}
 	file.close();
