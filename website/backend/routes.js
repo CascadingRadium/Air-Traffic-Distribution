@@ -2,7 +2,7 @@ const router = require('express').Router();
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const airportsData = '../src/airports.txt'
-const paths='./OutputToSimulator.txt'
+const paths='./OutputToFrontend.txt'
 
 var airportSectorMapping={}
 
