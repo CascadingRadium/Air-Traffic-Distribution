@@ -116,8 +116,7 @@ void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<in
 			line+=std::to_string(i.StartPoint)+","+std::to_string(i.EndPoint)+","+std::to_string(i.PathIndex)+" ";
 		if(line.length()!=0)
 			line.pop_back();
-		if(i!=maxTime-1)
-			line+="\n";
+		line+="\n";
 		file<<line;
 	}
 	file.close();

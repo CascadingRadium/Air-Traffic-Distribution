@@ -3,7 +3,7 @@ const execSync = require('child_process').execSync;
 const fs = require('fs');
 const airportsData = '../src/airports.txt'
 const paths='./OutputToFrontend.txt'
-
+const CONVERSION_FACTOR=1000*60;
 var airportSectorMapping={}
 
 
@@ -100,7 +100,7 @@ router.post("/get-paths",async(req,res)=>{
 router.get("/simulator",(req,res)=>{
 
   try{
-  execSync('ipython -c "%run Simulator.ipynb"', { encoding: 'utf-8' });
+  execSync('python3 sim.py', { encoding: 'utf-8' });
   return res.status(200).json({"data":"Success"})
   }
   catch(e)
@@ -147,9 +147,11 @@ router.get("/get-times",async(req,res)=>{
     let endDate=addMinutes(d,endTime)
     let sourceAirport=flightIDToAirportMapping[id].sourceAirport
     let destinationAirport=flightIDToAirportMapping[id].destinationAirport
+    const aerialTime=(endDate-startDate)/CONVERSION_FACTOR
+    const groundHolding=(startDate-d)/CONVERSION_FACTOR
     startDate=prettifyDate(startDate)
     endDate=prettifyDate(endDate)
-    timeObj={ id,sourceAirport,destinationAirport,startDate,endDate}
+    timeObj={ id,sourceAirport,destinationAirport,startDate,endDate,aerialTime,groundHolding}
     timeList.push(timeObj)
   })
   res.status(200).json({"data":timeList}) 
