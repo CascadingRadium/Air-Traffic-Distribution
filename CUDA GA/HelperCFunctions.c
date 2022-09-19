@@ -1,47 +1,44 @@
-/*typedef struct GraphNode*/
-/*{*/
-/*	int vertexID;*/
-/*	double weight;*/
-/*}GraphNode;*/
-void tokenize(string &str, char delim, vector<string> &out)
+void tokenize(std::string &str, char delim, std::vector<std::string> &out)
 {
 	size_t start;
 	size_t end = 0;
-	while ((start = str.find_first_not_of(delim, end)) != string::npos)
+	while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
 	{
 		end = str.find(delim, start);
-		string s=str.substr(start, end - start);
+		std::string s=str.substr(start, end - start);
 		out.push_back(s);
 	}
 }
-void writeOutput(vector<vector<int>>& Paths,vector<pair<int,int>>& Times, string OutputFileName, int NumODPairs)
+void writeOutput(std::vector<std::pair<std::vector<int>,int>>&Paths, std::string OutputFileName, int NumODPairs)
 {
-	ofstream file(OutputFileName);
-	string line="";
+	std::ofstream file(OutputFileName);
+	std::string line="";
 	for(int i=0;i<NumODPairs;i++)
 	{
 		line="";
-		for(int j=0;j<Paths[i].size();j++)
+		for(int j=0;j<Paths[i].first.size();j++)
 		{
-			line+=to_string(Paths[i][j])+",";
+			line+=std::to_string(Paths[i].first[j])+",";
 		}
 		if(line.length()>0)
 			line.pop_back();
 		line.push_back(' ');
-		line+=to_string(Times[i].first);
+		int st=Paths[i].second;
+		int en=st+Paths[i].first.size();
+		line+=std::to_string(st);
 		line.push_back(' ');
-		line+=to_string(Times[i].second);
+		line+=std::to_string(en);
 		line.push_back('\n');
 		file<<line;
 	}
 	file.close();
 }
 
-void readInput(vector<pair<int,int>>& ODPairs, string InputFileName)
+void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileName)
 {
-	fstream file(InputFileName);
-	string line="";
-	vector<string> tokens;
+	std::fstream file(InputFileName);
+	std::string line="";
+	std::vector<std::string> tokens;
 	while(getline(file,line))
 	{
 		tokens.clear();
@@ -51,12 +48,12 @@ void readInput(vector<pair<int,int>>& ODPairs, string InputFileName)
 	file.close();
 }
 
-void readCentroids(string CentroidFileName, double host_centroids_x[], double host_centroids_y[])
+void readCentroids(std::string CentroidFileName, double host_centroids_x[], double host_centroids_y[])
 {
-	string line="";
-	fstream file(CentroidFileName);
+	std::string line="";
+	std::fstream file(CentroidFileName);
 	int sectorNum=0;
-	vector<string> tokens;
+	std::vector<std::string> tokens;
 	while(getline(file,line))
 	{
 		tokens.clear();
@@ -67,12 +64,12 @@ void readCentroids(string CentroidFileName, double host_centroids_x[], double ho
 	file.close();
 }
 
-void readGraph(string GraphFileName,GraphNode* host_graph[], int* arrSizes)
+void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 {
-	string line="";
-	fstream file(GraphFileName);
-	vector<string> tokens;
-	vector<string> pairString;
+	std::string line="";
+	std::fstream file(GraphFileName);
+	std::vector<std::string> tokens;
+	std::vector<std::string> pairString;
 	int VNum=0;
 	while(getline(file,line))
 	{
@@ -95,4 +92,31 @@ void readGraph(string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 	}
 	file.close();	
 }
-
+void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<int>,int>>& Paths, int NumODPairs)
+{
+	std::ofstream file(MatFile);
+	int maxTime=0;
+	for(auto pair:Paths)
+		maxTime=max(maxTime,(int)pair.first.size()+pair.second);
+	std::vector<std::vector<SimulatorTriplet>> OutputVector(maxTime,std::vector<SimulatorTriplet>());
+	for(int pathIdx=0;pathIdx<NumODPairs;pathIdx++)
+	{
+		int startTime=Paths[pathIdx].second;
+		int endTime=startTime+Paths[pathIdx].first.size();
+		OutputVector[startTime].push_back({Paths[pathIdx].first[0],Paths[pathIdx].first[0],pathIdx});
+		for(int time=startTime+1;time<endTime;time++)
+			OutputVector[time].push_back({Paths[pathIdx].first[time-1-startTime],Paths[pathIdx].first[time-startTime],pathIdx});	
+	}
+	file<<std::to_string(NumODPairs)<<'\n';
+	for(int i=0;i<maxTime;i++)
+	{
+		std::string line="";
+		for(auto i:OutputVector[i])
+			line+=std::to_string(i.StartPoint)+","+std::to_string(i.EndPoint)+","+std::to_string(i.PathIndex)+" ";
+		if(line.length()!=0)
+			line.pop_back();
+		line+="\n";
+		file<<line;
+	}
+	file.close();
+}
