@@ -27,7 +27,7 @@ def TraceFunction(event):
 	global axTab
 	toPlotNow=[]
 	c=[]
-	if(CurTime<=MaxTime):
+	if(CurTime<MaxTime):
 		for triplet in TimeDict[CurTime]:
 			if(triplet[0]==triplet[1]):
 				Point=CentroidDict[triplet[0]]
