@@ -1,4 +1,5 @@
 from collections import deque,defaultdict
+from matplotlib import collections  as mc
 import matplotlib.pyplot as plt
 import distinctipy as ds
 import pickle as pk
@@ -7,40 +8,37 @@ import json
 CentroidDict=pk.load(open("CentroidDict.pkl","rb"))
 fig = plt.figure(pk.load(open("Simulator.pkl","rb")))
 opfile=open("OutputToSimulator.txt","r")
-Paths=[]
-Times=[]
-MaxTime=0
+NumODPairs=int(opfile.readline())
+TimeDict=[]
 for line in opfile:
+	line=line[:len(line)-1]
 	A=line.split(' ')
-	x=list(A[0].split(','))
-	x = [eval(i) for i in x]
-	Paths.append(x)
-	Times.append(int(A[1]))
-	MaxTime=max(MaxTime,int(A[2]))
+	row=[]
+	for i in A:
+		X=i.split(',')
+		row.append((int(X[0]),int(X[1])))
+	TimeDict.append(row)
 CurTime=0
-prevX=[deque() for _ in range(len(Paths))]
-prevY=[deque() for _ in range(len(Paths))]
-colors=ds.get_colors(len(Paths))
-FirstDict=defaultdict(list)
-for path,startTime in enumerate(Times):
-	FirstDict[startTime].append(path)
-maxStartTime = max(Times)
-FirstPlot=[True for _ in range(maxStartTime)]
-position=0
+MaxTime=len(TimeDict)
+colors=ds.get_colors(NumODPairs)
+ax = fig.axes[0]
 def TraceFunction(event):
 	global CurTime
 	global axTab
-	global position
+	toPlotNow=[]
 	if(CurTime<=MaxTime):
-		if(CurTime<maxStartTime and FirstPlot[CurTime]):
-			for pathIdx in FirstDict[CurTime]:
-				point=CentroidDict[Paths[pathIdx][0]]
-				prevX[pathIdx].append(point[0])
-				prevY[pathIdx].append(point[1])
-			plt.plot([i for i in prevX if len(i)!=0],[i for i in prevY if len(i)!=0],'o',markersize=50,color=colors[pathIdx])
-			fig.canvas.draw()
-			FirstPlot[CurTime]=False
-			CurTime+=1
-		
+		for 3pair in TimeDict[CurTime]:
+			if(3pair[0]==3pair[1]):
+				Point=CentroidDict[3pair[0]]
+				ax.plot(Point[0],Point[1],'o',markersize=30,color=3pair[2])
+			else:
+				PointOne=CentroidDict[3pair[0]]
+				PointTwo=CentroidDict[3pair[1]]
+				toPlotNow.append([PointOne,PointTwo])
+		if(len(toPlotNow)!=0):
+			lc = mc.LineCollection(toPlotNow, colors=colors, linewidths=30)
+			ax.add_collection(lc)
+		fig.canvas.draw()
+	CurTime+=1
 cid = fig.canvas.mpl_connect('button_press_event', TraceFunction)
 plt.show()

@@ -17,16 +17,18 @@ int main()
 {	
 	/*Input File Name*/
 	std::string InputFileName="InputFromFrontend.txt";
-	/*Output File Name*/
-	std::string OutputFileName="OutputToSimulator.txt";
+	/*Frontend Output File Name*/
+	std::string OutputToFrontendFileName="OutputToFrontend.txt";
+	/*Simulator Output File Name*/
+	std::string OutputToSimulatorFileName="OutputToSimulator.txt";
 	/*Supplementary Files */
 	std::string GraphFileName="CppGraph.txt";
 	std::string CentroidFileName="CppCentroids.txt";
 	/* GA Parameters*/
 	int NumSectors=1250;
 	int PopulationSize=4000;
-	int NumberOfMutations=10;
-	int NumberOfGenerations=250;
+	int NumberOfMutations=2;
+	int NumberOfGenerations=300;
 	/* Read OD Pairs */
 	std::vector<std::pair<int,int>> ODPairs;
 	readInput(ODPairs,InputFileName);
@@ -37,14 +39,17 @@ int main()
 	getPaths(ODPairs,Paths,NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,GraphFileName,CentroidFileName);// Input,Output
 
 
-//	cudaError_t err = cudaGetLastError();  
-//	if (err != cudaSuccess) 
-//		printf("CUDA error: %s\n",cudaGetErrorString(err)); 
-//	cudaProfilerStop();
+	cudaError_t err = cudaGetLastError();  
+	if (err != cudaSuccess) 
+		printf("CUDA error: %s\n",cudaGetErrorString(err)); 
+	//cudaProfilerStop();
 
 
-	/*Output all Paths to Output File*/
-	writeOutput(Paths,OutputFileName,NumODPairs);
+	/*Output all Paths to Output File for the Frontend to read*/
+	writeOutput(Paths,OutputToFrontendFileName,NumODPairs);
+	
+	/*Output all Paths to Output File for the Simulator to read*/
+	getSimulatorMatrix(OutputToSimulatorFileName,Paths,NumODPairs);
 	return 0;
 }
 void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<std::vector<int>,int>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::string& CentroidFileName)
@@ -58,6 +63,7 @@ void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<st
 	int* device_Paths_size;
 	double* device_Fitness; //2D
 	int* SelectionPool;
+	int* host_SelectionPool;
 	int* Selected;
 	int* SelectedTime;
 	//OUTPUT RELATED
@@ -74,17 +80,16 @@ void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<st
 		SelectionSize+=1;
 	int CrossoverSize=SelectionSize/2;	
 	int NumODPairs=ODPairs.size();
-	int* OutputSize;
-	CUDA_Init(CentroidFileName, GraphFileName, SectorTimeDict, device_centroids_x, device_centroids_y, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, Selected, SelectedTime, SelectionSize, NumSectors, PopulationSize, NumODPairs, OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputTimes, host_OutputPaths, host_OutputPathsSizes, host_OutputPathsFitnesses, host_OutputTimes, OutputSize);
+	CUDA_Init(CentroidFileName, GraphFileName, SectorTimeDict, device_centroids_x, device_centroids_y, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, host_SelectionPool, Selected, SelectedTime, SelectionSize, NumSectors, PopulationSize, NumODPairs, OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputTimes, host_OutputPaths, host_OutputPathsSizes, host_OutputPathsFitnesses, host_OutputTimes);
 	for(int i=0;i<NumODPairs;i++)
 	{	
-		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, CrossoverSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first, ODPairs[i].second, SectorTimeDict, device_centroids_x, device_centroids_y, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, Selected, SelectedTime, OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputTimes, i, OutputSize);
-		update_SectorTimeDict<<<((*OutputSize)/NumThreads)+1,NumThreads>>>(SectorTimeDict, OutputPaths, OutputTimes, *OutputSize, i);
-		resetForNextPair(device_Paths, device_Paths_size, SelectionPool, Selected, SelectedTime, PopulationSize, SelectionSize);		
+		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, CrossoverSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first, ODPairs[i].second, SectorTimeDict, device_centroids_x, device_centroids_y, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, Selected, SelectedTime, OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputTimes, i);
+		update_SectorTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict, OutputPaths, OutputTimes, OutputPathsSizes, i);
+		resetForNextPair(device_Paths, device_Paths_size, Selected, SelectedTime, PopulationSize, SelectionSize);		
 	}
 	cudaMemcpy(host_OutputPaths,OutputPaths,sizeof(int)*MaxPathLen*NumODPairs,cudaMemcpyDeviceToHost);
 	cudaMemcpy(host_OutputPathsSizes,OutputPathsSizes,sizeof(int)*NumODPairs,cudaMemcpyDeviceToHost);
-	cudaMemcpy(host_OutputPathsFitnesses,OutputPathsFitnesses,sizeof(double)*NumODPairs,cudaMemcpyDeviceToHost);
+	//cudaMemcpy(host_OutputPathsFitnesses,OutputPathsFitnesses,sizeof(double)*NumODPairs,cudaMemcpyDeviceToHost);
 	cudaMemcpy(host_OutputTimes,OutputTimes,sizeof(int)*NumODPairs,cudaMemcpyDeviceToHost);
 	for(int i=0;i<NumODPairs;i++)
 	{
@@ -94,9 +99,9 @@ void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<st
 		}
 		Paths[i].second=host_OutputTimes[i];
 	}
-	CUDA_Free(SectorTimeDict, device_centroids_x, device_centroids_y, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, Selected, SelectedTime,OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputTimes, host_OutputPaths, host_OutputPathsSizes, host_OutputPathsFitnesses, host_OutputTimes, OutputSize);
+	CUDA_Free(SectorTimeDict, device_centroids_x, device_centroids_y, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, host_SelectionPool, Selected, SelectedTime,OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputTimes, host_OutputPaths, host_OutputPathsSizes, host_OutputPathsFitnesses, host_OutputTimes);
 }
-void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &Selected, int* &SelectedTime, int SelectionSize, int NumSectors, int PopulationSize, int NumODPairs, int* &OutputPaths, int* &OutputPathsSizes, double* &OutputPathsFitnesses, int* &OutputTimes, int* &host_OutputPaths, int* &host_OutputPathsSizes, double* &host_OutputPathsFitnesses, int* &host_OutputTimes, int* &OutputSize)
+void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &SelectedTime, int SelectionSize, int NumSectors, int PopulationSize, int NumODPairs, int* &OutputPaths, int* &OutputPathsSizes, double* &OutputPathsFitnesses, int* &OutputTimes, int* &host_OutputPaths, int* &host_OutputPathsSizes, double* &host_OutputPathsFitnesses, int* &host_OutputTimes)
 {
 	//ONE TIME
 	srand(time(NULL));
@@ -120,6 +125,11 @@ void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &
 		cudaMemcpy(temp, host_graph[i], sizeof(GraphNode) * host_arrSizes[i], cudaMemcpyHostToDevice);
 		cudaMemcpy(device_graph+i, &temp, sizeof(GraphNode*), cudaMemcpyHostToDevice);
 	}
+	cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize);
+	host_SelectionPool=(int*)calloc(sizeof(int),PopulationSize);
+	for(int i=0;i<PopulationSize;i++)
+		host_SelectionPool[i]=i;
+	cudaMemcpy(SelectionPool,host_SelectionPool,sizeof(int)*PopulationSize,cudaMemcpyHostToDevice);
 	cudaMalloc((void**)&SectorTimeDict,sizeof(int)*NumSectors*NumSectors);
 	cudaMemset(SectorTimeDict,0,sizeof(int)*NumSectors*NumSectors);
 	cudaMalloc((void**)&OutputPaths,sizeof(int)*MaxPathLen*NumODPairs);
@@ -133,7 +143,7 @@ void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &
 	host_OutputPathsSizes=(int*)calloc(sizeof(int),NumODPairs);
 	host_OutputPathsFitnesses=(double*)calloc(sizeof(double),NumODPairs);
 	host_OutputTimes=(int*)calloc(sizeof(int),NumODPairs);
-	OutputSize=(int*)calloc(sizeof(int),1);
+	
 
 	//RESET PER OD PAIR
 	cudaMalloc((void **)&device_Fitness, sizeof(double)*PopulationSize*FitnessMatrixCols); //DO NOT MEMSET -> DOUBLE
@@ -141,22 +151,16 @@ void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &
 	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
 	cudaMalloc((void **)&device_Paths_size, sizeof(int)* PopulationSize);
 	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-	cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize);
-	cudaMemset(SelectionPool,0,sizeof(int)*PopulationSize);
 	cudaMalloc((void**)&Selected, sizeof(int)*SelectionSize);
 	cudaMemset(Selected,0,sizeof(int)*SelectionSize);
 	cudaMalloc((void**)&SelectedTime, sizeof(int)*SelectionSize);
 	cudaMemset(SelectedTime,0,sizeof(int)*SelectionSize);
 }
-void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int CrossoverSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y,  GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* & device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &Selected, int* &SelectedTime, int* OutputPaths, int* OutputPathsSizes, double* OutputPathsFitnesses, int* OutputTimes, int OutputIndex, int* &OutputSize)
+void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int CrossoverSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y,  GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* & device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &Selected, int* &SelectedTime, int* OutputPaths, int* OutputPathsSizes, double* OutputPathsFitnesses, int* OutputTimes, int OutputIndex)
 {	
 	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_centroids_x,device_centroids_y,SectorTimeDict);
 	int genNum=0;
 	int SelectionPoolSize=PopulationSize;
-	int host_SelectionPool[SelectionPoolSize];
-	for(int i=0;i<SelectionPoolSize;i++)
-		host_SelectionPool[i]=i;
-	cudaMemcpy(SelectionPool,host_SelectionPool,SelectionPoolSize*sizeof(int),cudaMemcpyHostToDevice);
 	while(genNum<=NumberOfGenerations)
 	{
 		genNum+=1;
@@ -169,18 +173,16 @@ void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int
 		Repair<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths, device_Paths_size, PopulationSize, device_Fitness, device_graph, device_arrSizes, device_centroids_x, device_centroids_y,  SectorTimeDict);
 	}
 	getOutput<<<1,1>>>(device_Fitness, device_Paths, device_Paths_size, PopulationSize, OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputTimes, OutputIndex); 
-	cudaMemcpy(OutputSize,OutputPathsSizes+OutputIndex,sizeof(int),cudaMemcpyDeviceToHost);
 }
 
-void resetForNextPair(int* &device_Paths, int* &device_Paths_size, int* &SelectionPool, int* &Selected, int* &SelectedTime, int PopulationSize, int SelectionSize)
+void resetForNextPair(int* &device_Paths, int* &device_Paths_size, int* &Selected, int* &SelectedTime, int PopulationSize, int SelectionSize)
 {
 	cudaMemset(device_Paths,-1,sizeof(int)*PopulationSize*MaxPathLen);
 	cudaMemset(device_Paths_size,0,sizeof(int)* PopulationSize);
-	cudaMemset(SelectionPool,0,sizeof(int)*PopulationSize);
 	cudaMemset(Selected,0,sizeof(int)*SelectionSize);
 	cudaMemset(SelectedTime,0,sizeof(int)*SelectionSize);
 }
-void CUDA_Free(int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &Selected, int* &SelectedTime, int* &OutputPaths, int* &OutputPathsSizes, double* &OutputPathsFitnesses, int* &OutputTimes, int* &host_OutputPaths, int* &host_OutputPathsSizes, double* &host_OutputPathsFitnesses, int* &host_OutputTimes, int* &OutputSize)
+void CUDA_Free(int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &SelectedTime, int* &OutputPaths, int* &OutputPathsSizes, double* &OutputPathsFitnesses, int* &OutputTimes, int* &host_OutputPaths, int* &host_OutputPathsSizes, double* &host_OutputPathsFitnesses, int* &host_OutputTimes)
 {
 	cudaFree(SectorTimeDict);
 	cudaFree(device_centroids_x);
@@ -201,7 +203,8 @@ void CUDA_Free(int* &SectorTimeDict, double* &device_centroids_x, double* &devic
 	free(host_OutputPathsSizes);
 	free(host_OutputPathsFitnesses);
 	free(host_OutputTimes);
-	free(OutputSize);
+	free(host_SelectionPool);
+	cudaDeviceReset();
 }
 __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize, int seed, double* device_centroids_x, double* device_centroids_y, int* SectorTimeDict)
 {
@@ -295,10 +298,11 @@ __device__ double getAngle(int A, int B, int C,double* device_centroids_x, doubl
 		return 180-(abs(b-a));
 }
 
-__global__ void update_SectorTimeDict(int* SectorTimeDict, int* OutputPaths, int* OutputTimes, int OutputPathsSize, int Index)
+__global__ void update_SectorTimeDict(int* SectorTimeDict, int* OutputPaths, int* OutputTimes, int* OutputPathsSize, int Index)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-	if(thread < OutputPathsSize)
+	int PathLen=OutputPathsSize[Index];
+	if(thread < PathLen)
 	{
 		SectorTimeDict[OutputPaths[Index*MaxPathLen+thread]*MaxPathLen+(OutputTimes[Index]+thread)]+=1;
 	}

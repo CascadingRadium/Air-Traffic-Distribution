@@ -92,4 +92,31 @@ void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 	}
 	file.close();	
 }
-
+void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<int>,int>>& Paths, int NumODPairs)
+{
+	std::ofstream file(MatFile);
+	int maxTime=0;
+	for(auto pair:Paths)
+		maxTime=max(maxTime,(int)pair.first.size()+pair.second);
+	std::vector<std::vector<SimulatorTriplet>> OutputVector(maxTime,std::vector<SimulatorTriplet>());
+	for(int pathIdx=0;pathIdx<NumODPairs;pathIdx++)
+	{
+		int startTime=Paths[pathIdx].second;
+		int endTime=startTime+Paths[pathIdx].first.size();
+		OutputVector[startTime].push_back({Paths[pathIdx].first[0],Paths[pathIdx].first[0]});
+		for(int time=startTime+1;time<endTime;time++)
+			OutputVector[time].push_back({Paths[pathIdx].first[time-1-startTime],Paths[pathIdx].first[time-startTime],pathIdx});	
+	}
+	file<<std::to_string(NumODPairs)<<'\n';
+	for(int i=0;i<maxTime;i++)
+	{
+		std::string line="";
+		for(auto i:OutputVector[i])
+			line+=std::to_string(i.StartPoint)+","+std::to_string(i.EndPoint)+","+std::to_string(i.PathIndex)+" ";
+		if(line.length()!=0)
+			line.pop_back();
+		line+="\n";
+		file<<line;
+	}
+	file.close();
+}
