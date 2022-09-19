@@ -10,6 +10,7 @@ import Paper from '../../node_modules/@mui/material/Paper'
 import '../App.css'
 import { useEffect ,useState} from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.common.black,
@@ -38,10 +39,15 @@ export default function PathTable() {
   
   
   const [pathData,setPathData]=useState([])
-
+  const navigate=useNavigate();
   useEffect(()=>{
     getPathData()
   },[])
+
+  const goToSim=()=>{
+    navigate("/sim")
+  }
+
 
   const getPathData=()=>{
     axios.get("http://localhost:5000/api/get-times")
@@ -82,7 +88,7 @@ export default function PathTable() {
         </TableBody>
       </Table>
     </TableContainer>
-    
+    <button type='submit' class="btn btn-primary" onClick={goToSim}>Go To Simulator</button>
     </>
     
   );

@@ -1,18 +1,13 @@
 import './App.css';
 import axios from 'axios'
 import { useState , useEffect} from 'react';
-import airportsData from './airports.txt'
 import CustomizedTables from './components/AddTableRows';
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import {useNavigate} from 'react-router-dom';
-
+import LoadingButton from './components/LoadingButton'
 
 function App() {
-  const [firstNumber,setfirstNumber]=useState(0);
-  const [secondNumber,setsecondNumber]=useState(0);
-  const [answer,setAnswer]=useState(0)
-  const [answer1,setAnswer1]=useState(0)
-  const [airports,setAirports]=useState([])
+
   const [sourceAirports,setsourceAirports]=useState([])
   const [destinatonAirports,setdestinationAirports]=useState([])
   const [sourceAirport,setsourceAirport]=useState("")
@@ -20,10 +15,9 @@ function App() {
   const [numberOfFlights,setNumberOfFlights]=useState(1)
   const [startTime,setStartTime]=useState("")
   const [items,setItems]=useState([])
-  const [simulatorData,setsimulatorData]=useState({})
-  const [pathData,setPathData]=useState([])
   const [states,setStates]=useState([])
   const [stateToAirport,setStateToAirport]=useState({})
+  const [isLoading,setisLoading]=useState(false)
   const navigate=useNavigate()
 
   useEffect(()=>{
@@ -40,28 +34,27 @@ function App() {
       stateList.sort()
       setStates(stateList)
       setStateToAirport(stateToAirportMapping)
+      const airports=Object.values(stateToAirportMapping)
+      let airportList=[]
+      airports.forEach((airport)=>{
+        airportList = [...airportList, ...airport]
+      })
+      console.log(airportList , airportList.length)
+      setsourceAirports(airportList)
+      setdestinationAirports(airportList)
     })
   }
 
-
-  const calculateSum=(e)=>{
-    e.preventDefault();
-    const data={firstNumber,secondNumber}
-    axios.post("http://localhost:5000/api/submit",data)
-    .then(({data})=>{
-      console.log(data.data)
-      setAnswer(data.data)
-    })
-
-  }
 
   const getPathHelper=async(e)=>{
     e.preventDefault();
+    setisLoading(true)
     await axios.post("http://localhost:5000/api/get-paths",items)
     .then(({data})=>{
       console.log(data.data)
       setItems([])
     })
+    setisLoading(false)
     navigate("/paths")
 
   }
@@ -79,14 +72,7 @@ function App() {
   const deleteEntry=(idx,e)=>{
       setItems(items.filter((v,i)=>i!==idx))
   }
-  const mpld3_load_lib = (url, callback) => {
-    var s = document.createElement('script');
-    s.src = url;
-    s.async = true;
-    s.onreadystatechange = s.onload = callback;
-    s.onerror = function () { console.warn("failed to load library " + url); };
-    document.getElementsByTagName("head")[0].appendChild(s);
-  }
+  
 
   const continueSim=()=>{
     console.log("hello")
@@ -106,6 +92,7 @@ function App() {
       <label>
           Select State:
         <select onChange={(e)=>setsourceAirports(stateToAirport[e.target.value])}>
+          <option value=""> Select a state </option>
         {
           states.map((state)=>(
             <option key={state} value={state}>{state}</option>
@@ -113,6 +100,9 @@ function App() {
         }
         </select>
         </label>
+        &emsp;
+        &emsp;
+        &emsp;
         <label>
           Select Source Airport:
         <select onChange={(e)=>setsourceAirport(e.target.value)}>
@@ -130,6 +120,7 @@ function App() {
         <label>
           Select State:
         <select onChange={(e)=>setdestinationAirports(stateToAirport[e.target.value])}>
+          <option value=""> Select a state </option>
         {
           states.map((state)=>(
             <option key={state} value={state}>{state}</option>
@@ -137,6 +128,9 @@ function App() {
         }
         </select>
         </label>
+        &emsp;
+        &emsp;
+        &emsp;
         <label>
           Select Destination Airport:
         <select onChange={(e)=>setdestinationAirport(e.target.value)}>
@@ -167,7 +161,8 @@ function App() {
       {
           <>
           <CustomizedTables items={items} deleteEntry={deleteEntry}/>
-          <button className='btn btn-primary' onClick={getPathHelper}>Get Paths</button>
+
+          {isLoading?<LoadingButton/>:<button className='btn btn-primary' onClick={getPathHelper}>Get Paths</button>}
           </>
           //mpld3.draw_figure("hello",simulation)
           //<PathTable pathData={pathData}/>
