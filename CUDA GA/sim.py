@@ -16,7 +16,7 @@ for line in opfile:
 	row=[]
 	for i in A:
 		X=i.split(',')
-		row.append((int(X[0]),int(X[1])))
+		row.append((int(X[0]),int(X[1]),int(X[2])))
 	TimeDict.append(row)
 CurTime=0
 MaxTime=len(TimeDict)
@@ -26,17 +26,19 @@ def TraceFunction(event):
 	global CurTime
 	global axTab
 	toPlotNow=[]
+	c=[]
 	if(CurTime<=MaxTime):
-		for 3pair in TimeDict[CurTime]:
-			if(3pair[0]==3pair[1]):
-				Point=CentroidDict[3pair[0]]
-				ax.plot(Point[0],Point[1],'o',markersize=30,color=3pair[2])
+		for triplet in TimeDict[CurTime]:
+			if(triplet[0]==triplet[1]):
+				Point=CentroidDict[triplet[0]]
+				ax.plot(Point[0],Point[1],'o',markersize=50,color=colors[triplet[2]])
 			else:
-				PointOne=CentroidDict[3pair[0]]
-				PointTwo=CentroidDict[3pair[1]]
+				PointOne=CentroidDict[triplet[0]]
+				PointTwo=CentroidDict[triplet[1]]
+				c.append(colors[triplet[2]])
 				toPlotNow.append([PointOne,PointTwo])
 		if(len(toPlotNow)!=0):
-			lc = mc.LineCollection(toPlotNow, colors=colors, linewidths=30)
+			lc = mc.LineCollection(toPlotNow, colors=c, linewidths=30)
 			ax.add_collection(lc)
 		fig.canvas.draw()
 	CurTime+=1

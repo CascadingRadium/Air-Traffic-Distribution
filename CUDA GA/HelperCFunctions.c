@@ -103,7 +103,7 @@ void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<in
 	{
 		int startTime=Paths[pathIdx].second;
 		int endTime=startTime+Paths[pathIdx].first.size();
-		OutputVector[startTime].push_back({Paths[pathIdx].first[0],Paths[pathIdx].first[0]});
+		OutputVector[startTime].push_back({Paths[pathIdx].first[0],Paths[pathIdx].first[0],pathIdx});
 		for(int time=startTime+1;time<endTime;time++)
 			OutputVector[time].push_back({Paths[pathIdx].first[time-1-startTime],Paths[pathIdx].first[time-startTime],pathIdx});	
 	}
