@@ -18,6 +18,7 @@ function App() {
   const [states,setStates]=useState([])
   const [stateToAirport,setStateToAirport]=useState({})
   const [isLoading,setisLoading]=useState(false)
+  const [file,setFile]=useState()
   const navigate=useNavigate()
 
   useEffect(()=>{
@@ -58,6 +59,21 @@ function App() {
     navigate("/paths")
 
   }
+
+  const uploadFile=(e)=>{
+    e.preventDefault()
+    const formData=new FormData()
+    formData.append('file',file)
+    console.log(formData)
+    setFile()
+    axios.post("http://localhost:5000/api/upload-file",formData)
+    .then(({data})=>{
+        setItems(items=>[...items,...data.data])
+    })
+  }
+
+
+
   const addFlight=(e)=>{
     e.preventDefault();
     const sourceAirportName=sourceAirport.split(",")[0]
@@ -72,22 +88,11 @@ function App() {
   const deleteEntry=(idx,e)=>{
       setItems(items.filter((v,i)=>i!==idx))
   }
-  
 
-  const continueSim=()=>{
-    console.log("hello")
-    axios.get("http://localhost:5000/api/simulation")
-    .then(({data})=>{
-      console.log(data.data)
-    })
-  }
-
-
-  const fig_name="lol";
   return (
     <>
     <div className="App">
-      <h1>Lol let's try</h1>
+      <h1>GPU - Accelerated Genetic Algorithm for Air Traffic Management</h1>
       <form>
       <label>
           Select State:
@@ -151,7 +156,12 @@ function App() {
         Start Time:
         <input type="text" value={startTime} onChange={(e)=> setStartTime(e.target.value)}/>
         <br/>
-        <button type='submit' class="btn btn-primary" onClick={addFlight}>Add flight</button>
+        <button type='submit' class="btn btn-primary" onClick={addFlight}>Add flight</button><br/><br/>
+        <h3>---------------  OR ----------------</h3>
+        &emsp;
+        <input type='file' onChange={(e)=>setFile(e.target.files[0])}/>
+        &emsp;
+        <button type='submit' class="btn btn-primary" onClick={uploadFile}>Upload File</button>
       </form>
       
     </div>
@@ -164,29 +174,12 @@ function App() {
 
           {isLoading?<LoadingButton/>:<button className='btn btn-primary' onClick={getPathHelper}>Get Paths</button>}
           </>
-          //mpld3.draw_figure("hello",simulation)
-          //<PathTable pathData={pathData}/>
           
       }
     </div>
       </>
-  //   <div onClick={continueSim}>
-  //     {
-  //     mpld3_load_lib("https://d3js.org/d3.v5.js", function () {
-  //       mpld3_load_lib("https://mpld3.github.io/js/mpld3.v0.5.8.js", function () {
-  //         mpld3.remove_figure(fig_name)
-  //         mpld3.draw_figure(fig_name, simulation);
-  //       })
-  //     })
-  //   }
-  //   <div id={fig_name}></div>
-  // </div>
+ 
   );
-
-
-  
-
-
 }
 
 export default App;

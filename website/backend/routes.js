@@ -46,6 +46,7 @@ data.map((airportInfo)=>{
   airportSectorMapping[airportData[1]]=airportData[3]
 })
 
+ 
 
 router.post("/submit",(req,res)=>{
     console.log(req.body)
@@ -58,33 +59,38 @@ router.post("/submit",(req,res)=>{
         console.error(err);
       }
     })
-    
-router.post("/submit-subtraction",(req,res)=>{
-    console.log(req.body)
-    console.log(`python3 ${req.body.firstNumber} ${req.body.secondNumber}`)
-    execSync('python3 subtract.py ' + req.body.firstNumber +' '+ req.body.secondNumber, { encoding: 'utf-8' }); 
-    try {
-      const data = fs.readFileSync('output-subtract.txt', 'utf8');
-        res.send({"data":data})
-      } catch (err) {
-        console.error(err);
-      }
-})
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 router.post("/get-paths",async(req,res)=>{
     
 
     const flights=req.body
+    let flightTiming=[]
+    flights.forEach((flight)=>{
+      const start=flight.startTime
+      flightTiming.push(start)
+    })
+    flightTiming=[...new Set([...flightTiming])]
+    flightTiming=flightTiming.sort((a,b)=>{
+      let x=a.split(":")
+      let y=b.split(":")
+      if(x[0]===y[0])
+          return Number(x[1]) - Number(y[1])
+      return Number(x[0]) - Number(y[0])
+    })
+    const earliest=flightTiming[0].split(":")
     let content="";
     flights.map((flight,id)=>{
-      const startTime=flight.startTime
+      const startTime=flight.startTime.split(":")
+      const difference=(Number(startTime[0]) -Number(earliest[0]))*60 + (Number(startTime[1]) -Number(earliest[1]))
+      const idx=difference/5
       const sourceAirport=flight.sourceAirportName
       const destinationAirport=flight.destinationAirportName
       const sourceSector=airportSectorMapping[sourceAirport]
       const destinationSector=airportSectorMapping[destinationAirport]
       flightIDToAirportMapping[id]={startTime,sourceAirport,destinationAirport}
-      content+=`${sourceSector},${destinationSector}\n`
+      content+=`${sourceSector},${destinationSector},${idx}\n`
+      console.log(content)
     })
   try {
     fs.writeFileSync('InputFromFrontend.txt', content);
@@ -100,13 +106,31 @@ router.post("/get-paths",async(req,res)=>{
 router.get("/simulator",(req,res)=>{
 
   try{
-  execSync('ipython -c "%run Simulator.ipynb"', { encoding: 'utf-8' });
-  return res.status(200).json({"data":"Success"})
+  execSync('python3 sim.py', { encoding: 'utf-8' });
+  res.status(200).json({"data":"Success"})
   }
   catch(e)
   {
-    return res.status(500).json({"data":"Something is wrong"})
+    res.status(500).json({"data":"Something is wrong"})
   }
+})
+
+router.post("/upload-file",(req,res)=>{
+    const data=req.files.file.data.toString().split("\n")
+    let items=[]
+    data.forEach((row)=>{
+      const info=row.split(",")
+      const sourceAirportName=info[0]
+      const destinationAirportName=info[1]
+      const numberOfFlights=parseInt(info[2])
+      const startTime=info[3]
+      const item={startTime,sourceAirportName,destinationAirportName}
+      for(let i=0;i<numberOfFlights;i++)
+      {
+          items.push(item)
+      }
+    })
+    res.status(200).json({"data":items})
 })
 
 router.get("/get-states",(req,res)=>{

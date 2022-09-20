@@ -50,6 +50,7 @@ export default function CustomizedTables({items,deleteEntry}) {
           <StyledTableCell>Flight ID</StyledTableCell>
             <StyledTableCell>Source Airport</StyledTableCell>
             <StyledTableCell>Destination Airport</StyledTableCell>
+            <StyledTableCell>Start Time</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -59,6 +60,7 @@ export default function CustomizedTables({items,deleteEntry}) {
               <StyledTableCell>{idx}</StyledTableCell>
               <StyledTableCell>{row.source}</StyledTableCell>
               <StyledTableCell>{row.destination}</StyledTableCell>
+              <StyledTableCell>{row.startTime}</StyledTableCell>
             </StyledTableRow>
           ))
         }
