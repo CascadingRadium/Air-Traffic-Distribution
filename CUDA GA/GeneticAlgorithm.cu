@@ -26,9 +26,9 @@ int main()
 	std::string CentroidFileName="CppCentroids.txt";
 	/* GA Parameters*/
 	int NumSectors=1250;
-	int PopulationSize=4000;
+	int PopulationSize=6000;
 	int NumberOfMutations=2;
-	int NumberOfGenerations=300;
+	int NumberOfGenerations=400;
 	/* Read OD Pairs */
 	std::vector<std::pair<int,int>> ODPairs;
 	readInput(ODPairs,InputFileName);

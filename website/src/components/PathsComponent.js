@@ -30,8 +30,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function createData(id,sourceAirport,destinationAirport,startDate,endDate) {
-  return {id,sourceAirport,destinationAirport,startDate,endDate}
+function createData(id,sourceAirport,destinationAirport,startDate,endDate,aerialTime,groundHolding) {
+  return {id,sourceAirport,destinationAirport,startDate,endDate,aerialTime,groundHolding}
 }
 
 
@@ -45,7 +45,11 @@ export default function PathTable() {
   },[])
 
   const goToSim=()=>{
-    navigate("/sim")
+    console.log("bozo shit")
+    axios.get("http://localhost:5000/api/simulator")
+    .then(({data})=>{
+      console.log(data)
+    })
   }
 
 
@@ -57,7 +61,8 @@ export default function PathTable() {
     })
   }
   const rows=pathData.map((item)=>{
-     return createData(item.id,item.sourceAirport,item.destinationAirport,item.startDate,item.endDate)
+    console.log(item)
+     return createData(item.id,item.sourceAirport,item.destinationAirport,item.startDate,item.endDate,item.aerialTime,item.groundHolding)
   });
     return (
         <>
@@ -71,6 +76,8 @@ export default function PathTable() {
             <StyledTableCell>Destination Airport</StyledTableCell>
             <StyledTableCell>Departure Time</StyledTableCell>
             <StyledTableCell>Arrival Time</StyledTableCell>
+            <StyledTableCell>Aerial Time</StyledTableCell>
+            <StyledTableCell>Ground Holding</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -82,6 +89,8 @@ export default function PathTable() {
               <StyledTableCell>{row.destinationAirport}</StyledTableCell>
               <StyledTableCell>{row.startDate}</StyledTableCell>
               <StyledTableCell>{row.endDate}</StyledTableCell>
+              <StyledTableCell>{row.aerialTime}</StyledTableCell>
+              <StyledTableCell>{row.groundHolding}</StyledTableCell>
             </StyledTableRow>
           ))
         }

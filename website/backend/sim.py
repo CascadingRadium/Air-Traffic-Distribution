@@ -16,7 +16,10 @@ for line in opfile:
 	row=[]
 	for i in A:
 		X=i.split(',')
+<<<<<<< HEAD
 		print(X)
+=======
+>>>>>>> 61b9b365dc32ac5c5d747df20f79d87d42ee7188
 		row.append((int(X[0]),int(X[1]),int(X[2])))
 	TimeDict.append(row)
 CurTime=0

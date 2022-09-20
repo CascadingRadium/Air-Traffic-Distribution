@@ -20,7 +20,6 @@ function App() {
   const [isLoading,setisLoading]=useState(false)
   const [file,setFile]=useState()
   const navigate=useNavigate()
-
   useEffect(()=>{
     getStates()
   },[])
@@ -80,10 +79,19 @@ function App() {
     const destinationAirportName=destinationAirport.split(",")[0]
     let dataList=[];
     const data={sourceAirportName,destinationAirportName,startTime};
+    if(startTime==='')
+    {
+      alert("Start Time cannot be empty")
+    }
+    else{
     for(let i=0;i<numberOfFlights;i++)
       dataList.push(data)
     setItems(items=>[...items,...dataList])
+    }
   }
+
+
+
 
   const deleteEntry=(idx,e)=>{
       setItems(items.filter((v,i)=>i!==idx))
@@ -92,7 +100,11 @@ function App() {
   return (
     <>
     <div className="App">
+<<<<<<< HEAD
       <h1>GPU - Accelerated Genetic Algorithm for Air Traffic Management</h1>
+=======
+      <h1>Flight Scheduler and Plan Generator</h1>
+>>>>>>> 61b9b365dc32ac5c5d747df20f79d87d42ee7188
       <form>
       <label>
           Select State:
@@ -154,7 +166,7 @@ function App() {
         <br/>
         &emsp;
         Start Time:
-        <input type="text" value={startTime} onChange={(e)=> setStartTime(e.target.value)}/>
+        <input type="text" placeholder="Start Time" value={startTime} onChange={(e)=>setStartTime(e.target.value)} required/>
         <br/>
         <button type='submit' class="btn btn-primary" onClick={addFlight}>Add flight</button><br/><br/>
         <h3>---------------  OR ----------------</h3>

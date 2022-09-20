@@ -28,7 +28,8 @@ void writeOutput(std::vector<std::pair<std::vector<int>,int>>&Paths, std::string
 		line+=std::to_string(st);
 		line.push_back(' ');
 		line+=std::to_string(en);
-		line.push_back('\n');
+		if(i!=NumODPairs-1)
+			line.push_back('\n');
 		file<<line;
 	}
 	file.close();

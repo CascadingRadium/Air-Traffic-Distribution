@@ -3,7 +3,7 @@ const execSync = require('child_process').execSync;
 const fs = require('fs');
 const airportsData = '../src/airports.txt'
 const paths='./OutputToFrontend.txt'
-
+const CONVERSION_FACTOR=1000*60;
 var airportSectorMapping={}
 
 
@@ -159,6 +159,7 @@ router.get("/get-times",async(req,res)=>{
   timeObj={}
   let timeList=[]
   const pathsFile=fs.readFileSync(paths).toString().split("\n")
+  console.log(pathsFile)
   pathsFile.forEach((path,id)=>{
     const start=flightIDToAirportMapping[id].startTime.split(":")
     let d=new Date();
@@ -170,9 +171,11 @@ router.get("/get-times",async(req,res)=>{
     let endDate=addMinutes(d,endTime)
     let sourceAirport=flightIDToAirportMapping[id].sourceAirport
     let destinationAirport=flightIDToAirportMapping[id].destinationAirport
+    const aerialTime=(endDate-startDate)/CONVERSION_FACTOR
+    const groundHolding=(startDate-d)/CONVERSION_FACTOR
     startDate=prettifyDate(startDate)
     endDate=prettifyDate(endDate)
-    timeObj={ id,sourceAirport,destinationAirport,startDate,endDate}
+    timeObj={ id,sourceAirport,destinationAirport,startDate,endDate,aerialTime,groundHolding}
     timeList.push(timeObj)
   })
   res.status(200).json({"data":timeList}) 
