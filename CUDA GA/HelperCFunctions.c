@@ -9,7 +9,7 @@ void tokenize(std::string &str, char delim, std::vector<std::string> &out)
 		out.push_back(s);
 	}
 }
-void writeOutput(std::vector<std::pair<std::vector<int>,int>>&Paths, std::string OutputFileName, int NumODPairs)
+void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std::string OutputFileName, int NumODPairs)
 {
 	std::ofstream file(OutputFileName);
 	std::string line="";
@@ -23,11 +23,15 @@ void writeOutput(std::vector<std::pair<std::vector<int>,int>>&Paths, std::string
 		if(line.length()>0)
 			line.pop_back();
 		line.push_back(' ');
-		int st=Paths[i].second;
-		int en=st+Paths[i].first.size();
-		line+=std::to_string(st);
+		line+=std::to_string(Paths[i].second.EstimatedDeparture);
 		line.push_back(' ');
-		line+=std::to_string(en);
+		line+=std::to_string(Paths[i].second.GroundHolding);
+		line.push_back(' ');
+		line+=std::to_string(Paths[i].second.ActualDeparture);
+		line.push_back(' ');
+		line+=std::to_string(Paths[i].second.AerialDelay);
+		line.push_back(' ');
+		line+=std::to_string(Paths[i].second.ArrivalTime);
 		if(i!=NumODPairs-1)
 			line.push_back('\n');
 		file<<line;
@@ -94,17 +98,17 @@ void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 	}
 	file.close();	
 }
-void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<int>,int>>& Paths, int NumODPairs)
+void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, int NumODPairs)
 {
 	std::ofstream file(MatFile);
 	int maxTime=0;
 	for(auto pair:Paths)
-		maxTime=max(maxTime,(int)pair.first.size()+pair.second);
+		maxTime=max(maxTime,pair.second.ArrivalTime);
 	std::vector<std::vector<SimulatorTriplet>> OutputVector(maxTime,std::vector<SimulatorTriplet>());
 	for(int pathIdx=0;pathIdx<NumODPairs;pathIdx++)
 	{
-		int startTime=Paths[pathIdx].second;
-		int endTime=startTime+Paths[pathIdx].first.size();
+		int startTime=Paths[pathIdx].second.ActualDeparture;
+		int endTime=Paths[pathIdx].second.ArrivalTime;
 		OutputVector[startTime].push_back({Paths[pathIdx].first[0],Paths[pathIdx].first[0],pathIdx});
 		for(int time=startTime+1;time<endTime;time++)
 			OutputVector[time].push_back({Paths[pathIdx].first[time-1-startTime],Paths[pathIdx].first[time-startTime],pathIdx});	
@@ -122,3 +126,4 @@ void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<in
 	}
 	file.close();
 }
+

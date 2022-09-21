@@ -34,7 +34,7 @@ int main()
 	std::vector<int> times;
 	readInput(ODPairs,InputFileName,times);
 	int NumODPairs=ODPairs.size();
-	std::vector<std::pair<std::vector<int>,int>>Paths(NumODPairs);
+	std::vector<std::pair<std::vector<int>,PathOutput>>Paths(NumODPairs);
 	/* Call CUDA Genetic Algorithm to solve the Congestion Game*/
 	getPaths(ODPairs,Paths,NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,GraphFileName,CentroidFileName,times);// Input,Output
 
@@ -47,12 +47,12 @@ int main()
 
 	/*Output all Paths to Output File for the Frontend to read*/
 	writeOutput(Paths,OutputToFrontendFileName,NumODPairs);
-	
+
 	/*Output all Paths to Output File for the Simulator to read*/
 	getSimulatorMatrix(OutputToSimulatorFileName,Paths,NumODPairs);
 	return 0;
 }
-void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<std::vector<int>,int>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::string& CentroidFileName, std::vector<int>&times)
+void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<std::vector<int>,PathOutput>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::string& CentroidFileName, std::vector<int>&times)
 {	
 	int* SectorTimeDict; //2D
 	double* device_centroids_x;
@@ -89,19 +89,21 @@ void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<st
 	}
 	cudaMemcpy(host_OutputPaths,OutputPaths,sizeof(int)*MaxPathLen*NumODPairs,cudaMemcpyDeviceToHost);
 	cudaMemcpy(host_OutputPathsSizes,OutputPathsSizes,sizeof(int)*NumODPairs,cudaMemcpyDeviceToHost);
-	cudaMemcpy(host_OutputPathsFitnesses,OutputPathsFitnesses,sizeof(double)*NumODPairs,cudaMemcpyDeviceToHost);
+	//cudaMemcpy(host_OutputPathsFitnesses,OutputPathsFitnesses,sizeof(double)*NumODPairs,cudaMemcpyDeviceToHost);
 	cudaMemcpy(host_OutputDelays,OutputDelays,sizeof(int)*NumODPairs,cudaMemcpyDeviceToHost);
-	double cost=0;
+	//double cost=0;
 	for(int i=0;i<NumODPairs;i++)
 	{
 		for(int j=0;j<host_OutputPathsSizes[i];j++)
 		{
 			Paths[i].first.push_back(host_OutputPaths[i*MaxPathLen+j]);
 		}
-		Paths[i].second=times[i]+host_OutputDelays[i];
-		cost+=host_OutputPathsFitnesses[i];
+		Paths[i].second.EstimatedDeparture=times[i];
+		Paths[i].second.GroundHolding=host_OutputDelays[i];
+		Paths[i].second.ActualDeparture=times[i]+host_OutputDelays[i];
+		Paths[i].second.AerialDelay=host_OutputPathsSizes[i];
+		Paths[i].second.ArrivalTime=times[i]+host_OutputDelays[i]+host_OutputPathsSizes[i];
 	}
-	printf("%0.12g\n",cost);
 	CUDA_Free(SectorTimeDict, device_centroids_x, device_centroids_y, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, host_SelectionPool, Selected, SelectedDelay, OutputPaths, OutputPathsSizes, OutputPathsFitnesses, OutputDelays, host_OutputPaths, host_OutputPathsSizes, host_OutputPathsFitnesses, host_OutputDelays);
 }
 void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &SelectedDelay, int SelectionSize, int NumSectors, int PopulationSize, int NumODPairs, int* &OutputPaths, int* &OutputPathsSizes, double* &OutputPathsFitnesses, int* &OutputDelays, int* &host_OutputPaths, int* &host_OutputPathsSizes, double* &host_OutputPathsFitnesses, int* &host_OutputDelays)
@@ -146,7 +148,7 @@ void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &
 	host_OutputPathsSizes=(int*)calloc(sizeof(int),NumODPairs);
 	host_OutputPathsFitnesses=(double*)calloc(sizeof(double),NumODPairs);
 	host_OutputDelays=(int*)calloc(sizeof(int),NumODPairs);
-	
+
 
 	//RESET PER OD PAIR
 	cudaMalloc((void **)&device_Fitness, sizeof(double)*PopulationSize*(MaxDelay)); //DO NOT MEMSET -> DOUBLE
@@ -299,7 +301,7 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 		{
 			TrafficFactor+=SectorTimeDict[device_Paths[thread*MaxPathLen+j]*MaxPathLen+(StartTime+j+delay)];
 		}
-		device_Fitness[thread*MaxDelay+delay]=StaticFitness*(1/TrafficFactor)*(1/((double)((device_Paths_size[thread]-2)*(delay+1))));
+		device_Fitness[thread*MaxDelay+delay]=StaticFitness*(1/TrafficFactor)*(1/((double)(device_Paths_size[thread]*(delay+1))));
 	}
 }
 __device__ double getAngle(int A, int B, int C,double* device_centroids_x, double* device_centroids_y)
@@ -550,3 +552,4 @@ __global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_
 	OutputDelays[index]=time;
 	OutputPathsFitnesses[index]=maxF;
 }
+

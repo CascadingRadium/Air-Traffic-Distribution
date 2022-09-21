@@ -1,1 +1,10 @@
-Tampa International Airport,Indianapolis International Airport,9,12:00
+Salt Lake City International Airport,Albuquerque International Sunport Airport,10:00
+Salt Lake City International Airport,Dallas Fort Worth International Airport,10:00
+Salt Lake City International Airport,Los Angeles International Airport,10:00
+Salt Lake City International Airport,Cincinnati Northern Kentucky International Airport,10:05
+Salt Lake City International Airport,Fort Lauderdale Hollywood International Airport,10:05
+Salt Lake City International Airport,Denver International Airport,10:05
+Salt Lake City International Airport,City of Colorado Springs Municipal Airport,10:05
+Salt Lake City International Airport,Denver International Airport,10:05
+Salt Lake City International Airport,General Edward Lawrence Logan International Airport,10:05
+Salt Lake City International Airport,Orlando International Airport,10:25

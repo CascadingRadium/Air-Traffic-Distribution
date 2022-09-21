@@ -10,65 +10,66 @@ import Paper from '../../node_modules/@mui/material/Paper'
 import { MdDelete } from 'react-icons/md' 
 import '../App.css'
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
+	[`&.${tableCellClasses.head}`]: {
+		backgroundColor: theme.palette.common.black,
+		color: theme.palette.common.white,
+	},
+	[`&.${tableCellClasses.body}`]: {
+		fontSize: 14,
+	},
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
-  },
-  '&:last-child td, &:last-child th': {
-    border: 0,
-  },
+	'&:nth-of-type(odd)': {
+		backgroundColor: theme.palette.action.hover,
+	},
+	'&:last-child td, &:last-child th': {
+		border: 0,
+	},
 }));
 
 function createData(id,source,destination,startTime) {
-  return { id,source,destination,startTime};
+	return { id,source,destination,startTime};
 }
 
 
 export default function CustomizedTables({items,deleteEntry}) {
-  
-    const rows=items.map((item)=>{
-       return createData(item._id,item.sourceAirportName,item.destinationAirportName,item.startTime)
-    });
 
-   
+	const rows=items.map((item)=>{
+		return createData(item._id,item.sourceAirportName,item.destinationAirportName,item.startTime)
+	});
 
-    return (
-        <>
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
-        <TableHead>
-          <TableRow>
-          <StyledTableCell>Flight ID</StyledTableCell>
-            <StyledTableCell>Source Airport</StyledTableCell>
-            <StyledTableCell>Destination Airport</StyledTableCell>
-            <StyledTableCell>Start Time</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-        {
-          rows.map((row,idx) => (
-            <StyledTableRow key={idx}>
-              <StyledTableCell>{idx}</StyledTableCell>
-              <StyledTableCell>{row.source}</StyledTableCell>
-              <StyledTableCell>{row.destination}</StyledTableCell>
-              <StyledTableCell>{row.startTime}</StyledTableCell>
-            </StyledTableRow>
-          ))
-        }
-        </TableBody>
-      </Table>
-    </TableContainer>
-    
-    </>
-    
-  );
+
+
+	return (
+		<>
+		<TableContainer component={Paper}>
+		<Table sx={{ minWidth: 700 }} aria-label="customized table">
+		<TableHead>
+		<TableRow>
+		<StyledTableCell>Flight ID</StyledTableCell>
+		<StyledTableCell>Source Airport</StyledTableCell>
+		<StyledTableCell>Destination Airport</StyledTableCell>
+		<StyledTableCell>Start Time</StyledTableCell>
+		</TableRow>
+		</TableHead>
+		<TableBody>
+		{
+			rows.map((row,idx) => (
+				<StyledTableRow key={idx}>
+				<StyledTableCell>{idx}</StyledTableCell>
+				<StyledTableCell>{row.source}</StyledTableCell>
+				<StyledTableCell>{row.destination}</StyledTableCell>
+				<StyledTableCell>{row.startTime}</StyledTableCell>
+				</StyledTableRow>
+			))
+		}
+		</TableBody>
+		</Table>
+		</TableContainer>
+
+		</>
+
+	);
 }
+

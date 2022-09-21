@@ -8,7 +8,14 @@ typedef struct SimulatorTriplet
 {
 	int StartPoint, EndPoint, PathIndex;
 }SimulatorTriplet;
-
+typedef struct
+{
+	int EstimatedDeparture;
+	int GroundHolding;
+	int ActualDeparture;
+	int AerialDelay;
+	int ArrivalTime;
+}PathOutput;
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -22,7 +29,7 @@ void CUDA_Init(std::string &CentroidFileName, std::string &GraphFileName, int* &
 void resetForNextPair(int* &device_Paths, int* &device_Paths_size, int* &Selected, int* &SelectedTime, int PopulationSize, int SelectionSize);
 __global__ void update_SectorTimeDict(int* SectorTimeDict, int* OutputPaths, int* OutputDelays, int* OutputPathsSize, int Index, int StartTime);
 void CUDA_Free(int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &SelectedTime, int* &OutputPaths, int* &OutputPathsSizes, double* &OutputPathsFitnesses, int* &OutputTimes, int* &host_OutputPaths, int* &host_OutputPathsSizes, double* &host_OutputPathsFitnesses, int* &host_OutputTimes);
-void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<std::vector<int>,int>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::string& CentroidFileName, std::vector<int>&times);
+void getPaths(std::vector<std::pair<int,int>> &ODPairs, std::vector<std::pair<std::vector<int>,PathOutput>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::string& CentroidFileName, std::vector<int>&times);
 __device__ double getAngle(int A, int B, int C,double* device_centroids_x, double* device_centroids_y);
 __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* device_Paths_size, int thread, GraphNode** device_graph, int* device_arrSizes, double* device_centroids_x, double* device_centroids_y, int* SectorTimeDict, int StartTime);
 __device__ void getPath(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int PopulationSize, int seed, double* device_centroids_x, double* device_centroids_y, int* SectorTimeDict, int start, int end, int thread, int skip, int StartTime);
@@ -36,8 +43,9 @@ __global__ void Repair(int* device_Paths, int* device_Paths_size, int Population
 __global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_Paths_size, int PopulationSize, int* OutputPaths, int* OutputPathsSizes, double* OutputPathsFitnesses, int* OutputTimes, int index);
 void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int CrossoverSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, double* &device_centroids_x, double* &device_centroids_y,  GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* & device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &Selected, int* &SelectedDelay, int* OutputPaths, int* OutputPathsSizes, double* OutputPathsFitnesses, int* OutputDelays, int OutputIndex,int StartTime);
 void tokenize(std::string &str, char delim, std::vector<std::string> &out);
-void writeOutput(std::vector<std::pair<std::vector<int>,int>>&Paths, std::string OutputFileName, int NumODPairs);
+void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>> &Paths, std::string OutputFileName, int NumODPairs);
 void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileName,std::vector<int>& times);
 void readCentroids(std::string CentroidFileName, double host_centroids_x[], double host_centroids_y[]);
 void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes);
-void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<int>,int>>& Paths, int NumODPairs);
+void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, int NumODPairs);
+
