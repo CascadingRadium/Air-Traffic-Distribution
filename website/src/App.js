@@ -100,11 +100,8 @@ function App() {
   return (
     <>
     <div className="App">
-<<<<<<< HEAD
       <h1>GPU - Accelerated Genetic Algorithm for Air Traffic Management</h1>
-=======
       <h1>Flight Scheduler and Plan Generator</h1>
->>>>>>> 61b9b365dc32ac5c5d747df20f79d87d42ee7188
       <form>
       <label>
           Select State:
