@@ -14,6 +14,8 @@ function App() {
   const [destinationAirport,setdestinationAirport]=useState("")
   const [numberOfFlights,setNumberOfFlights]=useState(1)
   const [startTime,setStartTime]=useState("")
+  const [mins,setMin]=useState(0)
+  const [hrs,sethrs]=useState(1)
   const [items,setItems]=useState([])
   const [states,setStates]=useState([])
   const [stateToAirport,setStateToAirport]=useState({})
@@ -70,24 +72,55 @@ function App() {
         setItems(items=>[...items,...data.data])
     })
   }
+  const number_of_flights=()=>{
+    let ar=[]
+    for(let i=1;i<=20;i++){ar.push(i);}
+    return ar
+  }
+  
+  
 
+const gethrs=()=>{
+  let arr=[]
+  for(let i=1;i<24;i++)
+  {
+      arr.push(i)
+  }
+  return arr;
+}
 
-
+const getmins=()=>{
+  let arr=[]
+  for(let i=0;i<=55;i+=5)
+  {
+    arr.push(i)
+  }
+  return arr
+}
   const addFlight=(e)=>{
     e.preventDefault();
     const sourceAirportName=sourceAirport.split(",")[0]
     const destinationAirportName=destinationAirport.split(",")[0]
-    let dataList=[];
-    const data={sourceAirportName,destinationAirportName,startTime};
-    if(startTime==='')
+    if(sourceAirportName===destinationAirportName)
     {
-      alert("Start Time cannot be empty")
+      alert("Source airport and destination airport cannot be same")
+      return ;
     }
-    else{
+    let dataList=[];
+    let startTime=hrs.toString() + ":"
+    if(mins < 10)
+    {
+      startTime+="0"+mins.toString()
+    }
+    else 
+    {
+      startTime +=mins.toString()
+    }
+    const data={sourceAirportName,destinationAirportName,startTime};
     for(let i=0;i<numberOfFlights;i++)
       dataList.push(data)
     setItems(items=>[...items,...dataList])
-    }
+    
   }
 
 
@@ -100,12 +133,9 @@ function App() {
   return (
     <>
     <div className="App">
-<<<<<<< HEAD
       <h1>GPU - Accelerated Genetic Algorithm for Air Traffic Management</h1>
-=======
-      <h1>Flight Scheduler and Plan Generator</h1>
->>>>>>> 61b9b365dc32ac5c5d747df20f79d87d42ee7188
       <form>
+        <div id="source" align="left">
       <label>
           Select State:
         <select onChange={(e)=>setsourceAirports(stateToAirport[e.target.value])}>
@@ -117,9 +147,9 @@ function App() {
         }
         </select>
         </label>
-        &emsp;
-        &emsp;
-        &emsp;
+        <br/>
+        <br/>
+        <br/>
         <label>
           Select Source Airport:
         <select onChange={(e)=>setsourceAirport(e.target.value)}>
@@ -131,9 +161,11 @@ function App() {
         }
         </select>
         </label>
+        </div>
         &emsp;
         &emsp;
         &emsp;
+        <div id="destination" align="right">
         <label>
           Select State:
         <select onChange={(e)=>setdestinationAirports(stateToAirport[e.target.value])}>
@@ -145,9 +177,9 @@ function App() {
         }
         </select>
         </label>
-        &emsp;
-        &emsp;
-        &emsp;
+        <br/>
+        <br/>
+        <br/>
         <label>
           Select Destination Airport:
         <select onChange={(e)=>setdestinationAirport(e.target.value)}>
@@ -155,18 +187,45 @@ function App() {
         {
           destinatonAirports.map((airport)=>(
             <option key={airport} value={airport}>{airport}</option>
+            ))
+          }
+        </select>
+        </label> 
+          </div>
+        <br/>
+
+        <label>
+          Number of flights 
+          &emsp;
+        <select onChange={(e)=>setNumberOfFlights(e.target.value)}>
+        {
+          number_of_flights().map((airport)=>(
+            <option key={airport} value={airport}>{airport}</option>
           ))
         }
         </select>
-        </label> 
-        &emsp;
-
-        Number of flights:
-        <input type="number" value={numberOfFlights} onChange={(e)=> setNumberOfFlights(e.target.value)}/>
+         </label>
         <br/>
         &emsp;
-        Start Time:
-        <input type="text" placeholder="Start Time" value={startTime} onChange={(e)=>setStartTime(e.target.value)} required/>
+        <label>Hour: &emsp;
+        <select onChange={(e)=>sethrs(e.target.value)}>
+        {
+          gethrs().map((state)=>(
+            <option key={state} value={state}>{state}</option>
+          ))
+        }
+        </select>
+        </label>
+        &emsp;
+        <label>Minutes: &emsp;
+        <select onChange={(e)=>setMin(e.target.value)}>
+        {
+          getmins().map((state)=>(
+            <option key={state} value={state}>{state}</option>
+          ))
+        }
+        </select>
+        </label>
         <br/>
         <button type='submit' class="btn btn-primary" onClick={addFlight}>Add flight</button><br/><br/>
         <h3>---------------  OR ----------------</h3>

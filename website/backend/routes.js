@@ -8,7 +8,6 @@ var airportSectorMapping={}
 
 
 var flightIDToAirportMapping={}
-
 var stateToAirports={}
 
 const data = fs.readFileSync(airportsData).toString().split("\n");
