@@ -35,7 +35,7 @@ void writeOutput(std::vector<std::pair<std::vector<int>,int>>&Paths, std::string
 	file.close();
 }
 
-void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileName)
+void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileName,std::vector<int>& times)
 {
 	std::fstream file(InputFileName);
 	std::string line="";
@@ -45,6 +45,7 @@ void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileNa
 		tokens.clear();
 		tokenize(line,',',tokens);
 		ODPairs.push_back({stoi(tokens[0]),stoi(tokens[1])});
+		times.push_back(stoi(tokens[2]));
 	}
 	file.close();
 }
