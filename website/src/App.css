@@ -45,3 +45,11 @@
 .icon{
   width: 10px;
 }
+
+#source{
+ display: inline-block;
+ align-self: flex-start;
+}
+#destination{
+  display: inline-block;
+}
