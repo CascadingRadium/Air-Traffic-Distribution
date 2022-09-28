@@ -42,7 +42,7 @@ function addMinutes(date, minutes) {
 
 data.map((airportInfo)=>{
 	const airportData=airportInfo.split(",")
-	airportSectorMapping[airportData[1]]=airportData[3]
+	airportSectorMapping[airportData[0]]=airportData[3]
 })
 
 
@@ -135,8 +135,8 @@ router.get("/get-states",(req,res)=>{
 
 	try{
 		data.forEach((airportData)=>{
-			const airportName=airportData.split(",")[1]
-			const state=airportData.split(",")[2]
+			const airportName=airportData.split(",")[0]
+			const state=airportData.split(",")[1]
 			if(stateToAirports[state]===undefined)
 				stateToAirports[state]=[airportName]
 			else if(!stateToAirports[state].includes(airportName))

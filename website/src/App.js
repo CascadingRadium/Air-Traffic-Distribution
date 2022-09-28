@@ -156,8 +156,8 @@ function App() {
 		<select onChange={(e)=>setsourceAirport(e.target.value)}>
 		<option value=""> Select an airport </option>
 		{
-			sourceAirports.map((airport)=>(
-				<option key={airport} value={airport}>{airport}</option>
+			sourceAirports.map((airport,idx)=>(
+				<option key={idx} value={airport}>{airport}</option>
 			))
 		}
 		</select>
@@ -186,8 +186,8 @@ function App() {
 		<select onChange={(e)=>setdestinationAirport(e.target.value)}>
 		<option value=""> Select an airport </option>
 		{
-			destinatonAirports.map((airport)=>(
-				<option key={airport} value={airport}>{airport}</option>
+			destinatonAirports.map((airport,idx)=>(
+				<option key={idx} value={airport}>{airport}</option>
 			))
 		}
 		</select>
