@@ -1,15 +1,3 @@
-void readGA_Params(int &PopulationSize, int &NumberOfMutations, int &NumberOfGenerations, std::string &GA_ParametersFileName)
-{
-	std::fstream file(GA_ParametersFileName);
-	std::string line="";
-	getline(file,line);
-	PopulationSize=stoi(line);
-	getline(file,line);
-	NumberOfMutations=stoi(line);
-	getline(file,line);
-	NumberOfGenerations=stoi(line);
-	file.close();
-}
 void tokenize(std::string &str, char delim, std::vector<std::string> &out)
 {
 	size_t start;
@@ -44,15 +32,13 @@ void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std:
 		line+=std::to_string(Paths[i].second.AerialDelay);
 		line.push_back(' ');
 		line+=std::to_string(Paths[i].second.ArrivalTime);
-		line.push_back(' ');
 		if(i!=NumODPairs-1)
 			line.push_back('\n');
 		file<<line;
 	}
 	file.close();
 }
-
-void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileName, std::vector<int>& times, std::vector<double>& speeds)
+void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileName,std::vector<int>& times)
 {
 	std::fstream file(InputFileName);
 	std::string line="";
@@ -63,11 +49,9 @@ void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileNa
 		tokenize(line,',',tokens);
 		ODPairs.push_back({stoi(tokens[0]),stoi(tokens[1])});
 		times.push_back(stoi(tokens[2]));
-		speeds.push_back(stod(tokens[3]));
 	}
 	file.close();
 }
-
 void readCentroids(std::string CentroidFileName, double host_centroids_x[], double host_centroids_y[])
 {
 	std::string line="";
@@ -83,7 +67,6 @@ void readCentroids(std::string CentroidFileName, double host_centroids_x[], doub
 	}
 	file.close();
 }
-
 void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 {
 	std::string line="";
@@ -103,8 +86,7 @@ void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 			tokenize(tokens[i],',',pairString);
 			GraphNode* node = new GraphNode;
 			node->vertexID=stoi(pairString[0]);
-			node->XCoord=stod(pairString[1]);
-			node->YCoord=stod(pairString[2]);
+			node->weight=stod(pairString[1]);
 			Neighbors[i-1]=*node;
 		}
 		host_graph[VNum]=Neighbors;
@@ -113,3 +95,33 @@ void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 	}
 	file.close();	
 }
+void getSimulatorMatrix(std::string MatFile,std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, int NumODPairs)
+{
+	std::ofstream file(MatFile);
+	int maxTime=0;
+	for(auto pair:Paths)
+		maxTime=max(maxTime,pair.second.ArrivalTime);
+	std::vector<std::vector<SimulatorTriplet>> OutputVector(maxTime,std::vector<SimulatorTriplet>());
+	for(int pathIdx=0;pathIdx<NumODPairs;pathIdx++)
+	{
+		int startTime=Paths[pathIdx].second.ActualDeparture;
+		int endTime=Paths[pathIdx].second.ArrivalTime;
+		OutputVector[startTime].push_back({Paths[pathIdx].first[0],Paths[pathIdx].first[0],pathIdx});
+		for(int time=startTime+1;time<endTime;time++)
+			OutputVector[time].push_back({Paths[pathIdx].first[time-1-startTime],Paths[pathIdx].first[time-startTime],pathIdx});	
+	}
+	file<<std::to_string(NumODPairs)<<'\n';
+	for(int i=0;i<maxTime;i++)
+	{
+		std::string line="";
+		for(auto i:OutputVector[i])
+			line+=std::to_string(i.StartPoint)+","+std::to_string(i.EndPoint)+","+std::to_string(i.PathIndex)+" ";
+		if(line.length()!=0)
+			line.pop_back();
+		line+="\n";
+		file<<line;
+	}
+	file.close();
+}
+
+
