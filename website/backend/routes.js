@@ -42,7 +42,7 @@ function addMinutes(date, minutes) {
 
 data.map((airportInfo)=>{
 	const airportData=airportInfo.split(",")
-	airportSectorMapping[airportData[0]]=airportData[3]
+	airportSectorMapping[airportData[0]]=airportData[2]
 })
 
 
