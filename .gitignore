@@ -22,3 +22,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+/Notebooks/Outputs/realTracks.csv
+/Notebooks/Outputs/realTrackWithSpeed.csv
+/Notebooks/Outputs/Flight_History.csv

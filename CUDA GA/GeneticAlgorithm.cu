@@ -8,11 +8,10 @@
 #include <time.h>
 #include <unistd.h>
 #define NumThreads 32
-#define SpeedInKnots 450
 #define MaxPathLen 1250
 #define SectorTimeDictCols 1440
 #define RAND_MAX 2147483647
-#define MaxDelay 60
+#define MaxDelay 10
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
 #include "GeneticAlgorithm.h"
@@ -199,7 +198,7 @@ void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int
 		}
 		Repair<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths, device_Paths_size, PopulationSize, device_Fitness, device_graph, device_arrSizes, device_centroids_x, device_centroids_y,  SectorTimeDict,StartTime,speed,device_times);
 	}
-	getOutput<<<1,1>>>(device_Fitness, device_Paths, device_Paths_size, PopulationSize, OutputPaths, OutputPathsSizes, OutputDelays, OutputIndex, OutputPathsTime, device_graph, device_arrSizes, speed, device_times, StartTime, OutputAirTime); 
+	getOutput<<<1,1>>>(device_Fitness, device_Paths, device_Paths_size, PopulationSize, OutputPaths, OutputPathsSizes, OutputDelays, OutputIndex, OutputPathsTime, device_graph, device_arrSizes, speed, device_times, StartTime, OutputAirTime,device_centroids_x,device_centroids_y); 
 }
 void resetForNextPair(int* &device_Paths, int* &device_times, int* &device_Paths_size, int* &Selected, int* &SelectedDelay, int PopulationSize, int SelectionSize, int* &OutputPathsTime)
 {
@@ -638,13 +637,14 @@ __global__ void Repair(int* device_Paths, int* device_Paths_size, int Population
 		}
 	}
 }
-__global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_Paths_size, int PopulationSize, int* OutputPaths, int* OutputPathsSizes, int* OutputDelays, int index, int* OutputPathsTime, GraphNode** device_graph, int* device_arrSizes,double speed, int* device_times,int StartTime, int* OutputAirTime)
+__global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_Paths_size, int PopulationSize, int* OutputPaths, int* OutputPathsSizes, int* OutputDelays, int index, int* OutputPathsTime, GraphNode** device_graph, int* device_arrSizes,double speed, int* device_times,int StartTime, int* OutputAirTime, double* device_centroids_x, double* device_centroids_y)
 {
 	double maxF=device_Fitness[0];
 	int path_index=0;
 	int time=0;
 	int i=1;
 	int OutLoc=index*MaxPathLen;
+	double distance=0;
 	for(i=1;i<MaxDelay*PopulationSize;i++)
 	{
 		if(device_Fitness[i]>maxF)
@@ -657,12 +657,35 @@ __global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_
 	int Loc=path_index*MaxPathLen;
 	OutputPathsSizes[index]=device_Paths_size[path_index];
 	OutputDelays[index]=time;
-	OutputAirTime[index]=device_times[Loc];
+	int CurSec=device_Paths[Loc];
+	int NextSec=device_Paths[Loc+1];
+	double prevPointX=device_centroids_x[CurSec];
+	double prevPointY=device_centroids_y[CurSec];	
+	double curPointX=0;
+	double curPointY=0;
+	for (i=0;i<device_Paths_size[path_index]-1;i++)
+	{
+		CurSec=device_Paths[Loc+i];
+		NextSec=device_Paths[Loc+(i+1)];
+		for(int j=0;j<device_arrSizes[CurSec];j++)
+		{
+			if(device_graph[CurSec][j].vertexID==NextSec)
+			{
+				curPointX=device_graph[CurSec][j].XCoord;
+				curPointY=device_graph[CurSec][j].YCoord;
+				distance+=euclidianDistance(prevPointX,prevPointY,curPointX,curPointY);
+				prevPointX=curPointX;
+				prevPointY=curPointY;
+				break;
+			}
+		}
+	}
+	distance+=euclidianDistance(prevPointX,prevPointY,device_centroids_x[NextSec],device_centroids_y[NextSec]);
+	OutputAirTime[index]=ceil(distance/speed);
 	OutputPathsTime[0]=StartTime+time+device_times[Loc];
 	OutputPaths[OutLoc]=device_Paths[Loc];
 	for(i=1;i<device_Paths_size[path_index];i++)
 	{
-		OutputAirTime[index]+=device_times[Loc+i];
 		OutputPaths[OutLoc+i]=device_Paths[Loc+i];
 		OutputPathsTime[i]=device_times[Loc+i]+OutputPathsTime[i-1];
 	}
