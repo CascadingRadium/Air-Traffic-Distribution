@@ -64,6 +64,7 @@ void printDevProp(cudaDeviceProp devProp)
 int main()
 {
 	int devCount;
+	cudaDeviceReset();
 	cudaGetDeviceCount(&devCount);
 	printf("CUDA Device Query...\n");
 	printf("There are %d CUDA devices.\n", devCount);
