@@ -353,7 +353,7 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 	{
 		angle+=getAngle(AnglePointsX[i],AnglePointsY[i],AnglePointsX[i+1],AnglePointsY[i+1],AnglePointsX[i+2],AnglePointsY[i+2]);
 	}
-	StaticCost=1/(path_length*angle);
+	StaticCost=(path_length*angle);
 	int InnerLoc=(device_Paths[Loc]*MaxPathLen);
 	for(delay=0;delay<MaxDelay;delay++)
 	{
@@ -370,7 +370,7 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 			}
 			time=time+device_times[Loc+i];
 		}
-		device_Fitness[FitLoc+delay]=StaticCost*(1/TrafficFactor)*(1/((double)delay+1.0));
+		device_Fitness[FitLoc+delay]=1/(StaticCost+pow(TrafficFactor,2)+(double)delay+1.0);
 	}
 }
 __global__ void update_SectorTimeDict(int* SectorTimeDict, int* OutputPaths, int* OutputDelays, int* OutputPathsSize, int Index, int StartTime, int* OutputPathsTime)

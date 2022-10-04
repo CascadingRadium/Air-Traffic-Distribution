@@ -26,3 +26,4 @@ yarn-error.log*
 /Notebooks/Outputs/realTracks.csv
 /Notebooks/Outputs/realTrackWithSpeed.csv
 /Notebooks/Outputs/Flight_History.csv
+/Notebooks/.ipynb_checkpoints
