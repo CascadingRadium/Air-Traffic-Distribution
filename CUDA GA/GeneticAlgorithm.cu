@@ -9,7 +9,7 @@
 #include <unistd.h>
 #define NumThreads 32
 #define MaxPathLen 1250
-#define SectorTimeDictCols 1440
+#define SectorTimeDictCols 2880
 #define RAND_MAX 2147483647
 #define MaxDelay 10
 #define PI 3.141592653589793238
