@@ -157,20 +157,19 @@ router.get("/get-times",async(req,res)=>{
 		timeObj={}
 		let timeList=[]
 		const pathsFile=fs.readFileSync(paths).toString().split("\n")
-		console.log(pathsFile)
 		pathsFile.forEach((path,id)=>{
 			const start=flightIDToAirportMapping[id].startTime
 			let d=new Date();
 			d.setHours(start[0],start[1]);
-			const pathData=path.split(" ")
-			const startTime=5*parseInt(pathData[2]) 
-			const endTime=5*parseInt(pathData[4])
+			const pathData=path.split(",")
+			const startTime=parseInt(pathData[pathData.length -4]) 
+			const endTime=parseInt(pathData[pathData.length - 2])
 			let startDate=addMinutes(d,startTime)
 			let endDate=addMinutes(d,endTime)
 			let sourceAirport=flightIDToAirportMapping[id].sourceAirport
 			let destinationAirport=flightIDToAirportMapping[id].destinationAirport
-			const aerialTime=(endDate-startDate)/CONVERSION_FACTOR
-			const groundHolding=(startDate-d)/CONVERSION_FACTOR
+			const aerialTime=pathData[pathData.length - 3]
+			const groundHolding=pathData[pathData.length - 5]
 			startDate=prettifyDate(startDate)
 			endDate=prettifyDate(endDate)
 			timeObj={id,sourceAirport,destinationAirport,startDate,endDate,aerialTime,groundHolding}
