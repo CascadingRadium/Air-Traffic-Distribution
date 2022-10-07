@@ -34,17 +34,18 @@ void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std:
 		}
 		if(line.length()>0)
 			line.pop_back();
-		line.push_back(' ');
+		line.push_back(',');
 		line+=std::to_string(Paths[i].second.EstimatedDeparture);
-		line.push_back(' ');
+		line.push_back(',');
 		line+=std::to_string(Paths[i].second.GroundHolding);
-		line.push_back(' ');
+		line.push_back(',');
 		line+=std::to_string(Paths[i].second.ActualDeparture);
-		line.push_back(' ');
+		line.push_back(',');
 		line+=std::to_string(Paths[i].second.AerialDelay);
-		line.push_back(' ');
+		line.push_back(',');
 		line+=std::to_string(Paths[i].second.ArrivalTime);
-		line.push_back(' ');
+		line.push_back(',');
+		line+=std::to_string(Paths[i].second.speed);
 		if(i!=NumODPairs-1)
 			line.push_back('\n');
 		file<<line;
