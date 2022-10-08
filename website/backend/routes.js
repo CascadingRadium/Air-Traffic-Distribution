@@ -81,7 +81,7 @@ router.post("/get-paths",async(req,res)=>{
 	})
 	try {
 		fs.writeFileSync('InputFromFrontend.txt', content);
-		//execSync('./a.out')
+		execSync('./a.out')
 		res.status(200).json({"data":"Paths generated"})
 	} catch (err) {
 		console.error(err);
@@ -93,7 +93,7 @@ router.post("/get-paths",async(req,res)=>{
 router.get("/simulator",(req,res)=>{
 
 	try{
-		execSync('python3 x.py', { encoding: 'utf-8' });
+		execSync('python3 sim.py', { encoding: 'utf-8' });
 		res.status(200).json({"data":"Success"})
 	}
 	catch(e)
