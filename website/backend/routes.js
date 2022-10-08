@@ -46,18 +46,6 @@ data.map((airportInfo)=>{
 })
 
 
-
-router.post("/submit",(req,res)=>{
-	console.log(req.body)
-	console.log(`./a.out ${req.body.firstNumber} ${req.body.secondNumber}`)
-	execSync('./a.out ' + req.body.firstNumber +' '+ req.body.secondNumber, { encoding: 'utf-8' }); 
-	try {
-		const data = fs.readFileSync('output.txt', 'utf8');
-		res.send({"data":data})
-	} catch (err) {
-		console.error(err);
-	}
-})
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 router.post("/get-paths",async(req,res)=>{
@@ -82,13 +70,13 @@ router.post("/get-paths",async(req,res)=>{
 	flights.map((flight,id)=>{
 		const startTime=flight.startTime.split(":")
 		const difference=(Number(startTime[0]) -Number(earliest[0]))*60 + (Number(startTime[1]) -Number(earliest[1]))
-		const idx=difference/5
+		const idx=difference
 		const sourceAirport=flight.sourceAirportName
 		const destinationAirport=flight.destinationAirportName
 		const sourceSector=airportSectorMapping[sourceAirport]
 		const destinationSector=airportSectorMapping[destinationAirport]
 		flightIDToAirportMapping[id]={startTime,sourceAirport,destinationAirport}
-		content+=`${sourceSector},${destinationSector},${idx}\n`
+		content+=`${sourceSector},${destinationSector},${idx},${flight.speed}\n`
 	})
 	try {
 		fs.writeFileSync('InputFromFrontend.txt', content);
@@ -104,7 +92,7 @@ router.post("/get-paths",async(req,res)=>{
 router.get("/simulator",(req,res)=>{
 
 	try{
-		execSync('python3 sim.py', { encoding: 'utf-8' });
+		execSync('python3 x.py', { encoding: 'utf-8' });
 		res.status(200).json({"data":"Success"})
 	}
 	catch(e)
@@ -122,7 +110,8 @@ router.post("/upload-file",(req,res)=>{
 		const destinationAirportName=info[1]
 		const numberOfFlights=parseInt(info[2])
 		const startTime=info[3]
-		const item={startTime,sourceAirportName,destinationAirportName}
+		const speed=info[4]
+		const item={startTime,sourceAirportName,destinationAirportName,speed}
 		for(let i=0;i<numberOfFlights;i++)
 		{
 			items.push(item)

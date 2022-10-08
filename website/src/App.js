@@ -21,6 +21,7 @@ function App() {
 	const [stateToAirport,setStateToAirport]=useState({})
 	const [isLoading,setisLoading]=useState(false)
 	const [file,setFile]=useState()
+	const [speed,setSpeed]=useState("")
 	const navigate=useNavigate()
 	useEffect(()=>{
 		getStates()
@@ -116,7 +117,7 @@ function App() {
 		{
 			startTime +=mins.toString()
 		}
-		const data={sourceAirportName,destinationAirportName,startTime};
+		const data={sourceAirportName,destinationAirportName,startTime,speed};
 		for(let i=0;i<numberOfFlights;i++)
 			dataList.push(data)
 		setItems(items=>[...items,...dataList])
@@ -207,6 +208,9 @@ function App() {
 		</select>
 		</label>
 		<br/>
+		&emsp;
+		Speed:
+		<input type="text" onChange={(e) => setSpeed(e.target.value)} /> Knots
 		&emsp;
 	<label>Hour: &emsp;
 	<select onChange={(e)=>sethrs(e.target.value)}>
