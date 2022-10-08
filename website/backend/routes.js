@@ -16,22 +16,8 @@ const prettifyDate=(date)=>{
 
 	let hours=date.getHours()
 	const minutes=date.getMinutes();
-	let hourString,minuteString=minutes.toString();
-	let subString="AM";
-	if(minutes < 10)
-	{
-		minuteString="0" + minuteString;
-	}
-	if(hours >=12)
-	{
-		if(hours!==12)
-		{
-			hours-=12
-		}
-		subString="PM";
-	}
-	hourString=hours.toString();
-	return `${hourString}:${minuteString} ${subString}` 
+	let hourString=hours.toString(),minuteString=minutes.toString();
+	return `${hourString}:${minuteString}` 
 
 }
 
