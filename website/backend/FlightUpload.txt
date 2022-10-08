@@ -1,10 +1,14 @@
-Salt Lake City International Airport,Albuquerque International Sunport Airport,10:00
-Salt Lake City International Airport,Dallas Fort Worth International Airport,10:00
-Salt Lake City International Airport,Los Angeles International Airport,10:00
-Salt Lake City International Airport,Cincinnati Northern Kentucky International Airport,10:05
-Salt Lake City International Airport,Fort Lauderdale Hollywood International Airport,10:05
-Salt Lake City International Airport,Denver International Airport,10:05
-Salt Lake City International Airport,City of Colorado Springs Municipal Airport,10:05
-Salt Lake City International Airport,Denver International Airport,10:05
-Salt Lake City International Airport,General Edward Lawrence Logan International Airport,10:05
-Salt Lake City International Airport,Orlando International Airport,10:25
+Tampa International Airport,Denver International Airport,1,13:29,429.0
+Tampa International Airport,Lambert St Louis International Airport,1,13:29,411.0
+Bradley International Airport,Philadelphia International Airport,1,13:29,231.5
+Phoenix Sky Harbor International Airport,San Diego International Airport,1,13:30,361.5
+San Diego International Airport,Chicago O'Hare International Airport,1,13:30,455.0
+Bob Hope Airport,Norman Y. Mineta San Jose International Airport,1,13:30,407.5
+General Edward Lawrence Logan International Airport,Miami International Airport,1,13:30,398.0
+Billings Logan International Airport,Louisville International Standiford Field,1,13:30,477.0
+Raleigh Durham International Airport,Charlotte Douglas International Airport,1,13:30,407.5
+Chicago O'Hare International Airport,San Antonio International Airport,1,13:30,428.5
+Metropolitan Oakland International Airport,San Diego International Airport,1,13:30,435.5
+La Guardia Airport,Charlotte Douglas International Airport,1,13:30,407.5
+Wilmington International Airport,Charlotte Douglas International Airport,1,13:30,315.0
+San Diego International Airport,Salt Lake City International Airport,1,13:30,480.0
