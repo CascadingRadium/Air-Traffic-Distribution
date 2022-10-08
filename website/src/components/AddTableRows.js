@@ -28,15 +28,15 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 	},
 }));
 
-function createData(id,source,destination,startTime) {
-	return { id,source,destination,startTime};
+function createData(id,source,destination,startTime,speed) {
+	return { id,source,destination,startTime,speed};
 }
 
 
 export default function CustomizedTables({items,deleteEntry}) {
 
 	const rows=items.map((item)=>{
-		return createData(item._id,item.sourceAirportName,item.destinationAirportName,item.startTime)
+		return createData(item._id,item.sourceAirportName,item.destinationAirportName,item.startTime,item.speed)
 	});
 
 
@@ -51,6 +51,7 @@ export default function CustomizedTables({items,deleteEntry}) {
 		<StyledTableCell>Source Airport</StyledTableCell>
 		<StyledTableCell>Destination Airport</StyledTableCell>
 		<StyledTableCell>Start Time</StyledTableCell>
+		<StyledTableCell>Speed</StyledTableCell>
 		</TableRow>
 		</TableHead>
 		<TableBody>
@@ -61,6 +62,7 @@ export default function CustomizedTables({items,deleteEntry}) {
 				<StyledTableCell>{row.source}</StyledTableCell>
 				<StyledTableCell>{row.destination}</StyledTableCell>
 				<StyledTableCell>{row.startTime}</StyledTableCell>
+				<StyledTableCell>{row.speed}</StyledTableCell>
 				</StyledTableRow>
 			))
 		}
