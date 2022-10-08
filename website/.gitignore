@@ -26,4 +26,3 @@ yarn-error.log*
 
 /backend/InputFromFrontend.txt
 /backend/OutputToFrontend.txt
-/backend/OutputToSimulator.txt
