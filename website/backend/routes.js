@@ -147,8 +147,8 @@ router.get("/get-times",async(req,res)=>{
 			const pathData=path.split(",")
 			const startTime=parseInt(pathData[pathData.length -4]) 
 			const endTime=parseInt(pathData[pathData.length - 2])
-			let startDate=addMinutes(d,startTime)
-			let endDate=addMinutes(d,endTime)
+			let startDate=startTime
+			let endDate=endTime
 			let sourceAirport=flightIDToAirportMapping[id].sourceAirport
 			let destinationAirport=flightIDToAirportMapping[id].destinationAirport
 			const aerialTime=pathData[pathData.length - 3]
@@ -164,5 +164,6 @@ router.get("/get-times",async(req,res)=>{
 	{
 		res.status(500).json({"data":e})
 	}
+
 })
 module.exports=router;
