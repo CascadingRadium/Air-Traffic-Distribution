@@ -83,7 +83,7 @@ function App() {
 
 	const gethrs=()=>{
 		let arr=[]
-		for(let i=1;i<24;i++)
+		for(let i=0;i<24;i++)
 		{
 			arr.push(i)
 		}
