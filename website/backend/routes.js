@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const execSync = require('child_process').execSync;
 const fs = require('fs');
+const { min } = require('mpld3');
 const airportsData = '../src/airports.txt'
 const paths='./OutputToFrontend.txt'
 const CONVERSION_FACTOR=1000*60;
@@ -17,6 +18,8 @@ const prettifyDate=(date)=>{
 	let hours=date.getHours()
 	const minutes=date.getMinutes();
 	let hourString=hours.toString(),minuteString=minutes.toString();
+	if(minutes < 10)
+		minuteString="0" + minuteString
 	return `${hourString}:${minuteString}` 
 
 }
