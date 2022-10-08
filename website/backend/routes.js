@@ -75,12 +75,13 @@ router.post("/get-paths",async(req,res)=>{
 		const destinationAirport=flight.destinationAirportName
 		const sourceSector=airportSectorMapping[sourceAirport]
 		const destinationSector=airportSectorMapping[destinationAirport]
-		flightIDToAirportMapping[id]={startTime,sourceAirport,destinationAirport}
-		content+=`${sourceSector},${destinationSector},${idx},${flight.speed}\n`
+		const speed=flight.speed
+		flightIDToAirportMapping[id]={startTime,sourceAirport,destinationAirport,speed}
+		content+=`${sourceSector},${destinationSector},${idx},${speed}\n`
 	})
 	try {
 		fs.writeFileSync('InputFromFrontend.txt', content);
-		execSync('./a.out')
+		//execSync('./a.out')
 		res.status(200).json({"data":"Paths generated"})
 	} catch (err) {
 		console.error(err);
@@ -103,13 +104,10 @@ router.get("/simulator",(req,res)=>{
 
 router.post("/upload-file",(req,res)=>{
 	const data=req.files.file.data.toString().split("\n")
-	console.log(data)
-	console.log(data[data.length -1])
 	if(data[data.length -1]=='')
 	{
 		data.pop()
 	}
-	console.log(data)
 	let items=[]
 	data.forEach((row)=>{
 		const info=row.split(",")
