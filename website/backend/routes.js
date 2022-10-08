@@ -143,12 +143,12 @@ router.get("/get-times",async(req,res)=>{
 		pathsFile.forEach((path,id)=>{
 			const start=flightIDToAirportMapping[id].startTime
 			let d=new Date();
-			d.setHours(start[0],start[1]);
+			d.setHours(0,0);
 			const pathData=path.split(",")
 			const startTime=parseInt(pathData[pathData.length -4]) 
 			const endTime=parseInt(pathData[pathData.length - 2])
-			let startDate=startTime
-			let endDate=endTime
+			let startDate=addMinutes(d,startTime)
+			let endDate=addMinutes(d,endTime)
 			let sourceAirport=flightIDToAirportMapping[id].sourceAirport
 			let destinationAirport=flightIDToAirportMapping[id].destinationAirport
 			const aerialTime=pathData[pathData.length - 3]
