@@ -92,7 +92,7 @@ function App() {
 
 	const getmins=()=>{
 		let arr=[]
-		for(let i=0;i<=55;i+=5)
+		for(let i=0;i<=59;i++)
 		{
 			arr.push(i)
 		}
