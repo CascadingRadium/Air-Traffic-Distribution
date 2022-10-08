@@ -103,6 +103,13 @@ router.get("/simulator",(req,res)=>{
 
 router.post("/upload-file",(req,res)=>{
 	const data=req.files.file.data.toString().split("\n")
+	console.log(data)
+	console.log(data[data.length -1])
+	if(data[data.length -1]=='')
+	{
+		data.pop()
+	}
+	console.log(data)
 	let items=[]
 	data.forEach((row)=>{
 		const info=row.split(",")
