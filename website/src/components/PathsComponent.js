@@ -45,7 +45,6 @@ export default function PathTable() {
 	},[])
 
 	const goToSim=()=>{
-		console.log("bozo shit")
 		axios.get("http://localhost:5000/api/simulator")
 			.then(({data})=>{
 				console.log(data)

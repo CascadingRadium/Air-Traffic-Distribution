@@ -53,34 +53,33 @@ void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std:
 	file.close();
 }
 
-void readInput(std::vector<std::pair<int,int>>& ODPairs, std::string InputFileName, std::vector<int>& times, std::vector<double>& speeds)
+void readInput(std::vector<std::pair<Airport,Airport>>& ODPairs, std::string InputFileName, std::vector<int>& times, std::vector<double>& speeds)
 {
 	std::fstream file(InputFileName);
 	std::string line="";
 	std::vector<std::string> tokens;
+	std::vector<std::string> innertoken;
 	while(getline(file,line))
 	{
 		tokens.clear();
 		tokenize(line,',',tokens);
-		ODPairs.push_back({stoi(tokens[0]),stoi(tokens[1])});
+		innertoken.clear();
+		tokenize(tokens[0],' ',innertoken);
+		Airport source;
+		source.sector=stoi(innertoken[0]);
+		source.ICAO=innertoken[1];
+		source.X=stod(innertoken[2]);
+		source.Y=stod(innertoken[3]);
+		innertoken.clear();
+		tokenize(tokens[1],' ',innertoken);
+		Airport dest;
+		dest.sector=stoi(innertoken[0]);
+		dest.ICAO=innertoken[1];
+		dest.X=stod(innertoken[2]);
+		dest.Y=stod(innertoken[3]);
+		ODPairs.push_back({source,dest});
 		times.push_back(stoi(tokens[2]));
 		speeds.push_back(stod(tokens[3]));
-	}
-	file.close();
-}
-
-void readCentroids(std::string CentroidFileName, double host_centroids_x[], double host_centroids_y[])
-{
-	std::string line="";
-	std::fstream file(CentroidFileName);
-	int sectorNum=0;
-	std::vector<std::string> tokens;
-	while(getline(file,line))
-	{
-		tokens.clear();
-		tokenize(line,',',tokens);
-		host_centroids_x[sectorNum]=stod(tokens[0]);
-		host_centroids_y[sectorNum++]=stod(tokens[1]);
 	}
 	file.close();
 }
