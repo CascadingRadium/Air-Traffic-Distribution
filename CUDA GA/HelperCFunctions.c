@@ -46,6 +46,10 @@ void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std:
 		line+=std::to_string(Paths[i].second.ArrivalTime);
 		line.push_back(',');
 		line+=std::to_string(Paths[i].second.speed);
+		line.push_back(',');
+		line+=Paths[i].second.StartICAO;
+		line.push_back(',');
+		line+=Paths[i].second.EndICAO;
 		if(i!=NumODPairs-1)
 			line.push_back('\n');
 		file<<line;

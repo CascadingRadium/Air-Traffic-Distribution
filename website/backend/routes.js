@@ -32,9 +32,9 @@ function addMinutes(date, minutes) {
 
 data.map((airportInfo)=>{
 	const airportData=airportInfo.split(",")
-	airportSectorMapping[airportData[0]]=airportData[1]
-	airportICAOMapping[airportData[0]]=airportData[2]
-	airportToXYMapping[airportData[0]]=[airportData[3] , airportData[4]]
+	airportSectorMapping[airportData[0]]=airportData[2]
+	airportICAOMapping[airportData[0]]=airportData[3]
+	airportToXYMapping[airportData[0]]=[airportData[4] , airportData[5]]
 })
 
 
@@ -138,14 +138,14 @@ router.get("/get-times",async(req,res)=>{
 			let d=new Date();
 			d.setHours(0,0);
 			const pathData=path.split(",")
-			const startTime=parseInt(pathData[pathData.length -4]) 
-			const endTime=parseInt(pathData[pathData.length - 2])
+			const startTime=parseInt(pathData[pathData.length -6]) 
+			const endTime=parseInt(pathData[pathData.length - 4])
 			let startDate=addMinutes(d,startTime)
 			let endDate=addMinutes(d,endTime)
 			let sourceAirport=flightIDToAirportMapping[id].sourceAirport
 			let destinationAirport=flightIDToAirportMapping[id].destinationAirport
-			const aerialTime=pathData[pathData.length - 3]
-			const groundHolding=pathData[pathData.length - 5]
+			const aerialTime=pathData[pathData.length - 5]
+			const groundHolding=pathData[pathData.length - 7]
 			startDate=prettifyDate(startDate)
 			endDate=prettifyDate(endDate)
 			timeObj={id,sourceAirport,destinationAirport,startDate,endDate,aerialTime,groundHolding}
