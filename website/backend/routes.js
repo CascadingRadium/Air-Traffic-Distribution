@@ -2,7 +2,7 @@ const router = require('express').Router();
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const { min } = require('mpld3');
-const airportsData = '../src/airports.txt'
+const airportsData = '../src/AirportFileForFrontend.txt'
 const paths='./OutputToFrontend.txt'
 const CONVERSION_FACTOR=1000*60;
 var airportSectorMapping={}
@@ -10,7 +10,8 @@ var airportSectorMapping={}
 
 var flightIDToAirportMapping={}
 var stateToAirports={}
-
+var airportICAOMapping={}
+var airportToXYMapping={}
 const data = fs.readFileSync(airportsData).toString().split("\n");
 
 const prettifyDate=(date)=>{
@@ -31,7 +32,9 @@ function addMinutes(date, minutes) {
 
 data.map((airportInfo)=>{
 	const airportData=airportInfo.split(",")
-	airportSectorMapping[airportData[0]]=airportData[2]
+	airportSectorMapping[airportData[0]]=airportData[1]
+	airportICAOMapping[airportData[0]]=airportData[2]
+	airportToXYMapping[airportData[0]]=[airportData[3] , airportData[4]]
 })
 
 
@@ -41,20 +44,6 @@ router.post("/get-paths",async(req,res)=>{
 
 
 	const flights=req.body
-	let flightTiming=[]
-	flights.forEach((flight)=>{
-		const start=flight.startTime
-		flightTiming.push(start)
-	})
-	flightTiming=[...new Set([...flightTiming])]
-	flightTiming=flightTiming.sort((a,b)=>{
-		let x=a.split(":")
-		let y=b.split(":")
-		if(x[0]===y[0])
-			return Number(x[1]) - Number(y[1])
-		return Number(x[0]) - Number(y[0])
-	})
-	const earliest=flightTiming[0].split(":")
 	let content="";
 	flights.map((flight,id)=>{
 		const startTime=flight.startTime.split(":")
@@ -64,9 +53,13 @@ router.post("/get-paths",async(req,res)=>{
 		const destinationAirport=flight.destinationAirportName
 		const sourceSector=airportSectorMapping[sourceAirport]
 		const destinationSector=airportSectorMapping[destinationAirport]
+		const sourceICAOCode=airportICAOMapping[sourceAirport]
+		const destinationICAOCode=airportICAOMapping[destinationAirport]
+		const sourceAirportCoordinates=airportToXYMapping[sourceAirport]
+		const destinationAirportCoordinates=airportToXYMapping[destinationAirport]
 		const speed=flight.speed
 		flightIDToAirportMapping[id]={startTime,sourceAirport,destinationAirport,speed}
-		content+=`${sourceSector},${destinationSector},${idx},${speed}\n`
+		content+=`${sourceSector} ${sourceICAOCode} ${sourceAirportCoordinates[0]} ${sourceAirportCoordinates[1]},${destinationSector} ${destinationICAOCode} ${destinationAirportCoordinates[0]} ${destinationAirportCoordinates[1]},${idx},${speed}\n`
 	})
 	try {
 		fs.writeFileSync('InputFromFrontend.txt', content);
