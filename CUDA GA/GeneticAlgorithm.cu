@@ -30,6 +30,9 @@ int main()
 	int NumberOfMutations;
 	int NumberOfGenerations;
 	readGA_Params(PopulationSize,NumberOfMutations,NumberOfGenerations,GA_ParametersFileName);
+	/*Metric Files*/
+	std::string TrafFactorFile="GA_Metrics/TrafficFactor.txt";
+	std::string AerGDFile="GA_Metrics/AerialTimeGD.txt";
 	/* Read OD Pairs */
 	std::vector<std::pair<Airport,Airport>> ODPairs;
 	std::vector<int> times;
@@ -48,16 +51,15 @@ int main()
 	writeOutput(Paths,OutputToFrontendFileName,NumODPairs);
 	return 0;
 }
-//void fitNessTest(double* device_Fitness,int PopulationSize)
-//{
-//	double maxx=0;
-//	for(int i=0;i<(MaxDelay*PopulationSize);i++)
-//	{
-//		maxx=max(device_Fitness[i],maxx);
-//	}
-//	printf("%0.5g\n",maxx);
-//		
-//}
+void fitNessTest(double* device_FitnessArray,int PopulationSize,int genNum)
+{
+	double maxx=0;
+	for(int i=0;i<(PopulationSize);i++)
+	{
+		maxx=max(device_FitnessArray[i],maxx);
+	}
+	printf("%0.18g\n",maxx);
+}
 void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std::pair<std::vector<int>,PathOutput>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::vector<int>&times, std::vector<double> &speeds)
 {	
 	GraphNode* host_graph[NumSectors];
@@ -72,11 +74,13 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 	int *device_arrSizes;
 	int* device_Paths; //2D
 	int* device_Paths_size;
-	double* device_Fitness; //2D
 	int* SelectionPool;
 	int* host_SelectionPool;
+	int* ReplacementPool;
+	int* host_ReplacementPool;
+	int* MutationPool;
+	int* host_MutationPool;
 	int* Selected;
-	int* SelectedDelay;
 	int* device_times;
 	//OUTPUT RELATED
 	int* OutputPaths; //2D
@@ -89,7 +93,10 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 	int* host_OutputDelays;
 	int* host_OutputAirTime;
 	int* TrafficMatrixSum;
+	double* device_FitnessArray;
+	int* device_TimeArray;
 	int SelectionSize=PopulationSize/2;
+	int NumRowsForPathMatrix=(3*PopulationSize)/2;
 	if(SelectionSize&1==1)
 		SelectionSize+=1;
 	int CrossoverSize=SelectionSize/2;	
@@ -100,13 +107,13 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 		host_DestCoordArr[i].X=ODPairs[i].second.X;
 		host_DestCoordArr[i].Y=ODPairs[i].second.Y;
 	}
-	CUDA_Init(GraphFileName, host_graph, host_arrSizes, SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, host_SourceCoordArr, host_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, host_SelectionPool, Selected, SelectedDelay, device_times,SelectionSize, NumSectors, PopulationSize, NumODPairs, OutputPaths, OutputPathsSizes, OutputDelays, host_OutputPaths, host_OutputPathsSizes, host_OutputDelays, OutputPathsTime, OutputAirTime, host_OutputAirTime, TrafficMatrixSum);
+	CUDA_Init(GraphFileName, host_graph, host_arrSizes, SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, host_SourceCoordArr, host_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, host_SelectionPool, Selected, device_times, SelectionSize, NumSectors, PopulationSize, NumODPairs, OutputPaths, OutputPathsSizes, OutputDelays, host_OutputPaths, host_OutputPathsSizes, host_OutputDelays, OutputPathsTime, OutputAirTime, host_OutputAirTime, TrafficMatrixSum, device_FitnessArray, device_TimeArray,NumRowsForPathMatrix,ReplacementPool,host_ReplacementPool,MutationPool,host_MutationPool);
 	for(int i=0;i<NumODPairs;i++)
 	{	
 		double MpM_Speed=(speeds[i]*30.8667);
-		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, CrossoverSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first.sector, ODPairs[i].second.sector, SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, Selected, SelectedDelay, device_times, OutputPaths, OutputPathsSizes, OutputDelays, i, times[i], MpM_Speed, OutputPathsTime, OutputAirTime, TrafficMatrixSum);
+		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, CrossoverSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first.sector, ODPairs[i].second.sector, SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, Selected, device_times, OutputPaths, OutputPathsSizes, OutputDelays, i, times[i], MpM_Speed, OutputPathsTime, OutputAirTime, TrafficMatrixSum,device_FitnessArray,device_TimeArray,NumRowsForPathMatrix,ReplacementPool,MutationPool);
 		update_SectorTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict, OutputPaths, OutputDelays, OutputPathsSizes, i, times[i], OutputPathsTime, TrafficMatrixSum);
-		resetForNextPair(device_Paths, device_times, device_Paths_size, Selected, SelectedDelay, PopulationSize, SelectionSize, OutputPathsTime);
+		resetForNextPair(device_Paths, device_times, device_Paths_size, Selected, PopulationSize, SelectionSize, OutputPathsTime,device_FitnessArray,device_TimeArray);
 	}
 	cudaMemcpy(host_OutputPaths,OutputPaths,sizeof(int)*MaxPathLen*NumODPairs,cudaMemcpyDeviceToHost);
 	cudaMemcpy(host_OutputPathsSizes,OutputPathsSizes,sizeof(int)*NumODPairs,cudaMemcpyDeviceToHost);
@@ -128,9 +135,9 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 		Paths[i].second.StartICAO=ODPairs[i].first.ICAO;
 		Paths[i].second.EndICAO=ODPairs[i].second.ICAO;
 	}
-	CUDA_Free(SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, SelectionPool, host_SelectionPool, Selected, SelectedDelay, device_times, OutputPaths, OutputPathsSizes, OutputPathsTime, OutputDelays, OutputAirTime, host_OutputPaths, host_OutputPathsSizes, host_OutputDelays, host_OutputAirTime,TrafficMatrixSum);
+	CUDA_Free(SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, host_SelectionPool, Selected, device_times, OutputPaths, OutputPathsSizes, OutputPathsTime, OutputDelays, OutputAirTime, host_OutputPaths, host_OutputPathsSizes, host_OutputDelays, host_OutputAirTime,TrafficMatrixSum,device_FitnessArray,device_TimeArray);
 }
-void CUDA_Init(std::string &GraphFileName, GraphNode** host_graph, int* host_arrSizes,int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr, AirportCoordinates* &device_DestCoordArr, AirportCoordinates* host_SourceCoordArr, AirportCoordinates* host_DestCoordArr, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &SelectedDelay, int* &device_times ,int SelectionSize, int NumSectors, int PopulationSize, int NumODPairs, int* &OutputPaths, int* &OutputPathsSizes, int* &OutputDelays, int* &host_OutputPaths, int* &host_OutputPathsSizes, int* &host_OutputDelays, int* &OutputPathsTime ,int* &OutputAirTime, int* &host_OutputAirTime,int* &TrafficMatrixSum)
+void CUDA_Init(std::string &GraphFileName, GraphNode** host_graph, int* host_arrSizes,int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr, AirportCoordinates* &device_DestCoordArr, AirportCoordinates* host_SourceCoordArr, AirportCoordinates* host_DestCoordArr, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &device_times ,int SelectionSize, int NumSectors, int PopulationSize, int NumODPairs, int* &OutputPaths, int* &OutputPathsSizes, int* &OutputDelays, int* &host_OutputPaths, int* &host_OutputPathsSizes, int* &host_OutputDelays, int* &OutputPathsTime ,int* &OutputAirTime, int* &host_OutputAirTime,int* &TrafficMatrixSum, double* &device_FitnessArray,int* &device_TimeArray,int NumRowsForPathMatrix,int* &ReplacementPool,int* &host_ReplacementPool,int* &MutationPool,int* &host_MutationPool)
 {
 	//ONE TIME
 	srand(time(NULL));
@@ -145,11 +152,6 @@ void CUDA_Init(std::string &GraphFileName, GraphNode** host_graph, int* host_arr
 		cudaMemcpy(temp, host_graph[i], sizeof(GraphNode) * host_arrSizes[i], cudaMemcpyHostToDevice);
 		cudaMemcpy(device_graph+i, &temp, sizeof(GraphNode*), cudaMemcpyHostToDevice);
 	}
-	gpuErrchk(cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize));
-	host_SelectionPool=(int*)calloc(sizeof(int),PopulationSize);
-	for(int i=0;i<PopulationSize;i++)
-		host_SelectionPool[i]=i;
-	gpuErrchk(cudaMemcpy(SelectionPool,host_SelectionPool,sizeof(int)*PopulationSize,cudaMemcpyHostToDevice));
 	gpuErrchk(cudaMalloc((void**)&SectorTimeDict,sizeof(int)*NumSectors*SectorTimeDictCols));
 	gpuErrchk(cudaMemset(SectorTimeDict,0,sizeof(int)*NumSectors*SectorTimeDictCols));
 	gpuErrchk(cudaMalloc((void**)&OutputPaths,sizeof(int)*MaxPathLen*NumODPairs));
@@ -164,7 +166,6 @@ void CUDA_Init(std::string &GraphFileName, GraphNode** host_graph, int* host_arr
 	gpuErrchk(cudaMemcpy(device_SourceCoordArr, host_SourceCoordArr, sizeof(AirportCoordinates)*NumODPairs,cudaMemcpyHostToDevice));
 	gpuErrchk(cudaMalloc((void **)&device_DestCoordArr, sizeof(AirportCoordinates)*NumODPairs));
 	gpuErrchk(cudaMemcpy(device_DestCoordArr, host_DestCoordArr, sizeof(AirportCoordinates)*NumODPairs,cudaMemcpyHostToDevice));
-	
 	host_OutputPaths=(int*)calloc(sizeof(int),NumODPairs*MaxPathLen);
 	host_OutputPathsSizes=(int*)calloc(sizeof(int),NumODPairs);
 	host_OutputDelays=(int*)calloc(sizeof(int),NumODPairs);
@@ -173,66 +174,102 @@ void CUDA_Init(std::string &GraphFileName, GraphNode** host_graph, int* host_arr
 	int tr[1]={1};
 	gpuErrchk(cudaMemcpy(TrafficMatrixSum,tr,sizeof(int),cudaMemcpyHostToDevice));
 	
-
+	gpuErrchk(cudaMalloc((void**)&MutationPool, sizeof(int)*NumRowsForPathMatrix));
+	host_MutationPool=(int*)calloc(sizeof(int),NumRowsForPathMatrix);
+	for(int i=0;i<NumRowsForPathMatrix;i++)
+		host_MutationPool[i]=i;
+	gpuErrchk(cudaMemcpy(MutationPool,host_MutationPool,sizeof(int)*NumRowsForPathMatrix,cudaMemcpyHostToDevice));
+	
 	//RESET PER OD PAIR
-	gpuErrchk(cudaMalloc((void **)&device_Fitness, sizeof(double)*PopulationSize*(MaxDelay))); //DO NOT MEMSET -> DOUBLE
-	gpuErrchk(cudaMalloc((void **)&device_Paths, sizeof(int)*PopulationSize*MaxPathLen));
-	gpuErrchk(cudaMemset(device_Paths,0,sizeof(int)*PopulationSize*MaxPathLen));
-	gpuErrchk(cudaMalloc((void **)&device_times, sizeof(int)*PopulationSize*MaxPathLen));
-	gpuErrchk(cudaMemset(device_times,0,sizeof(int)*PopulationSize*MaxPathLen));
-	gpuErrchk(cudaMalloc((void **)&device_Paths_size, sizeof(int)*PopulationSize));
-	gpuErrchk(cudaMemset(device_Paths_size,0,sizeof(int)*PopulationSize));
+	gpuErrchk(cudaMalloc((void **)&device_Paths, sizeof(int)*NumRowsForPathMatrix*MaxPathLen));
+	gpuErrchk(cudaMemset(device_Paths,0,sizeof(int)*NumRowsForPathMatrix*MaxPathLen));
+	gpuErrchk(cudaMalloc((void **)&device_times, sizeof(int)*NumRowsForPathMatrix*MaxPathLen));
+	gpuErrchk(cudaMemset(device_times,0,sizeof(int)*NumRowsForPathMatrix*MaxPathLen));
+	gpuErrchk(cudaMalloc((void **)&device_Paths_size, sizeof(int)*NumRowsForPathMatrix));
+	gpuErrchk(cudaMemset(device_Paths_size,0,sizeof(int)*NumRowsForPathMatrix));
 	gpuErrchk(cudaMalloc((void**)&Selected, sizeof(int)*SelectionSize));
 	gpuErrchk(cudaMemset(Selected,0,sizeof(int)*SelectionSize));
-	gpuErrchk(cudaMalloc((void**)&SelectedDelay, sizeof(int)*SelectionSize));
-	gpuErrchk(cudaMemset(SelectedDelay,0,sizeof(int)*SelectionSize));
 	gpuErrchk(cudaMalloc((void**)&OutputPathsTime,sizeof(int)*MaxPathLen));
 	gpuErrchk(cudaMemset(OutputPathsTime,0,sizeof(int)*MaxPathLen));
+	gpuErrchk(cudaMalloc((void **)&device_FitnessArray, sizeof(double)*NumRowsForPathMatrix));
+	gpuErrchk(cudaMemset(device_FitnessArray,0,sizeof(double)*NumRowsForPathMatrix));
+	gpuErrchk(cudaMalloc((void **)&device_TimeArray, sizeof(int)*NumRowsForPathMatrix));
+	gpuErrchk(cudaMemset(device_TimeArray,0,sizeof(int)*NumRowsForPathMatrix));
+	
+	gpuErrchk(cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize));
+	host_SelectionPool=(int*)calloc(sizeof(int),PopulationSize);
+	for(int i=0;i<PopulationSize;i++)
+		host_SelectionPool[i]=i;
+	gpuErrchk(cudaMemcpy(SelectionPool,host_SelectionPool,sizeof(int)*PopulationSize,cudaMemcpyHostToDevice));
+	
+	int ExtraRows=NumRowsForPathMatrix-PopulationSize;
+	
+	gpuErrchk(cudaMalloc((void **)&ReplacementPool, sizeof(int)*ExtraRows));
+	host_ReplacementPool=(int*)calloc(sizeof(int),ExtraRows);
+	for(int i=PopulationSize;i<NumRowsForPathMatrix;i++)
+		host_ReplacementPool[i-PopulationSize]=i;
+	gpuErrchk(cudaMemcpy(ReplacementPool,host_ReplacementPool,sizeof(int)*ExtraRows,cudaMemcpyHostToDevice));
 }
-__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int start, int end, int PopulationSize, int seed, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime, double speed, int* device_times, int* TrafficMatrixSum,int Index)
+
+__global__ void updateSelectionPool(int* SelectionPool, int* ReplacementPool, int SelectionPoolSize, int ReplacementPoolSize, int NumRowsForPathMatrix)
 {
-	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-	if(thread<PopulationSize)
-	{	
-		getPath(device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, PopulationSize, seed, device_SourceCoord, device_DestCoord, SectorTimeDict, start, end, thread, 0, StartTime, speed, device_times, TrafficMatrixSum,Index);
-	}
-}
-void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int CrossoverSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, AirportCoordinates* &device_SourceCoord, AirportCoordinates* &device_DestCoord,  GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* & device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &Selected, int* &SelectedDelay, int* device_times, int* OutputPaths, int* OutputPathsSizes, int* OutputDelays, int OutputIndex, int StartTime, double speed, int* &OutputPathsTime, int* &OutputAirTime, int* &TrafficMatrixSum)
-{	
-	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,device_Fitness,Start,End,PopulationSize,time(NULL),device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,OutputIndex);
-	int genNum=0;
-	int SelectionPoolSize=PopulationSize;
-	int OriginalNumberOfMutations=NumberOfMutations;
-	while(genNum<NumberOfGenerations)
+	int ReplacementPoolIndex=0;
+	int SelectionPoolIndex=0;
+	for(int i=0;i<NumRowsForPathMatrix;i++)
 	{
-		genNum+=1;
-		if(NumberOfMutations==0)
-			NumberOfMutations=OriginalNumberOfMutations;
+		if(ReplacementPoolIndex<ReplacementPoolSize && i==ReplacementPool[ReplacementPoolIndex])
+			ReplacementPoolIndex++;
 		else
-			NumberOfMutations=abs(rand())%NumberOfMutations;
-		Shuffle<<<1,1>>>(SelectionPool,SelectionPoolSize,time(NULL));
-		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,device_Fitness,SelectionSize,SelectedDelay,PopulationSize);
-		CrossoverShuffle<<<1,1>>>(Selected,SelectedDelay,SelectionSize,time(NULL));
-		CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,SelectedDelay,device_Paths,device_Paths_size,device_Fitness,CrossoverSize,time(NULL),device_graph, device_arrSizes,device_times,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,TrafficMatrixSum,OutputIndex);
-		if(NumberOfMutations!=0)
-		{
-			Shuffle<<<1,1>>>(SelectionPool,SelectionPoolSize,time(NULL));
-			Mutation<<<(NumberOfMutations/NumThreads)+1,NumThreads>>>(SelectionPool, NumberOfMutations, time(NULL), device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, PopulationSize, device_SourceCoord, device_DestCoord, SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,OutputIndex);
-		}
-		Repair<<<(PopulationSize/NumThreads)+1,NumThreads>>>(device_Paths, device_Paths_size, PopulationSize, device_Fitness, device_graph, device_arrSizes, device_SourceCoord, device_DestCoord,  SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,OutputIndex);
+			SelectionPool[SelectionPoolIndex++]=i;
 	}
-	getOutput<<<1,1>>>(device_Fitness, device_Paths, device_Paths_size, PopulationSize, OutputPaths, OutputPathsSizes, OutputDelays, OutputIndex, OutputPathsTime, device_graph, device_arrSizes, speed, device_times, StartTime, OutputAirTime, device_SourceCoord, device_DestCoord); 
 }
-void resetForNextPair(int* &device_Paths, int* &device_times, int* &device_Paths_size, int* &Selected, int* &SelectedDelay, int PopulationSize, int SelectionSize, int* &OutputPathsTime)
+
+__global__ void resetPools(int* SelectionPool,int* ReplacementPool, int SelectionPoolSize, int NumRowsForPathMatrix)
 {
-	gpuErrchk(cudaMemset(device_Paths,0,sizeof(int)*PopulationSize*MaxPathLen));
-	gpuErrchk(cudaMemset(device_times,0,sizeof(int)*PopulationSize*MaxPathLen))
-	gpuErrchk(cudaMemset(device_Paths_size,0,sizeof(int)*PopulationSize));
-	gpuErrchk(cudaMemset(Selected,0,sizeof(int)*SelectionSize));
-	gpuErrchk(cudaMemset(SelectedDelay,0,sizeof(int)*SelectionSize));
-	gpuErrchk(cudaMemset(OutputPathsTime,0,sizeof(int)*MaxPathLen));
+	int thread = threadIdx.x+(blockIdx.x*blockDim.x);
+	if(thread<NumRowsForPathMatrix)
+	{	
+		if(thread<SelectionPoolSize)
+			SelectionPool[thread]=thread;
+		else
+			ReplacementPool[thread-SelectionPoolSize]=thread;
+	}
 }
-void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr, AirportCoordinates* &device_DestCoordArr, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, double* &device_Fitness, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &SelectedDelay, int* &device_times, int* &OutputPaths, int* &OutputPathsSizes, int* &OutputPathsTime, int* &OutputDelays, int* &OutputAirTime, int* &host_OutputPaths, int* &host_OutputPathsSizes, int* &host_OutputDelays, int* &host_OutputAirTime,int* &TrafficMatrixSum)
+
+void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int CrossoverSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, AirportCoordinates* &device_SourceCoord, AirportCoordinates* &device_DestCoord,  GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* & device_Paths_size, int* &SelectionPool, int* &Selected, int* device_times, int* OutputPaths, int* OutputPathsSizes, int* OutputDelays, int OutputIndex, int StartTime, double speed, int* &OutputPathsTime, int* &OutputAirTime, int* &TrafficMatrixSum,double* &device_FitnessArray, int* &device_TimeArray, int NumRowsForPathMatrix,int* ReplacementPool,int* MutationPool)
+{	
+	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,Start,End,PopulationSize,time(NULL),device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,OutputIndex,device_FitnessArray,device_TimeArray);
+	int SelectionPoolSize=PopulationSize;
+	int MutationPoolSize=NumRowsForPathMatrix;
+	int ReplacementPoolSize=NumRowsForPathMatrix-PopulationSize;
+	for(int genNum=0;genNum<NumberOfGenerations;genNum++)
+	{
+//		cudaDeviceSynchronize();
+//		fitNessTest(device_FitnessArray,PopulationSize,genNum);
+		updateSelectionPool<<<1,1>>>(SelectionPool,ReplacementPool,SelectionPoolSize,ReplacementPoolSize,NumRowsForPathMatrix);
+		Shuffle<<<1,1>>>(SelectionPool,SelectionPoolSize,time(NULL));
+		SelectionKernel<<<(SelectionSize/NumThreads)+1,NumThreads>>>(Selected,SelectionPool,SelectionSize,device_FitnessArray);
+		Shuffle<<<1,1>>>(Selected,SelectionSize,time(NULL));
+		CrossoverKernel<<<(CrossoverSize/NumThreads)+1,NumThreads>>> (Selected,device_Paths,device_Paths_size,CrossoverSize,time(NULL),device_graph, device_arrSizes,device_times,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,TrafficMatrixSum,OutputIndex,device_FitnessArray,device_TimeArray,ReplacementPool);
+		Shuffle<<<1,1>>>(MutationPool,MutationPoolSize,time(NULL));
+		Mutation<<<(NumberOfMutations/NumThreads)+1,NumThreads>>>(ReplacementPool, NumberOfMutations, time(NULL), device_graph, device_arrSizes, device_Paths, device_Paths_size, device_SourceCoord, device_DestCoord, SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,OutputIndex,device_FitnessArray,device_TimeArray);
+		Repair<<<(NumRowsForPathMatrix/NumThreads)+1,NumThreads>>>(device_Paths, device_Paths_size, NumRowsForPathMatrix, device_graph, device_arrSizes, device_SourceCoord, device_DestCoord,  SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,OutputIndex,device_FitnessArray,device_TimeArray);
+		//ELIMINATION
+	}
+	getOutput<<<1,1>>>(device_Paths, device_Paths_size, NumRowsForPathMatrix, OutputPaths, OutputPathsSizes, OutputDelays, OutputIndex, OutputPathsTime, device_graph, device_arrSizes, speed, device_times, StartTime, OutputAirTime, device_SourceCoord, device_DestCoord,device_FitnessArray,device_TimeArray);
+	resetPools<<<(NumRowsForPathMatrix/NumThreads)+1,NumThreads>>>(SelectionPool,ReplacementPool,SelectionPoolSize,NumRowsForPathMatrix);
+}
+void resetForNextPair(int* &device_Paths, int* &device_times, int* &device_Paths_size, int* &Selected, int NumRowsForPathMatrix, int SelectionSize, int* &OutputPathsTime, double* &device_FitnessArray, int* &device_TimeArray)
+{
+	gpuErrchk(cudaMemset(device_Paths,0,sizeof(int)*NumRowsForPathMatrix*MaxPathLen));
+	gpuErrchk(cudaMemset(device_times,0,sizeof(int)*NumRowsForPathMatrix*MaxPathLen))
+	gpuErrchk(cudaMemset(device_Paths_size,0,sizeof(int)*NumRowsForPathMatrix));
+	gpuErrchk(cudaMemset(Selected,0,sizeof(int)*SelectionSize));
+	gpuErrchk(cudaMemset(OutputPathsTime,0,sizeof(int)*MaxPathLen));
+	gpuErrchk(cudaMemset(device_FitnessArray,0,sizeof(double)*NumRowsForPathMatrix));
+	gpuErrchk(cudaMemset(device_TimeArray,0,sizeof(int)*NumRowsForPathMatrix));
+}
+void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr, AirportCoordinates* &device_DestCoordArr, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &device_times, int* &OutputPaths, int* &OutputPathsSizes, int* &OutputPathsTime, int* &OutputDelays, int* &OutputAirTime, int* &host_OutputPaths, int* &host_OutputPathsSizes, int* &host_OutputDelays, int* &host_OutputAirTime,int* &TrafficMatrixSum,double* &device_FitnessArray,int* &device_TimeArray)
 {
 	cudaFree(SectorTimeDict);
 	cudaFree(device_SourceCoordArr);
@@ -241,10 +278,8 @@ void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr,
 	cudaFree(device_arrSizes);
 	cudaFree(device_Paths);
 	cudaFree(device_Paths_size);
-	cudaFree(device_Fitness);
 	cudaFree(SelectionPool);
 	cudaFree(Selected);
-	cudaFree(SelectedDelay);
 	cudaFree(device_times);
 	cudaFree(OutputPaths);
 	cudaFree(OutputPathsSizes);
@@ -252,6 +287,8 @@ void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr,
 	cudaFree(OutputDelays);
 	cudaFree(OutputAirTime);
 	cudaFree(TrafficMatrixSum);
+	cudaFree(device_TimeArray);
+	cudaFree(device_FitnessArray);
 	free(host_SelectionPool);
 	free(host_OutputPaths);
 	free(host_OutputPathsSizes);
@@ -259,7 +296,15 @@ void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr,
 	free(host_OutputAirTime);
 	cudaDeviceReset();
 }
-__device__ void getPath(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int PopulationSize, int seed, AirportCoordinates* &device_SourceCoord, AirportCoordinates* &device_DestCoord, int* SectorTimeDict, int start, int end, int thread, int skip, int StartTime, double speed, int* device_times,int* &TrafficMatrixSum,int Index)
+__global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, int start, int end, int PopulationSize, int seed, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime, double speed, int* device_times, int* TrafficMatrixSum,int Index, double* device_FitnessArray, int* device_TimeArray)
+{
+	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
+	if(thread<PopulationSize)
+	{	
+		getPath(device_graph, device_arrSizes, device_Paths, device_Paths_size, seed, device_SourceCoord, device_DestCoord, SectorTimeDict, start, end, thread, 0, StartTime, speed, device_times, TrafficMatrixSum, Index, device_FitnessArray, device_TimeArray);
+	}
+}
+__device__ void getPath(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, int seed, AirportCoordinates* &device_SourceCoord, AirportCoordinates* &device_DestCoord, int* SectorTimeDict, int start, int end, int thread, int skip, int StartTime, double speed, int* device_times,int* &TrafficMatrixSum,int Index,double* device_FitnessArray,int* device_TimeArray)
 {
 	curandState_t state;
 	curand_init(seed, thread, 0, &state);
@@ -275,12 +320,7 @@ __device__ void getPath(GraphNode** device_graph, int* device_arrSizes, int* dev
 	while(!InitPath)
 	{
 		memset(visited,0,MaxPathLen);
-		if(skip!=0)
-		{
-			for(int i=0;i<skip;i++)
-				visited[device_Paths[Loc+i]]=true;
-		}
-		visited[start]=true;
+		visited[start]=1;
 		ptr_pos=skip;
 		device_Paths[Loc+ptr_pos++]=start;
 		cur=start;
@@ -306,29 +346,12 @@ __device__ void getPath(GraphNode** device_graph, int* device_arrSizes, int* dev
 		}
 	}
 	device_Paths_size[thread]=ptr_pos;
-	InitPathFitness(device_Fitness,device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index);
+	InitPathFitness(device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index,device_FitnessArray,device_TimeArray);
 }
-__device__ double getAngle(double Ax,double Ay, double Bx, double By, double Cx, double Cy)
-{
-	double a = atan2(-(By-Ay),Bx-Ax)*RadConvFactorToMultiply;
-	double b = atan2(-(By-Cy),Bx-Cx)*RadConvFactorToMultiply;
-	if(abs(b-a)>180)
-		return 180-(360-abs(b-a));
-	else
-		return 180-(abs(b-a));
-}
-__device__ double euclidianDistance(double Point1X, double Point1Y, double Point2X, double Point2Y)
-{
-	double sumsq = 0.0;
-	sumsq += pow(Point2X - Point1X, 2);
-	sumsq += pow(Point2Y - Point1Y, 2);
-	return sqrt(sumsq);
-}
-__device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* device_Paths_size, int thread, GraphNode** device_graph, int* device_arrSizes, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime, double speed, int* device_times,int* TrafficMatrixSum, int AirportIndex)
+__device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int thread, GraphNode** device_graph, int* device_arrSizes, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime, double speed, int* device_times,int* TrafficMatrixSum, int AirportIndex,double* device_FitnessArray,int* device_TimeArray)
 {
 	int i=0;
 	int j=0;
-	int FitLoc=thread*MaxDelay;
 	int Loc=thread*MaxPathLen;
 	int CurSec=device_Paths[Loc];
 	int NextSec=device_Paths[Loc+1];
@@ -351,6 +374,7 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 	{
 		CurSec=device_Paths[Loc+i];
 		NextSec=device_Paths[Loc+(i+1)];
+		bool ok = 0;
 		for(int j=0;j<device_arrSizes[CurSec];j++)
 		{
 			if(device_graph[CurSec][j].vertexID==NextSec)
@@ -364,9 +388,13 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 				AnglePointsY[Index++]=curPointY;
 				prevPointX=curPointX;
 				prevPointY=curPointY;
+				ok=1;
 				break;
 			}
+			
 		}
+		if(!ok)
+			printf("\n\n\n\n\n\nBAD BAD BAD BAD\n\n\n\n\n");
 	}
 	dist=euclidianDistance(prevPointX,prevPointY,(device_DestCoord+AirportIndex)->X,(device_DestCoord+AirportIndex)->Y);
 	device_times[Loc+i]=ceil(dist/speed);
@@ -377,8 +405,12 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 	{
 		angle+=getAngle(AnglePointsX[i],AnglePointsY[i],AnglePointsX[i+1],AnglePointsY[i+1],AnglePointsX[i+2],AnglePointsY[i+2]);
 	}
-	StaticCost=(path_length*angle);
+	angle/=Index;
+	StaticCost=((double)(180.0-angle))/path_length;
 	int InnerLoc=(device_Paths[Loc]*MaxPathLen);
+	double meanFitness=0;
+	double maxFit=0;
+	double bestTime=0;
 	for(delay=0;delay<MaxDelay;delay++)
 	{
 		TrafficFactor=0;
@@ -394,8 +426,33 @@ __device__ void InitPathFitness(double* device_Fitness, int* device_Paths, int* 
 			}
 			time=time+device_times[Loc+i];
 		}
-		device_Fitness[FitLoc+delay]=(double)((MaxDelay-delay)+(*(TrafficMatrixSum)-TrafficFactor))/(StaticCost);
+		double Fitness = StaticCost*(((double)(MaxDelay-delay))*((double)(*TrafficMatrixSum)-TrafficFactor));
+		if(Fitness>maxFit)
+		{
+			maxFit=Fitness;
+			bestTime=delay;
+		}
+		meanFitness+=Fitness;
 	}
+	meanFitness/=MaxDelay;
+	device_FitnessArray[thread]=meanFitness;
+	device_TimeArray[thread]=bestTime;
+}
+__device__ double getAngle(double Ax,double Ay, double Bx, double By, double Cx, double Cy)
+{
+	double a = atan2(-(By-Ay),Bx-Ax)*RadConvFactorToMultiply;
+	double b = atan2(-(By-Cy),Bx-Cx)*RadConvFactorToMultiply;
+	if(abs(b-a)>180)
+		return 180-(360-abs(b-a));
+	else
+		return 180-(abs(b-a));
+}
+__device__ double euclidianDistance(double Point1X, double Point1Y, double Point2X, double Point2Y)
+{
+	double sumsq = 0.0;
+	sumsq += pow(Point2X - Point1X, 2);
+	sumsq += pow(Point2Y - Point1Y, 2);
+	return sqrt(sumsq);
 }
 __global__ void update_SectorTimeDict(int* SectorTimeDict, int* OutputPaths, int* OutputDelays, int* OutputPathsSize, int Index, int StartTime, int* OutputPathsTime, int* TrafficMatrixSum)
 {
@@ -424,75 +481,32 @@ __global__ void update_SectorTimeDict(int* SectorTimeDict, int* OutputPaths, int
 		atomicAdd(TrafficMatrixSum, Sum);
 	}
 }
-__global__ void Shuffle(int* SelectionPool,int SelectionPoolSize,int seed)
+__global__ void Shuffle(int* Array,int ArraySize,int seed)
 {
 	curandState_t state;
 	curand_init(seed, 0, 0, &state);
-	for (int i = 0; i < SelectionPoolSize - 1; i++) 
+	for (int i = 0; i < ArraySize- 1; i++) 
 	{
-		int j = i + abs((int)curand(&state)) / (RAND_MAX / (SelectionPoolSize - i) + 1);
-		int t = SelectionPool[j];
-		SelectionPool[j] = SelectionPool[i];
-		SelectionPool[i] = t;
+		int j = i + abs((int)curand(&state)) / (RAND_MAX / (ArraySize - i) + 1);
+		int t = Array[j];
+		Array[j] = Array[i];
+		Array[i] = t;
 	}
 }
-__global__ void CrossoverShuffle(int* Selection,int* SelectedDelay,int SelectionSize,int seed)
-{
-	curandState_t state;
-	curand_init(seed, 0, 0, &state);
-	for (int i = 0; i < SelectionSize - 1; i++) 
-	{
-		int j = i + abs((int)curand(&state)) / (RAND_MAX / (SelectionSize - i) + 1);
-		int c = Selection[j];
-		int t = SelectedDelay[j];
-		Selection[j] = Selection[i];
-		Selection[i] = c;
-		SelectedDelay[j]=SelectedDelay[i];
-		SelectedDelay[i]=t;
-	}
-}
-__global__ void SelectionKernel(int* Selected, int*SelectionPool, double* device_Fitness,int SelectionSize,int*SelectedDelay,int PopulationSize)
+__global__ void SelectionKernel(int* Selected, int*SelectionPool, int SelectionSize,double* device_FitnessArray)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
 	if(thread<SelectionSize)
 	{
-		double max1=0.0,max2=0.0;
-		double avg1=0.0,avg2=0.0;
-		int t1=-1,t2=-1;
-		int Loc1=SelectionPool[2*thread]*MaxDelay;
-		int Loc2=SelectionPool[2*thread+1]*MaxDelay;
-		for(int i=0;i<MaxDelay;i++)
-		{
-			avg1+=device_Fitness[Loc1+i];
-			if(device_Fitness[Loc1+i]>max1)
-			{
-				max1=device_Fitness[Loc1+i];
-				t1=i;
-			}
-		}
-		for(int i=0;i<MaxDelay;i++)
-		{
-			avg2+=device_Fitness[Loc2+i];
-			if(device_Fitness[Loc2+i]>max2)
-			{
-				max2=device_Fitness[Loc2+i];
-				t2=i;
-			}
-		}
-		if(avg1<avg2)
-		{
-			Selected[thread]=SelectionPool[2*thread+1];
-			SelectedDelay[thread]=t2;
-		}
+		int ChmNum1=SelectionPool[2*thread];
+		int ChmNum2=SelectionPool[(2*thread)+1];
+		if(device_FitnessArray[ChmNum1]<device_FitnessArray[ChmNum2])
+			Selected[thread]=ChmNum2;
 		else
-		{
-			Selected[thread]=SelectionPool[2*thread];
-			SelectedDelay[thread]=t1;
-		}
+			Selected[thread]=ChmNum1;
 	}
 }
-
-__global__ void CrossoverKernel(int* Selected, int* SelectedDelay, int* device_Paths, int* device_Paths_size, double* device_Fitness, int CrossoverSize,int seed,GraphNode** device_graph, int* device_arrSizes,int* device_times, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict,int StartTime,double speed,int* TrafficMatrixSum,int Index)
+__global__ void CrossoverKernel(int* Selected, int* device_Paths, int* device_Paths_size, int CrossoverSize,int seed,GraphNode** device_graph, int* device_arrSizes,int* device_times, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict,int StartTime,double speed,int* TrafficMatrixSum,int Index,double* device_FitnessArray, int* device_TimeArray, int* ReplacementPool)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
 	if(thread<CrossoverSize)
@@ -512,19 +526,16 @@ __global__ void CrossoverKernel(int* Selected, int* SelectedDelay, int* device_P
 		int r2=0;
 		int FirstIndex=2*thread;
 		int SecondIndex=(2*thread)+1;
-		int Loc1=Selected[FirstIndex]*MaxPathLen;
-		int Loc2=Selected[SecondIndex]*MaxPathLen;
-		int FitLoc1=Selected[FirstIndex]*MaxDelay;
-		int FitLoc2=Selected[SecondIndex]*MaxDelay;
+		int PathLoc1=Selected[FirstIndex]*MaxPathLen;
+		int PathLoc2=Selected[SecondIndex]*MaxPathLen;
 		int FirstLen=device_Paths_size[Selected[FirstIndex]];
 		int SecondLen=device_Paths_size[Selected[SecondIndex]];
-		double avgFirst=0,avgSecond=0;
-		CumulativeTime1[0]=StartTime+SelectedDelay[FirstIndex]+device_times[Loc1];
-		CumulativeTime2[0]=StartTime+SelectedDelay[SecondIndex]+device_times[Loc2];
+		CumulativeTime1[0]=StartTime+device_TimeArray[Selected[FirstIndex]]+device_times[PathLoc1];
+		CumulativeTime2[0]=StartTime+device_TimeArray[Selected[SecondIndex]]+device_times[PathLoc2];
 		for(i=1;i<FirstLen;i++)
-			CumulativeTime1[i]=CumulativeTime1[i-1]+device_times[Loc1+i];
+			CumulativeTime1[i]=CumulativeTime1[i-1]+device_times[PathLoc1+i];
 		for(i=1;i<SecondLen;i++)
-			CumulativeTime2[i]=CumulativeTime2[i-1]+device_times[Loc2+i];
+			CumulativeTime2[i]=CumulativeTime2[i-1]+device_times[PathLoc2+i];
 		i=0;
 		j=0;
 		while(i < FirstLen && j < SecondLen)
@@ -551,7 +562,7 @@ __global__ void CrossoverKernel(int* Selected, int* SelectedDelay, int* device_P
 			}
 			if(max(l1,l2) <= min(r1,r2) && !(i==0 && j==0) && !(i==FirstLen-1 && j== SecondLen-1))
 			{
-				if(device_Paths[Loc1+i]==device_Paths[Loc2+j])
+				if(device_Paths[PathLoc1+i]==device_Paths[PathLoc2+j])
 				{
 					CommonIndecesFirst[CommonIndecesLen]=i;
 					CommonIndecesSecond[CommonIndecesLen++]=j;
@@ -564,92 +575,44 @@ __global__ void CrossoverKernel(int* Selected, int* SelectedDelay, int* device_P
 		}
 		if(CommonIndecesLen!=0)
 		{	
-			int TempArray[MaxPathLen]; // For Storing First Chm Second Part (which gets overwritten)
-			r1=0;//Serves as tempArrayLen
-			r2=0;//Serves as checkpoint at which to swap
 			int CrossIndex=abs((int)curand(&state))%CommonIndecesLen;
+			int ChildOneLoc=ReplacementPool[FirstIndex]*MaxPathLen;
+			int ChildTwoLoc=ReplacementPool[SecondIndex]*MaxPathLen;
 			l1=CommonIndecesFirst[CrossIndex];  //l1 is index for first and l2 for second
 			l2=CommonIndecesSecond[CrossIndex];
-			for(i=0;i<MaxDelay;i++)
-			{
-				avgFirst+=device_Fitness[FitLoc1+i];
-				avgSecond+=device_Fitness[FitLoc2+i];
-			}
-			int FirstFitnessCopy[MaxDelay]={-1};//CumulativeTime1 is FirstTimeCopy and CommonIndecesFirst is FirstCopy and FirstLen is device_path[first] copy
-			int SecondFitnessCopy[MaxDelay]={-1}; //CumulativeTime2 is SecondTimeCopy and CommonIndecesSecond is SecondCopy and SecondLen is device_path[second] copy
-			for(i=0;i<MaxDelay;i++)
-			{
-				FirstFitnessCopy[i]=device_Fitness[FitLoc1+i];
-				SecondFitnessCopy[i]=device_Fitness[FitLoc2+i];
-			}	
-			for(i=0;i<FirstLen;i++)
-			{
-				CommonIndecesFirst[i]=device_Paths[Loc1+i];
-				CumulativeTime1[i]=device_times[Loc1+i];
-			}
-			for(i=0;i<SecondLen;i++)
-			{
-				CommonIndecesSecond[i]=device_Paths[Loc2+i];
-				CumulativeTime2[i]=device_times[Loc2+i];
-			}
-			for(i=l1+1;i<FirstLen;i++)
-				TempArray[r1++]=device_Paths[Loc1+i];
+			for(i=0;i<=l1;i++)
+				device_Paths[ChildOneLoc+i]=device_Paths[PathLoc1+i];
 			r2=l1+1;
 			for(i=l2+1;i<SecondLen;i++)
-				device_Paths[Loc1+r2++]=device_Paths[Loc2+i];
-			device_Paths_size[Selected[FirstIndex]]=r2; //Reuse r2 for same thing in Second
-			r2=l2+1;			
-			for(i=0;i<r1;i++)
-				device_Paths[Loc2+r2++]=TempArray[i];
-			device_Paths_size[Selected[SecondIndex]]=r2;
-			InitPathFitness(device_Fitness,device_Paths,device_Paths_size,Selected[FirstIndex],device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index);
-			InitPathFitness(device_Fitness,device_Paths,device_Paths_size,Selected[SecondIndex],device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index);
-			for(i=0;i<MaxDelay;i++)
-			{
-				avgFirst-=device_Fitness[FitLoc1+i];
-				avgSecond-=device_Fitness[FitLoc2+i];
-			}
-			if(avgFirst>0)
-			{
-				for(i=0;i<FirstLen;i++)
-				{
-					device_Paths[Loc1+i]=CommonIndecesFirst[i];
-					device_times[Loc1+i]=CumulativeTime1[i];
-				}
-				device_Paths_size[Selected[FirstIndex]]=FirstLen;
-				for(i=0;i<MaxDelay;i++)
-					device_Fitness[FitLoc1+i]=FirstFitnessCopy[i];
-			}
-			if(avgSecond>0)
-			{
-				for(i=0;i<SecondLen;i++)
-				{
-					device_Paths[Loc2+i]=CommonIndecesSecond[i];
-					device_times[Loc2+i]=CumulativeTime2[i];
-				}
-				device_Paths_size[Selected[SecondIndex]]=SecondLen;
-				for(i=0;i<MaxDelay;i++)
-					device_Fitness[FitLoc2+i]=SecondFitnessCopy[i];
-			}
+				device_Paths[ChildOneLoc+r2++]=device_Paths[PathLoc2+i];
+			device_Paths_size[ReplacementPool[FirstIndex]]=r2;
+			for(i=0;i<=l2;i++)
+				device_Paths[ChildTwoLoc+i]=device_Paths[PathLoc2+i];
+			r2=l2+1;
+			for(i=l1+1;i<FirstLen;i++)
+				device_Paths[ChildTwoLoc+r2++]=device_Paths[PathLoc1+i];
+			device_Paths_size[ReplacementPool[SecondIndex]]=r2;	InitPathFitness(device_Paths,device_Paths_size,ReplacementPool[FirstIndex],device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index,device_FitnessArray,device_TimeArray);	InitPathFitness(device_Paths,device_Paths_size,ReplacementPool[SecondIndex],device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index,device_FitnessArray,device_TimeArray);
 		}
 	}
 }
-__global__ void Mutation(int* MutationPool, int NumberOfMutations, int seed, GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, double*device_Fitness, int PopulationSize, AirportCoordinates* device_SourceCoord,  AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime,double speed,int* device_times,int* TrafficMatrixSum,int Index)
+__global__ void Mutation(int* MutationPool, int NumberOfMutations, int seed, GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, AirportCoordinates* device_SourceCoord,  AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime,double speed,int* device_times,int* TrafficMatrixSum,int Index,double* device_FitnessArray,int* device_TimeArray)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-	if(thread<NumberOfMutations)
+	if(thread<NumberOfMutations && device_Paths_size[MutationPool[thread]]>0)
 	{
 		curandState_t state;
 		curand_init(seed, thread, 0, &state);
 		int pathID=MutationPool[thread];
-		int MutPoint=abs((int)curand(&state))%(device_Paths_size[pathID]-2);
-		getPath(device_graph, device_arrSizes, device_Paths, device_Paths_size, device_Fitness, PopulationSize, seed, device_SourceCoord, device_DestCoord, SectorTimeDict,device_Paths[pathID*MaxPathLen+MutPoint+1], device_Paths[pathID*MaxPathLen+(device_Paths_size[pathID]-1)], pathID, MutPoint+1, StartTime,speed,device_times,TrafficMatrixSum,Index);
+		int StartIndex=abs((int)curand(&state))%(device_Paths_size[pathID]-1);
+		int Loc=pathID*MaxPathLen;
+		getPath(device_graph, device_arrSizes, device_Paths, device_Paths_size, seed, device_SourceCoord, device_DestCoord, SectorTimeDict,device_Paths[Loc+StartIndex], device_Paths[Loc+(device_Paths_size[pathID]-1)], pathID, StartIndex, StartTime,speed,device_times,TrafficMatrixSum,Index,device_FitnessArray,device_TimeArray);
 	}
 }
-__global__ void Repair(int* device_Paths, int* device_Paths_size, int PopulationSize, double* device_Fitness, GraphNode** device_graph, int* device_arrSizes, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict,int StartTime,double speed,int* device_times,int* TrafficMatrixSum,int Index)
+
+__global__ void Repair(int* device_Paths, int* device_Paths_size, int NumRowsForPathMatrix, GraphNode** device_graph, int* device_arrSizes, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict,int StartTime,double speed,int* device_times,int* TrafficMatrixSum,int Index,double* device_FitnessArray,int* device_TimeArray)
 {
 	int thread= threadIdx.x+(blockIdx.x*blockDim.x);
-	if(thread<PopulationSize)
+	if(thread<NumRowsForPathMatrix)
 	{
 		int dict[1250]={-1};
 		int Pos=thread*MaxPathLen;
@@ -667,36 +630,42 @@ __global__ void Repair(int* device_Paths, int* device_Paths_size, int Population
 		if(i<device_Paths_size[thread])
 		{
 			device_Paths_size[thread]=i;
-			InitPathFitness(device_Fitness,device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index);
+			InitPathFitness(device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index,device_FitnessArray,device_TimeArray);
 		}
 	}
 }
-__global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_Paths_size, int PopulationSize, int* OutputPaths, int* OutputPathsSizes, int* OutputDelays, int index, int* OutputPathsTime, GraphNode** device_graph, int* device_arrSizes,double speed, int* device_times,int StartTime, int* OutputAirTime, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord)
+__global__ void getOutput(int* device_Paths, int* device_Paths_size, int NumRowsForPathMatrix, int* OutputPaths, int* OutputPathsSizes, int* OutputDelays, int index, int* OutputPathsTime, GraphNode** device_graph, int* device_arrSizes,double speed, int* device_times,int StartTime, int* OutputAirTime, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord,double* device_FitnessArray,int* device_TimeArray)
 {
-	double maxF=device_Fitness[0];
+	double maxF=device_FitnessArray[0];
 	int path_index=0;
 	int time=0;
 	int i=1;
 	int OutLoc=index*MaxPathLen;
 	double distance=0;
-	for(i=1;i<MaxDelay*PopulationSize;i++)
+	double angle =0;
+	for(i=1;i<NumRowsForPathMatrix;i++)
 	{
-		if(device_Fitness[i]>maxF)
+		if(device_FitnessArray[i]>maxF)
 		{
-			maxF=device_Fitness[i];
-			path_index=i/MaxDelay;
-			time=i%MaxDelay;
+			maxF=device_FitnessArray[i];
+			path_index=i;
 		}
 	}
+	time=device_TimeArray[path_index];
 	int Loc=path_index*MaxPathLen;
 	OutputPathsSizes[index]=device_Paths_size[path_index];
 	OutputDelays[index]=time;
 	int CurSec=device_Paths[Loc];
 	int NextSec=device_Paths[Loc+1];
-	double prevPointX=device_SourceCoord->X;
-	double prevPointY=device_SourceCoord->Y;	
+	double prevPointX=(device_SourceCoord+index)->X;
+	double prevPointY=(device_SourceCoord+index)->Y;	
 	double curPointX=0;
 	double curPointY=0;
+	double AnglePointsX[MaxPathLen+1];
+	double AnglePointsY[MaxPathLen+1];
+	int Index=0;
+	AnglePointsX[Index]=prevPointX;
+	AnglePointsY[Index++]=prevPointY;
 	for (i=0;i<device_Paths_size[path_index]-1;i++)
 	{
 		CurSec=device_Paths[Loc+i];
@@ -708,13 +677,25 @@ __global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_
 				curPointX=device_graph[CurSec][j].XCoord;
 				curPointY=device_graph[CurSec][j].YCoord;
 				distance+=euclidianDistance(prevPointX,prevPointY,curPointX,curPointY);
+				AnglePointsX[Index]=curPointX;
+				AnglePointsY[Index++]=curPointY;
 				prevPointX=curPointX;
 				prevPointY=curPointY;
 				break;
 			}
 		}
 	}
-	distance+=euclidianDistance(prevPointX,prevPointY,device_DestCoord->X,device_DestCoord->Y);
+	AnglePointsX[Index]=(device_DestCoord+index)->X;
+	AnglePointsY[Index++]=(device_DestCoord+index)->Y;
+	for (i=0;i<Index-2;i++)
+	{
+		angle+=getAngle(AnglePointsX[i],AnglePointsY[i],AnglePointsX[i+1],AnglePointsY[i+1],AnglePointsX[i+2],AnglePointsY[i+2]);
+	}
+	angle/=Index;
+	distance+=euclidianDistance(prevPointX,prevPointY,(device_DestCoord+index)->X,(device_DestCoord+index)->Y);
+	printf("%lf\n",distance);
+	printf("%lf\n",angle);
+	printf("%0.18g\n",(double)((180.0-angle))/distance);
 	OutputAirTime[index]=ceil(distance/speed);
 	OutputPathsTime[0]=StartTime+time+device_times[Loc];
 	OutputPaths[OutLoc]=device_Paths[Loc];
@@ -724,3 +705,5 @@ __global__ void getOutput(double* device_Fitness,int* device_Paths, int* device_
 		OutputPathsTime[i]=device_times[Loc+i]+OutputPathsTime[i-1];
 	}
 }
+
+

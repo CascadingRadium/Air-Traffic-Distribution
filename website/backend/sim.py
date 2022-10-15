@@ -11,7 +11,7 @@ opfile=open("OutputToFrontend.txt","r")
 fig = plt.figure(pk.load(open("Simulator.pkl","rb")))
 airportCoords = pk.load(open("airportCoordDict.pkl","rb"))
 ax = fig.axes[0]
-SCALE_FACTOR=1
+SCALE_FACTOR=10
 def path_maker(pathFromGA,MpMSpeed,index,Src,Dst):
     PointPath=[airportCoords[Src]]
     Distance=0.0
@@ -30,8 +30,8 @@ def path_maker(pathFromGA,MpMSpeed,index,Src,Dst):
     points = [PathLine.interpolate(distance) for distance in distances] + [PathLine.boundary.geoms[1]]
     return points
 lines=opfile.readlines()
-TimeDict=[[] for i in range(1440)]
-toStart=1440
+TimeDict=[[] for i in range(2880)]
+toStart=2880
 toStop=0
 DistinctColors=ds.get_colors(len(lines))
 airports=set()
