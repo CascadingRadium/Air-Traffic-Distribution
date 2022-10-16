@@ -136,7 +136,8 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 		double MpM_Speed=(speeds[i]*30.8667);
 		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, CrossoverSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first.sector, ODPairs[i].second.sector, SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, Selected, device_times, OutputPaths, OutputPathsSizes, OutputDelays, i, times[i], MpM_Speed, OutputPathsTime, OutputAirTime, TrafficMatrixSum,device_FitnessArray,device_TimeArray,NumRowsForPathMatrix,ReplacementPool,MutationPool,heap);
 		update_SectorTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict, OutputPaths, OutputDelays, OutputPathsSizes, i, times[i], OutputPathsTime, TrafficMatrixSum);
-		resetForNextPair(device_Paths, device_times, device_Paths_size, Selected, PopulationSize, SelectionSize, OutputPathsTime,device_FitnessArray,device_TimeArray);
+		resetForNextPair(device_Paths, device_times, device_Paths_size, Selected, NumRowsForPathMatrix, SelectionSize, OutputPathsTime,device_FitnessArray,device_TimeArray);
+		printf("%d Done\n",i);
 	}
 	copySecTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict,metricSectorTimeDict);
 	cudaMemcpy(host_metricSectorTimeDict,metricSectorTimeDict,sizeof(int)*MaxPathLen,cudaMemcpyDeviceToHost);
@@ -227,15 +228,12 @@ void CUDA_Init(std::string &GraphFileName, GraphNode** host_graph, int* host_arr
 	gpuErrchk(cudaMemset(device_FitnessArray,0,sizeof(double)*NumRowsForPathMatrix));
 	gpuErrchk(cudaMalloc((void **)&device_TimeArray, sizeof(int)*NumRowsForPathMatrix));
 	gpuErrchk(cudaMemset(device_TimeArray,0,sizeof(int)*NumRowsForPathMatrix));
-
 	gpuErrchk(cudaMalloc((void**)&SelectionPool, sizeof(int)*PopulationSize));
 	host_SelectionPool=(int*)calloc(sizeof(int),PopulationSize);
 	for(int i=0;i<PopulationSize;i++)
 		host_SelectionPool[i]=i;
 	gpuErrchk(cudaMemcpy(SelectionPool,host_SelectionPool,sizeof(int)*PopulationSize,cudaMemcpyHostToDevice));
-
 	int ExtraRows=NumRowsForPathMatrix-PopulationSize;
-
 	gpuErrchk(cudaMallocManaged((void **)&ReplacementPool, sizeof(int)*ExtraRows));
 	host_ReplacementPool=(int*)calloc(sizeof(int),ExtraRows);
 	for(int i=PopulationSize;i<NumRowsForPathMatrix;i++)
@@ -329,6 +327,8 @@ void Elimination(double* Array, int ArraySize, int* KSmallestElementsIndexArray,
 
 void GeneticAlgorithm(int NumSectors, int PopulationSize, int SelectionSize, int CrossoverSize, int NumberOfMutations, int NumberOfGenerations, int Start, int End, int* &SectorTimeDict, AirportCoordinates* &device_SourceCoord, AirportCoordinates* &device_DestCoord,  GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* & device_Paths_size, int* &SelectionPool, int* &Selected, int* device_times, int* OutputPaths, int* OutputPathsSizes, int* OutputDelays, int OutputIndex, int StartTime, double speed, int* &OutputPathsTime, int* &OutputAirTime, int* &TrafficMatrixSum,double* &device_FitnessArray, int* &device_TimeArray, int NumRowsForPathMatrix,int* ReplacementPool,int* MutationPool, Pair* &heap)
 {	
+	if(Start==End)
+		return;
 	getInitPopulation<<<(PopulationSize/NumThreads)+1,NumThreads>>> (device_graph,device_arrSizes,device_Paths,device_Paths_size,Start,End,PopulationSize,time(NULL),device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,OutputIndex,device_FitnessArray,device_TimeArray);
 	int SelectionPoolSize=PopulationSize;
 	int MutationPoolSize=NumRowsForPathMatrix;
@@ -504,7 +504,7 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 		angle+=getAngle(AnglePointsX[i],AnglePointsY[i],AnglePointsX[i+1],AnglePointsY[i+1],AnglePointsX[i+2],AnglePointsY[i+2]);
 	}
 	angle/=Index;
-	StaticCost=path_length*angle;
+	StaticCost=((double)(180.0-angle))/path_length;
 	int InnerLoc=(device_Paths[Loc]*SectorTimeDictCols);
 	double meanFitness=0;
 	double maxFit=0;
@@ -524,7 +524,7 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 			}
 			time=time+device_times[Loc+i];
 		}
-		double Fitness = (((double)(MaxDelay-delay))*((double)(*TrafficMatrixSum)-TrafficFactor))/StaticCost;
+		double Fitness = StaticCost*(((double)(MaxDelay-delay))*((double)(*TrafficMatrixSum)-TrafficFactor));
 		if(Fitness>maxFit)
 		{
 			maxFit=Fitness;
