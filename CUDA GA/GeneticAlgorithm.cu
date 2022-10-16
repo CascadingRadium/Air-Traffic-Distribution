@@ -32,8 +32,8 @@ int main()
 	int NumberOfGenerations;
 	readGA_Params(PopulationSize,NumberOfMutations,NumberOfGenerations,GA_ParametersFileName);
 	/*Metric Files*/
-	std::string TrafficFactorMetricFileName="GA_Metrics/TrafficFactor.txt";
-	std::string AerGDFileName="GA_Metrics/AerialTimeGD.txt";
+	std::string TrafficFactorMetricFileName="TrafficFactor.txt";
+	std::string AerGDFileName="AerialTimeGD.txt";
 	/* Read OD Pairs */
 	std::vector<std::pair<Airport,Airport>> ODPairs;
 	std::vector<int> times;
@@ -476,7 +476,6 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 	{
 		CurSec=device_Paths[Loc+i];
 		NextSec=device_Paths[Loc+(i+1)];
-		bool ok = 0;
 		for(int j=0;j<device_arrSizes[CurSec];j++)
 		{
 			if(device_graph[CurSec][j].vertexID==NextSec)
@@ -490,13 +489,10 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 				AnglePointsY[Index++]=curPointY;
 				prevPointX=curPointX;
 				prevPointY=curPointY;
-				ok=1;
 				break;
 			}
 
 		}
-		if(!ok)
-			printf("\n\n\n\n\n\nBAD BAD BAD BAD\n\n\n\n\n");
 	}
 	dist=euclidianDistance(prevPointX,prevPointY,(device_DestCoord+AirportIndex)->X,(device_DestCoord+AirportIndex)->Y);
 	device_times[Loc+i]=ceil(dist/speed);
@@ -508,7 +504,7 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 		angle+=getAngle(AnglePointsX[i],AnglePointsY[i],AnglePointsX[i+1],AnglePointsY[i+1],AnglePointsX[i+2],AnglePointsY[i+2]);
 	}
 	angle/=Index;
-	StaticCost=((double)(180.0-angle))/path_length;
+	StaticCost=path_length*angle;
 	int InnerLoc=(device_Paths[Loc]*SectorTimeDictCols);
 	double meanFitness=0;
 	double maxFit=0;
@@ -528,7 +524,7 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 			}
 			time=time+device_times[Loc+i];
 		}
-		double Fitness = StaticCost*(((double)(MaxDelay-delay))*((double)(*TrafficMatrixSum)-TrafficFactor));
+		double Fitness = (((double)(MaxDelay-delay))*((double)(*TrafficMatrixSum)-TrafficFactor))/StaticCost;
 		if(Fitness>maxFit)
 		{
 			maxFit=Fitness;
@@ -795,7 +791,6 @@ __global__ void getOutput(int* device_Paths, int* device_Paths_size, int NumRows
 	}
 	angle/=Index;
 	distance+=euclidianDistance(prevPointX,prevPointY,(device_DestCoord+index)->X,(device_DestCoord+index)->Y);
-	distance=(distance-0.94)/1.25;
 	OutputAirTime[index]=ceil(distance/speed);
 	OutputPathsTime[0]=StartTime+time+device_times[Loc];
 	OutputPaths[OutLoc]=device_Paths[Loc];
