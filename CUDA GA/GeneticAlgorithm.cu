@@ -101,7 +101,7 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 	int* MutationPool;
 	int* host_MutationPool;
 	int* Selected;
-	int* device_times;
+	int* device_times; //2D
 	//OUTPUT RELATED
 	int* OutputPaths; //2D
 	int* OutputPathsSizes;
@@ -162,7 +162,7 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 	}
 	for(int i=0;i<MaxPathLen;i++)
 		TrafficFactorMetric.push_back(host_metricSectorTimeDict[i]);
-	CUDA_Free(SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, host_SelectionPool, Selected, device_times, OutputPaths, OutputPathsSizes, OutputPathsTime, OutputDelays, OutputAirTime, host_OutputPaths, host_OutputPathsSizes, host_OutputDelays, host_OutputAirTime,TrafficMatrixSum,device_FitnessArray,device_TimeArray);
+	CUDA_Free(SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, host_SelectionPool, Selected, device_times, OutputPaths, OutputPathsSizes, OutputPathsTime, OutputDelays, OutputAirTime, host_OutputPaths, host_OutputPathsSizes, host_OutputDelays, host_OutputAirTime,TrafficMatrixSum,device_FitnessArray,device_TimeArray,ReplacementPool,host_ReplacementPool,MutationPool,host_MutationPool,heap,metricSectorTimeDict,host_metricSectorTimeDict);
 }
 void CUDA_Init(std::string &GraphFileName, GraphNode** host_graph, int* host_arrSizes,int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr, AirportCoordinates* &device_DestCoordArr, AirportCoordinates* host_SourceCoordArr, AirportCoordinates* host_DestCoordArr, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &device_times ,int SelectionSize, int NumSectors, int PopulationSize, int NumODPairs, int* &OutputPaths, int* &OutputPathsSizes, int* &OutputDelays, int* &host_OutputPaths, int* &host_OutputPathsSizes, int* &host_OutputDelays, int* &OutputPathsTime ,int* &OutputAirTime, int* &host_OutputAirTime,int* &TrafficMatrixSum, double* &device_FitnessArray,int* &device_TimeArray,int NumRowsForPathMatrix,int* &ReplacementPool,int* &host_ReplacementPool,int* &MutationPool,int* &host_MutationPool, Pair* &heap, int* &metricSectorTimeDict,int* &host_metricSectorTimeDict)
 {
@@ -364,7 +364,7 @@ void resetForNextPair(int* &device_Paths, int* &device_times, int* &device_Paths
 	gpuErrchk(cudaMemset(device_FitnessArray,0,sizeof(double)*NumRowsForPathMatrix));
 	gpuErrchk(cudaMemset(device_TimeArray,0,sizeof(int)*NumRowsForPathMatrix));
 }
-void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr, AirportCoordinates* &device_DestCoordArr, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &device_times, int* &OutputPaths, int* &OutputPathsSizes, int* &OutputPathsTime, int* &OutputDelays, int* &OutputAirTime, int* &host_OutputPaths, int* &host_OutputPathsSizes, int* &host_OutputDelays, int* &host_OutputAirTime,int* &TrafficMatrixSum,double* &device_FitnessArray,int* &device_TimeArray)
+void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr, AirportCoordinates* &device_DestCoordArr, GraphNode** &device_graph, int* &device_arrSizes, int* &device_Paths, int* &device_Paths_size, int* &SelectionPool, int* &host_SelectionPool, int* &Selected, int* &device_times, int* &OutputPaths, int* &OutputPathsSizes, int* &OutputPathsTime, int* &OutputDelays, int* &OutputAirTime, int* &host_OutputPaths, int* &host_OutputPathsSizes, int* &host_OutputDelays, int* &host_OutputAirTime,int* &TrafficMatrixSum,double* &device_FitnessArray,int* &device_TimeArray,int* &ReplacementPool,int* &host_ReplacementPool,int* &MutationPool,int* &host_MutationPool,Pair* &heap, int* &metricSectorTimeDict,int* &host_metricSectorTimeDict)
 {
 	cudaFree(SectorTimeDict);
 	cudaFree(device_SourceCoordArr);
@@ -382,8 +382,15 @@ void CUDA_Free(int* &SectorTimeDict, AirportCoordinates* &device_SourceCoordArr,
 	cudaFree(OutputDelays);
 	cudaFree(OutputAirTime);
 	cudaFree(TrafficMatrixSum);
-	cudaFree(device_TimeArray);
 	cudaFree(device_FitnessArray);
+	cudaFree(device_TimeArray);
+	cudaFree(ReplacementPool);
+	cudaFree(MutationPool);
+	cudaFree(metricSectorTimeDict);
+	free(host_ReplacementPool);
+	free(heap);
+	free(host_MutationPool);
+	free(host_metricSectorTimeDict);
 	free(host_SelectionPool);
 	free(host_OutputPaths);
 	free(host_OutputPathsSizes);
