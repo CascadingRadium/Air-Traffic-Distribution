@@ -275,7 +275,7 @@ void resetForNextPair(int* &device_Paths, int* &device_times, int* &device_Paths
 {
 	gpuErrchk(cudaMemset(device_Paths,0,sizeof(int)*NumRowsForPathMatrix*MaxPathLen));
 	gpuErrchk(cudaMemset(device_times,0,sizeof(int)*NumRowsForPathMatrix*MaxPathLen))
-		gpuErrchk(cudaMemset(device_Paths_size,0,sizeof(int)*NumRowsForPathMatrix));
+	gpuErrchk(cudaMemset(device_Paths_size,0,sizeof(int)*NumRowsForPathMatrix));
 	gpuErrchk(cudaMemset(Selected,0,sizeof(int)*SelectionSize));
 	gpuErrchk(cudaMemset(OutputPathsTime,0,sizeof(int)*MaxPathLen));
 	gpuErrchk(cudaMemset(device_FitnessArray,0,sizeof(double)*NumRowsForPathMatrix));
