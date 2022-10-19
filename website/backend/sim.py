@@ -6,12 +6,13 @@ import distinctipy as ds
 import pickle as pk
 import numpy as np
 import pandas as pd
+import sys
 ConnectedSectorGraph = pk.load(open("ConnectedSectorGraph.pkl", "rb"))
 opfile=open("OutputToFrontend.txt","r")
 fig = plt.figure(pk.load(open("Simulator.pkl","rb")))
 airportCoords = pk.load(open("airportCoordDict.pkl","rb"))
 ax = fig.axes[0]
-SCALE_FACTOR=1
+SCALE_FACTOR=int(sys.argv[1])
 def path_maker(pathFromGA,MpMSpeed,index,Src,Dst):
     PointPath=[airportCoords[Src]]
     Distance=0.0
@@ -83,7 +84,7 @@ def StartSim(event):
     global toPlotNow
     if(not Started and event.button == 1):
         Started=True
-        title="Hour Minutes";
+        title="Hour Minutes"
         plt.text(6000000,3650000,title,fontsize = 120)
         CurTime=toStart
         plotIndex=0

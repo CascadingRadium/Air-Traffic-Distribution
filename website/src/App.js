@@ -246,9 +246,8 @@ function App() {
 		<h1>Flights</h1>
 		{
 			<>
-			<CustomizedTables items={items} deleteEntry={deleteEntry}/>
-
 			{isLoading?<LoadingButton/>:<button className='btn btn-primary' onClick={getPathHelper}>Get Paths</button>}
+			<CustomizedTables items={items} deleteEntry={deleteEntry}/>
 			</>
 
 		}
