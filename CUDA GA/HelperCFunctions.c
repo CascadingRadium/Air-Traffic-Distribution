@@ -21,13 +21,18 @@ void tokenize(std::string &str, char delim, std::vector<std::string> &out)
 		out.push_back(s);
 	}
 }
-void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std::string OutputFileName, int NumODPairs)
+void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std::string OutputFileName, std::vector<int> &TrafficFactorMetric, std::string TrafficFactorMetricFileName, std::string AerGDFileName, int NumODPairs)
 {
 	std::ofstream file(OutputFileName);
+	std::ofstream TFfile(TrafficFactorMetricFileName);
+	std::ofstream AerGDfile(AerGDFileName);
+	AerGDfile<<"Aerial Time,Ground Holding\n";
 	std::string line="";
+	std::string AerLine="";
 	for(int i=0;i<NumODPairs;i++)
 	{
 		line="";
+		AerLine="";
 		for(int j=0;j<Paths[i].first.size();j++)
 		{
 			line+=std::to_string(Paths[i].first[j])+",";
@@ -50,11 +55,25 @@ void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std:
 		line+=Paths[i].second.StartICAO;
 		line.push_back(',');
 		line+=Paths[i].second.EndICAO;
+		AerLine+=std::to_string(Paths[i].second.AerialDelay);
+		AerLine.push_back(',');
+		AerLine+=std::to_string(Paths[i].second.GroundHolding);
+		AerLine.push_back('\n');
+		AerGDfile<<AerLine;		
 		if(i!=NumODPairs-1)
 			line.push_back('\n');
 		file<<line;
 	}
 	file.close();
+	AerGDfile.close();
+	line="";
+	for(int i=0;i<TrafficFactorMetric.size();i++)
+	{
+		line+=std::to_string(TrafficFactorMetric[i]);
+		line+="\n";
+	}
+	TFfile<<line;
+	TFfile.close();
 }
 
 void readInput(std::vector<std::pair<Airport,Airport>>& ODPairs, std::string InputFileName, std::vector<int>& times, std::vector<double>& speeds)

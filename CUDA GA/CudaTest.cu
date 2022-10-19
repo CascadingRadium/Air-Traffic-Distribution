@@ -61,6 +61,7 @@ void printDevProp(cudaDeviceProp devProp)
 	printf("Max threads per processor: %d\n", devProp.maxThreadsPerMultiProcessor);
 	return;
 }
+
 int main()
 {
 	int devCount;
