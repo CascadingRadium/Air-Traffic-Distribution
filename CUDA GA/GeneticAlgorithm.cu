@@ -13,7 +13,8 @@
 #define MaxPathLen 1250
 #define SectorTimeDictCols 2880
 #define RAND_MAX 2147483647
-#define MaxDelay 20
+#define MaxDelay 120
+#define MinDelay -60
 #define ConvergenceCutoff 10
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
@@ -58,6 +59,9 @@ int main()
 
 void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std::pair<std::vector<int>,PathOutput>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::vector<int>&times, std::vector<double> &speeds, std::vector<int> &TrafficFactorMetric)
 {	
+
+	std::fstream file("TestFile.txt");
+		
 	GraphNode* host_graph[NumSectors];
 	int host_arrSizes[NumSectors];
 	int* SectorTimeDict; //2D
@@ -114,7 +118,7 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, CrossoverSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first.sector, ODPairs[i].second.sector, SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, Selected, device_times, OutputPaths, OutputPathsSizes, OutputDelays, i, times[i], MpM_Speed, OutputPathsTime, OutputAirTime, TrafficMatrixSum,device_FitnessArray,host_FitnessArray,device_TimeArray,NumRowsForPathMatrix,ReplacementPool,MutationPool,d_PairArray);
 		update_SectorTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict, OutputPaths, OutputDelays, OutputPathsSizes, i, times[i], OutputPathsTime, TrafficMatrixSum);
 		resetForNextPair(device_Paths, device_times, device_Paths_size, Selected, NumRowsForPathMatrix, SelectionSize, OutputPathsTime,device_FitnessArray,device_TimeArray);
-		printf("%d Done\n",i);
+		file<<i<<endl;
 	}
 	copySecTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict,metricSectorTimeDict);
 	cudaMemcpy(host_metricSectorTimeDict,metricSectorTimeDict,sizeof(int)*MaxPathLen,cudaMemcpyDeviceToHost);
@@ -391,8 +395,6 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 	AnglePointsY[Index++]=prevPointY;
 	double path_length=0;
 	double angle = 0;
-	double TrafficFactor=1;
-	int delay=0;
 	double StaticCost=0;
 	for (i=0;i<device_Paths_size[thread]-1;i++)
 	{
@@ -428,13 +430,15 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 	angle/=Index;
 	StaticCost=((double)(180.0-angle))/path_length;
 	int InnerLoc=(device_Paths[Loc]*SectorTimeDictCols);
-	double meanFitness=0;
-	double maxFit=0;
-	double bestTime=0;
+	int maxFit=0;
+	int TrafficFactor=0;
+	int delay=0;
+	int bestTime=0;
+	int Fitness=0;
 	for(delay=0;delay<MaxDelay;delay++)
 	{
 		TrafficFactor=0;
-		double time=device_times[Loc]+StartTime+delay;
+		int time=device_times[Loc]+StartTime+delay;
 		for(j=StartTime+delay;j<time;j++)
 			TrafficFactor+=SectorTimeDict[InnerLoc+j];	
 		for(i=1;i<device_Paths_size[thread];i++)
@@ -446,16 +450,16 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 			}
 			time=time+device_times[Loc+i];
 		}
-		double Fitness = StaticCost*(((double)(MaxDelay-delay))+((double)(*TrafficMatrixSum)-TrafficFactor));
+		Fitness = (MaxDelay-(2*delay))+((*TrafficMatrixSum)-TrafficFactor);
 		if(Fitness>maxFit)
 		{
 			maxFit=Fitness;
 			bestTime=delay;
 		}
-		meanFitness+=Fitness;
+		if(TrafficFactor==0)
+			break;
 	}
-	meanFitness/=MaxDelay;
-	device_FitnessArray[thread]=meanFitness;
+	device_FitnessArray[thread]=((double)maxFit)*StaticCost;
 	device_TimeArray[thread]=bestTime;
 }
 

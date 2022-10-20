@@ -11,7 +11,7 @@ opfile=open("OutputToFrontend.txt","r")
 fig = plt.figure(pk.load(open("Simulator.pkl","rb")))
 airportCoords = pk.load(open("airportCoordDict.pkl","rb"))
 ax = fig.axes[0]
-SCALE_FACTOR=1
+SCALE_FACTOR=5
 def path_maker(pathFromGA,MpMSpeed,index,Src,Dst):
     PointPath=[airportCoords[Src]]
     Distance=0.0
