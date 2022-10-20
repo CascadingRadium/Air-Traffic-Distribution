@@ -13,8 +13,8 @@
 #define MaxPathLen 1250
 #define SectorTimeDictCols 2880
 #define RAND_MAX 2147483647
-#define MaxDelay 120
-#define MinDelay -60
+#define MaxDelay 60
+#define MinDelay 60
 #define ConvergenceCutoff 10
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
@@ -60,7 +60,7 @@ int main()
 void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std::pair<std::vector<int>,PathOutput>> &Paths, int NumSectors, int PopulationSize, int NumberOfMutations, int NumberOfGenerations, std::string& GraphFileName, std::vector<int>&times, std::vector<double> &speeds, std::vector<int> &TrafficFactorMetric)
 {	
 
-	std::fstream file("TestFile.txt");
+	std::ofstream file("TestFile.txt");
 		
 	GraphNode* host_graph[NumSectors];
 	int host_arrSizes[NumSectors];
@@ -118,8 +118,9 @@ void getPaths(std::vector<std::pair<Airport,Airport>> &ODPairs, std::vector<std:
 		GeneticAlgorithm(NumSectors, PopulationSize, SelectionSize, CrossoverSize, NumberOfMutations, NumberOfGenerations, ODPairs[i].first.sector, ODPairs[i].second.sector, SectorTimeDict, device_SourceCoordArr, device_DestCoordArr, device_graph, device_arrSizes, device_Paths, device_Paths_size, SelectionPool, Selected, device_times, OutputPaths, OutputPathsSizes, OutputDelays, i, times[i], MpM_Speed, OutputPathsTime, OutputAirTime, TrafficMatrixSum,device_FitnessArray,host_FitnessArray,device_TimeArray,NumRowsForPathMatrix,ReplacementPool,MutationPool,d_PairArray);
 		update_SectorTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict, OutputPaths, OutputDelays, OutputPathsSizes, i, times[i], OutputPathsTime, TrafficMatrixSum);
 		resetForNextPair(device_Paths, device_times, device_Paths_size, Selected, NumRowsForPathMatrix, SelectionSize, OutputPathsTime,device_FitnessArray,device_TimeArray);
-		file<<i<<endl;
+		file<<i<<std::endl;
 	}
+	file.close();
 	copySecTimeDict<<<(MaxPathLen/NumThreads)+1,NumThreads>>>(SectorTimeDict,metricSectorTimeDict);
 	cudaMemcpy(host_metricSectorTimeDict,metricSectorTimeDict,sizeof(int)*MaxPathLen,cudaMemcpyDeviceToHost);
 	cudaMemcpy(host_OutputPaths,OutputPaths,sizeof(int)*MaxPathLen*NumODPairs,cudaMemcpyDeviceToHost);
@@ -455,6 +456,31 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 		{
 			maxFit=Fitness;
 			bestTime=delay;
+		}
+		if(TrafficFactor==0)
+			break;
+	}
+	InnerLoc=(device_Paths[Loc]*SectorTimeDictCols);
+	for(delay=1;delay<MinDelay;delay++)
+	{
+		TrafficFactor=0;
+		int time=device_times[Loc]+StartTime-delay;
+		for(j=StartTime-delay;j<time;j++)
+			TrafficFactor+=SectorTimeDict[InnerLoc+j];	
+		for(i=1;i<device_Paths_size[thread];i++)
+		{
+			InnerLoc=(device_Paths[Loc+i]*SectorTimeDictCols);	
+			for(j=time;j<time+device_times[Loc+i];j++)
+			{
+				TrafficFactor+=SectorTimeDict[InnerLoc+j];	
+			}
+			time=time+device_times[Loc+i];
+		}
+		Fitness = (MinDelay-(4*delay))+((*TrafficMatrixSum)-TrafficFactor);
+		if(Fitness>maxFit)
+		{
+			maxFit=Fitness;
+			bestTime=-1*delay;
 		}
 		if(TrafficFactor==0)
 			break;
