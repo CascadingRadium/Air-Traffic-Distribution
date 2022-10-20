@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const execSync = require('child_process').execSync;
 const fs = require('fs');
-const { min } = require('mpld3');
 const airportsData = '../src/AirportFileForFrontend.txt'
 const paths='./OutputToFrontend.txt'
 const CONVERSION_FACTOR=1000*60;
@@ -47,7 +46,7 @@ router.post("/get-paths",async(req,res)=>{
 	let content="";
 	flights.map((flight,id)=>{
 		const startTime=flight.startTime.split(":")
-		const difference=(Number(startTime[0]))*60 + (Number(startTime[1]))
+		const difference=(Number(startTime[0]))*60 + (Number(startTime[1])) + 60
 		const idx=difference
 		const sourceAirport=flight.sourceAirportName
 		const destinationAirport=flight.destinationAirportName
@@ -63,7 +62,11 @@ router.post("/get-paths",async(req,res)=>{
 	})
 	try {
 		fs.writeFileSync('InputFromFrontend.txt', content);
+		let start=Date.now()
 		execSync('./a.out')
+		let timeTaken= Date.now() - start 
+		console.log(timeTaken / 1000)
+		fs.writeFileSync('timeTaken.txt',(timeTaken/1000).toString())
 		res.status(200).json({"data":"Paths generated"})
 	} catch (err) {
 		console.error(err);
@@ -72,10 +75,11 @@ router.post("/get-paths",async(req,res)=>{
 
 })
 
-router.get("/simulator",(req,res)=>{
+router.get("/simulator/:speed",(req,res)=>{
 
 	try{
-		execSync('python3 sim.py', { encoding: 'utf-8' });
+		const speed=req.params.speed;
+		execSync(`python3 sim.py ${speed}`, { encoding: 'utf-8' });
 		res.status(200).json({"data":"Success"})
 	}
 	catch(e)
