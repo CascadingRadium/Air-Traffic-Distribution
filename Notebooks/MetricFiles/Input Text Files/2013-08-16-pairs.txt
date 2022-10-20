@@ -1,5 +1,6 @@
 La Guardia Airport,Lambert St Louis International Airport,1,0:00,442.0
 Charlotte Douglas International Airport,Greenville Spartanburg International Airport,1,0:00,165.0
+Charleston Air Force Base-International Airport,Ronald Reagan Washington National Airport,1,0:00,407.5
 Washington Dulles International Airport,San Francisco International Airport,1,0:00,438.0
 Dane County Regional Truax Field,Detroit Metropolitan Wayne County Airport,1,0:00,406.0
 Phoenix Sky Harbor International Airport,Detroit Metropolitan Wayne County Airport,1,0:00,470.5
@@ -7,9 +8,8 @@ L M Clayton Airport,Great Falls International Airport,1,0:00,151.0
 Detroit Metropolitan Wayne County Airport,Orlando International Airport,1,0:00,451.0
 Memphis International Airport,Charlotte Douglas International Airport,1,0:00,408.0
 Port Columbus International Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:00,432.0
-Statesboro Bulloch County Airport,Columbia Metropolitan Airport,1,0:00,140.0
 Detroit Metropolitan Wayne County Airport,General Mitchell International Airport,1,0:00,354.0
-Charlotte Douglas International Airport,General Mitchell International Airport,1,0:00,401.0
+Statesboro Bulloch County Airport,Columbia Metropolitan Airport,1,0:00,140.0
 Addison Airport,Charles B. Wheeler Downtown Airport,1,0:00,154.0
 Phoenix Sky Harbor International Airport,San Francisco International Airport,1,0:00,407.5
 Salt Lake City International Airport,Dallas Fort Worth International Airport,1,0:00,483.0
@@ -19,10 +19,11 @@ Ronald Reagan Washington National Airport,McGhee Tyson Airport,1,0:00,379.0
 Detroit Metropolitan Wayne County Airport,Des Moines International Airport,1,0:00,377.0
 Detroit Metropolitan Wayne County Airport,Philadelphia International Airport,1,0:00,408.0
 Piedmont Triad International Airport,Washington Dulles International Airport,1,0:00,314.0
-Grant Co International Airport,Boeing Field King County International Airport,1,0:00,196.0
+Charlotte Douglas International Airport,General Mitchell International Airport,1,0:00,401.0
 Austin Bergstrom International Airport,Dallas Love Field,1,0:00,407.5
-Charleston Air Force Base-International Airport,Ronald Reagan Washington National Airport,1,0:00,407.5
+Grant Co International Airport,Boeing Field King County International Airport,1,0:00,196.0
 Boise Air Terminal/Gowen field,McCarran International Airport,1,0:00,437.0
+Austin Bergstrom International Airport,Phoenix Sky Harbor International Airport,1,0:00,419.0
 Port Columbus International Airport,Charlotte Douglas International Airport,1,0:00,401.0
 Orlando International Airport,McCarran International Airport,1,0:00,433.0
 Chicago O'Hare International Airport,San Francisco International Airport,1,0:00,416.0
@@ -30,51 +31,51 @@ Myrtle Beach International Airport,Charlotte Douglas International Airport,1,0:0
 Memphis International Airport,Hartsfield Jackson Atlanta International Airport,1,0:00,350.0
 Phoenix Sky Harbor International Airport,McCarran International Airport,1,0:00,414.0
 Fort Lauderdale Hollywood International Airport,Hartsfield Jackson Atlanta International Airport,1,0:00,433.0
-Austin Bergstrom International Airport,Phoenix Sky Harbor International Airport,1,0:00,419.0
 George Bush Intercontinental Houston Airport,Salt Lake City International Airport,1,0:00,414.0
 Chicago Midway International Airport,Buffalo Niagara International Airport,1,0:00,454.0
-Chicago O'Hare International Airport,Los Angeles International Airport,1,0:00,424.5
 Chicago O'Hare International Airport,San Francisco International Airport,1,0:00,416.0
-Dallas Fort Worth International Airport,San Francisco International Airport,1,0:00,384.0
-Chicago Midway International Airport,Akron Canton Regional Airport,1,0:00,388.0
 Charlotte Douglas International Airport,John F Kennedy International Airport,1,0:00,399.5
-William P Hobby Airport,Los Angeles International Airport,1,0:00,407.5
-Austin Bergstrom International Airport,Norman Y. Mineta San Jose International Airport,1,0:00,350.5
+Chicago Midway International Airport,Akron Canton Regional Airport,1,0:00,388.0
 Mahlon Sweet Field,Metropolitan Oakland International Airport,1,0:00,415.5
-Charlotte Douglas International Airport,Charlottesville Albemarle Airport,1,0:00,263.0
+Chicago O'Hare International Airport,Los Angeles International Airport,1,0:00,424.5
+Austin Bergstrom International Airport,Norman Y. Mineta San Jose International Airport,1,0:00,350.5
+Chicago O'Hare International Airport,Dallas Fort Worth International Airport,1,0:00,425.0
+William P Hobby Airport,Los Angeles International Airport,1,0:00,407.5
 Detroit Metropolitan Wayne County Airport,Kalamazoo Battle Creek International Airport,1,0:00,295.0
 Hartsfield Jackson Atlanta International Airport,Charlotte Douglas International Airport,1,0:00,312.0
-Chicago O'Hare International Airport,Dallas Fort Worth International Airport,1,0:00,425.0
+Dallas Fort Worth International Airport,San Francisco International Airport,1,0:00,384.0
+Charlotte Douglas International Airport,Charlottesville Albemarle Airport,1,0:00,263.0
 Orlando International Airport,Newark Liberty International Airport,1,0:01,445.5
-Ronald Reagan Washington National Airport,Palm Beach International Airport,1,0:01,397.0
 Key West International Airport,Miami International Airport,1,0:01,312.0
 Rhinelander Oneida County Airport,General Mitchell International Airport,1,0:01,172.0
+Ronald Reagan Washington National Airport,Palm Beach International Airport,1,0:01,397.0
 San Francisco International Airport,McCarran International Airport,1,0:01,469.0
 General Edward Lawrence Logan International Airport,Newark Liberty International Airport,1,0:01,407.5
 Pensacola Regional Airport,George Bush Intercontinental Houston Airport,1,0:01,361.0
 Pittsburgh International Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:01,432.0
-Memphis International Airport,George Bush Intercontinental Houston Airport,1,0:01,348.0
+Indianapolis International Airport,Denver International Airport,1,0:01,410.5
 Charlotte Douglas International Airport,Roanoke Regional Woodrum Field,1,0:01,202.0
 Cincinnati Northern Kentucky International Airport,Washington Dulles International Airport,1,0:01,375.0
 Dallas Fort Worth International Airport,Abilene Regional Airport,1,0:01,331.0
+Memphis International Airport,George Bush Intercontinental Houston Airport,1,0:01,348.0
 Charlotte Douglas International Airport,Memphis International Airport,1,0:01,368.0
-Indianapolis International Airport,Denver International Airport,1,0:01,410.5
 Louis Armstrong New Orleans International Airport,San Francisco International Airport,1,0:01,441.5
 Detroit Metropolitan Wayne County Airport,McCarran International Airport,1,0:01,425.0
 Detroit Metropolitan Wayne County Airport,Indianapolis International Airport,1,0:01,358.0
 Bemidji Regional Airport,Grand Forks International Airport,1,0:02,156.0
 Sacramento International Airport,Seattle Tacoma International Airport,1,0:02,474.0
+Cleveland Hopkins International Airport,Philadelphia International Airport,1,0:02,336.5
 Port Columbus International Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:02,426.0
 Phoenix Sky Harbor International Airport,Yuma MCAS/Yuma International Airport,1,0:02,253.0
 John Wayne Airport-Orange County Airport,Dallas Fort Worth International Airport,1,0:02,490.0
 Hartsfield Jackson Atlanta International Airport,Pittsburgh International Airport,1,0:02,455.0
-Lawton Fort Sill Regional Airport,Dallas Fort Worth International Airport,1,0:02,308.0
 Rochester International Airport,Chicago O'Hare International Airport,1,0:02,382.0
+Lawton Fort Sill Regional Airport,Dallas Fort Worth International Airport,1,0:02,308.0
 Chicago Midway International Airport,Hartsfield Jackson Atlanta International Airport,1,0:02,446.0
 General Mitchell International Airport,Denver International Airport,1,0:02,423.0
-Cleveland Hopkins International Airport,Philadelphia International Airport,1,0:02,336.5
-Los Angeles International Airport,Sacramento International Airport,1,0:02,401.5
 Charlotte Douglas International Airport,Greater Rochester International Airport,1,0:02,436.5
+Los Angeles International Airport,Sacramento International Airport,1,0:02,401.5
+Charlotte Douglas International Airport,Charleston Air Force Base-International Airport,1,0:02,350.0
 Casper-Natrona County International Airport,Denver International Airport,1,0:02,335.0
 General Edward Lawrence Logan International Airport,Augusta State Airport,1,0:02,407.5
 Lambert St Louis International Airport,Williamson County Regional Airport,1,0:02,407.5
@@ -83,95 +84,94 @@ George Bush Intercontinental Houston Airport,Denver International Airport,1,0:02
 George Bush Intercontinental Houston Airport,Ronald Reagan Washington National Airport,1,0:02,503.0
 Tampa International Airport,Miami International Airport,1,0:02,321.5
 Charlotte Douglas International Airport,Fayetteville Regional Grannis Field,1,0:02,323.0
-Charlotte Douglas International Airport,Charleston Air Force Base-International Airport,1,0:02,350.0
 Phoenix Sky Harbor International Airport,Long Beach /Daugherty Field/ Airport,1,0:03,326.0
 George Bush Intercontinental Houston Airport,Salt Lake City International Airport,1,0:03,395.0
 Hartsfield Jackson Atlanta International Airport,Southwest Florida International Airport,1,0:03,463.0
 Cincinnati Northern Kentucky International Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:03,416.0
-Phoenix Sky Harbor International Airport,John Wayne Airport-Orange County Airport,1,0:03,357.5
 Detroit Metropolitan Wayne County Airport,Charlotte Douglas International Airport,1,0:03,430.0
+Phoenix Sky Harbor International Airport,John Wayne Airport-Orange County Airport,1,0:03,357.5
 Denver International Airport,La Guardia Airport,1,0:03,473.5
 Chicago O'Hare International Airport,Philadelphia International Airport,1,0:03,407.5
 Chicago O'Hare International Airport,Greenville Spartanburg International Airport,1,0:03,438.0
-McCarran International Airport,George Bush Intercontinental Houston Airport,1,0:04,488.0
+Phoenix Sky Harbor International Airport,McCarran International Airport,1,0:04,350.5
 Phoenix Sky Harbor International Airport,Salt Lake City International Airport,1,0:04,426.0
-Salisbury Ocean City Wicomico Regional Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:04,141.0
 Los Angeles International Airport,Portland International Airport,1,0:04,471.0
 Reno Tahoe International Airport,Los Angeles International Airport,1,0:04,376.5
 Hartsfield Jackson Atlanta International Airport,Norman Y. Mineta San Jose International Airport,1,0:04,428.0
 Jacksonville International Airport,Charlotte Douglas International Airport,1,0:04,378.0
-Phoenix Sky Harbor International Airport,McCarran International Airport,1,0:04,350.5
-George Bush Intercontinental Houston Airport,Lubbock Preston Smith International Airport,1,0:04,370.0
-Charlotte Douglas International Airport,Northwest Arkansas Regional Airport,1,0:04,394.0
+McCarran International Airport,George Bush Intercontinental Houston Airport,1,0:04,488.0
+Helena Regional Airport,Billings Logan International Airport,1,0:04,239.0
+Salisbury Ocean City Wicomico Regional Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:04,141.0
 George Bush Intercontinental Houston Airport,Richmond International Airport,1,0:04,491.0
 Mobile Regional Airport,Charlotte Douglas International Airport,1,0:04,376.0
+George Bush Intercontinental Houston Airport,Lubbock Preston Smith International Airport,1,0:04,370.0
 San Francisco International Airport,Hartsfield Jackson Atlanta International Airport,1,0:04,507.0
 Elmira Corning Regional Airport,Greater Rochester International Airport,1,0:04,151.0
 Austin Bergstrom International Airport,Salt Lake City International Airport,1,0:04,416.0
 Charlotte Douglas International Airport,Phoenix Sky Harbor International Airport,1,0:04,445.0
-Helena Regional Airport,Billings Logan International Airport,1,0:04,239.0
+Charlotte Douglas International Airport,Northwest Arkansas Regional Airport,1,0:04,394.0
+Louis Armstrong New Orleans International Airport,La Guardia Airport,1,0:05,491.0
 Yuma MCAS/Yuma International Airport,Phoenix Sky Harbor International Airport,1,0:05,147.0
 Dallas Fort Worth International Airport,San Francisco International Airport,1,0:05,417.0
 Salt Lake City International Airport,Los Angeles International Airport,1,0:05,421.0
 Cincinnati Northern Kentucky International Airport,Raleigh Durham International Airport,1,0:05,386.0
 McCarran International Airport,Los Angeles International Airport,1,0:05,407.5
-General Edward Lawrence Logan International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,492.0
-John Murtha Johnstown Cambria County Airport,Washington Dulles International Airport,1,0:05,224.0
-Bemidji Regional Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:05,218.5
 Chicago O'Hare International Airport,Gerald R. Ford International Airport,1,0:05,278.0
-Louis Armstrong New Orleans International Airport,La Guardia Airport,1,0:05,491.0
+Baton Rouge Metropolitan Ryan Field,Dallas Fort Worth International Airport,1,0:05,396.5
+Bemidji Regional Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:05,218.5
+Sacramento International Airport,Ontario International Airport,1,0:05,407.5
+John Murtha Johnstown Cambria County Airport,Washington Dulles International Airport,1,0:05,224.0
+Flagstaff Pulliam Airport,Phoenix Sky Harbor International Airport,1,0:05,285.0
 McCarran International Airport,El Paso International Airport,1,0:05,413.0
 Cleveland Hopkins International Airport,Greater Rochester International Airport,1,0:05,269.0
+General Edward Lawrence Logan International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,492.0
+Charlotte Douglas International Airport,Adams Field,1,0:05,366.0
+Cincinnati Northern Kentucky International Airport,Bradley International Airport,1,0:05,460.0
+Charlotte Douglas International Airport,Ronald Reagan Washington National Airport,1,0:05,401.0
 Midland International Airport,George Bush Intercontinental Houston Airport,1,0:05,361.0
-Baton Rouge Metropolitan Ryan Field,Dallas Fort Worth International Airport,1,0:05,396.5
-Sacramento International Airport,Ontario International Airport,1,0:05,407.5
-Ronald Reagan Washington National Airport,Orlando International Airport,1,0:05,400.0
-Phoenix Sky Harbor International Airport,Boise Air Terminal/Gowen field,1,0:05,433.0
 McCarran International Airport,Los Angeles International Airport,1,0:05,336.0
 Cincinnati Northern Kentucky International Airport,Harrisburg International Airport,1,0:05,439.0
 Baltimore/Washington International Thurgood Marshal Airport,Kansas City International Airport,1,0:05,401.0
 Hartsfield Jackson Atlanta International Airport,Phoenix Sky Harbor International Airport,1,0:05,405.0
 George Bush Intercontinental Houston Airport,Jackson Evers International Airport,1,0:05,402.0
+Phoenix Sky Harbor International Airport,Boise Air Terminal/Gowen field,1,0:05,433.0
 Akron Canton Regional Airport,Charlotte Douglas International Airport,1,0:05,373.0
-Dallas Love Field,Austin Bergstrom International Airport,1,0:05,407.5
 Bellingham International Airport,Seattle Tacoma International Airport,1,0:05,155.0
 Port Columbus International Airport,Chicago O'Hare International Airport,1,0:05,388.5
 Baltimore/Washington International Thurgood Marshal Airport,Austin Bergstrom International Airport,1,0:05,396.0
 Detroit Metropolitan Wayne County Airport,Louisville International Standiford Field,1,0:05,372.0
 McCarran International Airport,Ontario International Airport,1,0:05,407.5
-Cincinnati Northern Kentucky International Airport,Bradley International Airport,1,0:05,460.0
+Ronald Reagan Washington National Airport,Orlando International Airport,1,0:05,400.0
+Dallas Love Field,Austin Bergstrom International Airport,1,0:05,407.5
 General Edward Lawrence Logan International Airport,Ronald Reagan Washington National Airport,1,0:05,388.0
-Charlotte Douglas International Airport,Ronald Reagan Washington National Airport,1,0:05,401.0
-Charlotte Douglas International Airport,Adams Field,1,0:05,366.0
-McCarran International Airport,Sacramento International Airport,1,0:05,407.5
-Flagstaff Pulliam Airport,Phoenix Sky Harbor International Airport,1,0:05,285.0
-Newark Liberty International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,382.0
+George Bush Intercontinental Houston Airport,Tyler Pounds Regional Airport,1,0:05,272.5
+Nashville International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,291.0
 San Antonio International Airport,Phoenix Sky Harbor International Airport,1,0:05,417.5
 Des Moines International Airport,Chicago O'Hare International Airport,1,0:05,352.0
-Lambert St Louis International Airport,Raleigh Durham International Airport,1,0:05,407.5
 Chicago O'Hare International Airport,Lambert St Louis International Airport,1,0:05,399.0
 Lambert St Louis International Airport,Louisville International Standiford Field,1,0:05,404.5
 Kansas City International Airport,La Guardia Airport,1,0:05,462.0
-La Crosse Municipal Airport,Chicago O'Hare International Airport,1,0:05,313.5
 Pensacola Regional Airport,Dallas Fort Worth International Airport,1,0:05,379.0
-Chicago Midway International Airport,Birmingham-Shuttlesworth International Airport,1,0:05,455.0
+La Crosse Municipal Airport,Chicago O'Hare International Airport,1,0:05,313.5
+William P Hobby Airport,Ronald Reagan Washington National Airport,1,0:05,483.0
 Los Angeles International Airport,Chicago O'Hare International Airport,1,0:05,454.0
 Baltimore/Washington International Thurgood Marshal Airport,Albany International Airport,1,0:05,407.5
 Phoenix Sky Harbor International Airport,San Diego International Airport,1,0:05,407.5
 Kingman Airport,Ernest A. Love Field,1,0:05,247.0
 La Guardia Airport,Manchester Airport,1,0:05,296.0
-Nashville International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,291.0
+McCarran International Airport,Sacramento International Airport,1,0:05,407.5
+Chicago Midway International Airport,Birmingham-Shuttlesworth International Airport,1,0:05,455.0
 Norman Y. Mineta San Jose International Airport,Los Angeles International Airport,1,0:05,407.5
-William P Hobby Airport,Ronald Reagan Washington National Airport,1,0:05,483.0
-George Bush Intercontinental Houston Airport,Tyler Pounds Regional Airport,1,0:05,272.5
-George Bush Intercontinental Houston Airport,Chicago O'Hare International Airport,1,0:05,435.0
+Lambert St Louis International Airport,Raleigh Durham International Airport,1,0:05,407.5
+Northwest Florida Beaches International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,324.0
+Newark Liberty International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,382.0
 Denver International Airport,Newark Liberty International Airport,1,0:05,407.5
 Lambert St Louis International Airport,Philadelphia International Airport,1,0:05,407.5
-Northwest Florida Beaches International Airport,Hartsfield Jackson Atlanta International Airport,1,0:05,324.0
+George Bush Intercontinental Houston Airport,Chicago O'Hare International Airport,1,0:05,435.0
+Philadelphia International Airport,La Guardia Airport,1,0:05,282.0
 Washington Dulles International Airport,Charlotte Douglas International Airport,1,0:05,407.5
 Los Angeles International Airport,Metropolitan Oakland International Airport,1,0:05,396.0
 George Bush Intercontinental Houston Airport,Mc Allen Miller International Airport,1,0:05,339.0
-Philadelphia International Airport,La Guardia Airport,1,0:05,282.0
 Cincinnati Northern Kentucky International Airport,General Edward Lawrence Logan International Airport,1,0:05,480.5
 Lambert St Louis International Airport,Port Columbus International Airport,1,0:05,407.5
 Minneapolis-St Paul International/Wold-Chamberlain Airport,John F Kennedy International Airport,1,0:05,466.0
@@ -179,22 +179,322 @@ General Mitchell International Airport,Lambert St Louis International Airport,1,
 McCarran International Airport,San Francisco International Airport,1,0:05,399.0
 Ronald Reagan Washington National Airport,Jacksonville International Airport,1,0:05,382.0
 Metropolitan Oakland International Airport,Seattle Tacoma International Airport,1,0:05,407.5
-Charlotte Douglas International Airport,Des Moines International Airport,1,0:06,425.0
-Baltimore/Washington International Thurgood Marshal Airport,McCarran International Airport,1,0:06,414.0
 Philadelphia International Airport,Chicago O'Hare International Airport,1,0:06,420.0
-Centennial Airport,Adams Field,1,0:06,548.0
 Dallas Fort Worth International Airport,Los Angeles International Airport,1,0:06,421.5
+Centennial Airport,Adams Field,1,0:06,548.0
+Baltimore/Washington International Thurgood Marshal Airport,McCarran International Airport,1,0:06,414.0
+Dallas Fort Worth International Airport,San Francisco International Airport,1,0:06,424.0
+Charlotte Douglas International Airport,Akron Canton Regional Airport,1,0:06,399.0
+Dallas Fort Worth International Airport,San Diego International Airport,1,0:06,410.0
+Chicago Midway International Airport,Santa Fe Municipal Airport,1,0:06,407.5
 Livermore Municipal Airport,Mc Clellan-Palomar Airport,1,0:06,394.0
+Charlotte Douglas International Airport,Washington Dulles International Airport,1,0:06,346.0
 Denver International Airport,General Mitchell International Airport,1,0:06,455.0
+Dallas Fort Worth International Airport,Southwest Florida International Airport,1,0:06,473.0
 Hartsfield Jackson Atlanta International Airport,Port Columbus International Airport,1,0:06,441.0
-Denver International Airport,Port Columbus International Airport,1,0:06,407.5
+McCarran International Airport,Boise Air Terminal/Gowen field,1,0:06,433.0
 McCarran International Airport,Los Angeles International Airport,1,0:06,314.0
 Albert J Ellis Airport,Charlotte Douglas International Airport,1,0:06,311.5
 Washington Dulles International Airport,East Hampton Airport,1,0:06,362.0
 Charlotte Douglas International Airport,Norfolk International Airport,1,0:06,414.0
 Denver International Airport,George Bush Intercontinental Houston Airport,1,0:06,517.0
 Los Angeles International Airport,Portland International Airport,1,0:06,428.0
+Denver International Airport,Port Columbus International Airport,1,0:06,407.5
 Williamsport Regional Airport,Harrisburg International Airport,1,0:06,162.0
-Charlotte Douglas International Airport,Washington Dulles International Airport,1,0:06,346.0
-McCarran International Airport,Boise Air Terminal/Gowen field,1,0:06,433.0
-Charlotte Douglas International Airport,Akron Canton Regional Airport,1,0:06,399.0
+Charlotte Douglas International Airport,Des Moines International Airport,1,0:06,425.0
+Detroit Metropolitan Wayne County Airport,Cherry Capital Airport,1,0:07,361.0
+Charlotte Douglas International Airport,Salisbury Ocean City Wicomico Regional Airport,1,0:07,273.0
+McCarran International Airport,Salt Lake City International Airport,1,0:07,388.0
+Eglin Air Force Base,Dallas Fort Worth International Airport,1,0:07,377.0
+Phoenix Sky Harbor International Airport,Ontario International Airport,1,0:07,382.0
+Los Angeles International Airport,Norman Y. Mineta San Jose International Airport,1,0:07,407.5
+Visalia Municipal Airport,Metropolitan Oakland International Airport,1,0:07,161.0
+Baltimore/Washington International Thurgood Marshal Airport,Charlotte Douglas International Airport,1,0:07,383.0
+Los Angeles International Airport,Seattle Tacoma International Airport,1,0:07,473.0
+John F Kennedy International Airport,Port Columbus International Airport,1,0:07,407.5
+Hartsfield Jackson Atlanta International Airport,Sacramento International Airport,1,0:07,434.5
+George Bush Intercontinental Houston Airport,Baton Rouge Metropolitan Ryan Field,1,0:07,386.0
+Charlotte Douglas International Airport,Kansas City International Airport,1,0:07,409.0
+Hilton Head Airport,Charlotte Douglas International Airport,1,0:07,221.0
+Cleveland Hopkins International Airport,Charlotte Douglas International Airport,1,0:07,423.0
+Aspen-Pitkin Co/Sardy Field,Los Angeles International Airport,1,0:07,403.0
+Orlando International Airport,John F Kennedy International Airport,1,0:07,463.0
+Hartsfield Jackson Atlanta International Airport,Philadelphia International Airport,1,0:07,512.0
+Detroit Metropolitan Wayne County Airport,MBS International Airport,1,0:07,263.0
+Washington Dulles International Airport,John F Kennedy International Airport,1,0:07,301.0
+Fayetteville Regional Grannis Field,Charlotte Douglas International Airport,1,0:07,303.0
+Hartsfield Jackson Atlanta International Airport,Akron Canton Regional Airport,1,0:07,414.0
+Hartsfield Jackson Atlanta International Airport,Lambert St Louis International Airport,1,0:07,402.0
+Kalamazoo Battle Creek International Airport,Chicago O'Hare International Airport,1,0:07,245.0
+Charlotte Douglas International Airport,Los Angeles International Airport,1,0:07,427.0
+Charlotte Douglas International Airport,Savannah Hilton Head International Airport,1,0:07,370.0
+Detroit Metropolitan Wayne County Airport,Seattle Tacoma International Airport,1,0:07,450.0
+Denver International Airport,Rapid City Regional Airport,1,0:08,356.0
+George Bush Intercontinental Houston Airport,Wichita Mid Continent Airport,1,0:08,361.0
+Tucson International Airport,Phoenix Sky Harbor International Airport,1,0:08,407.5
+Cleveland Hopkins International Airport,Ronald Reagan Washington National Airport,1,0:08,386.0
+Philadelphia International Airport,Harrisburg International Airport,1,0:08,177.5
+Fort Lauderdale Hollywood International Airport,Newark Liberty International Airport,1,0:08,463.0
+Indianapolis International Airport,Charlotte Douglas International Airport,1,0:08,412.0
+Tyler Pounds Regional Airport,Dallas Fort Worth International Airport,1,0:08,269.0
+Detroit Metropolitan Wayne County Airport,John F Kennedy International Airport,1,0:08,391.0
+Tucson International Airport,Los Angeles International Airport,1,0:09,396.0
+Harrisburg International Airport,Charlotte Douglas International Airport,1,0:09,407.5
+Louisville International Standiford Field,Chicago O'Hare International Airport,1,0:09,358.5
+Cincinnati Northern Kentucky International Airport,Charlotte Douglas International Airport,1,0:09,395.0
+Bob Hope Airport,Denver International Airport,1,0:09,421.0
+Newark Liberty International Airport,Fort Lauderdale Hollywood International Airport,1,0:09,407.5
+Lafayette Regional Airport,George Bush Intercontinental Houston Airport,1,0:09,301.0
+Norman Y. Mineta San Jose International Airport,Seattle Tacoma International Airport,1,0:09,452.0
+Fort Lauderdale Hollywood International Airport,John F Kennedy International Airport,1,0:09,452.0
+Chicago O'Hare International Airport,San Francisco International Airport,1,0:09,407.5
+Spokane International Airport,Portland International Airport,1,0:09,407.5
+Denver International Airport,San Francisco International Airport,1,0:09,423.0
+Detroit Metropolitan Wayne County Airport,Los Angeles International Airport,1,0:09,439.0
+Denver International Airport,Austin Bergstrom International Airport,1,0:09,407.5
+George Bush Intercontinental Houston Airport,Jacksonville International Airport,1,0:09,457.0
+Port Columbus International Airport,Washington Dulles International Airport,1,0:09,405.0
+Seattle Tacoma International Airport,Portland International Airport,1,0:09,407.5
+Hartsfield Jackson Atlanta International Airport,Newport News Williamsburg International Airport,1,0:09,425.0
+Chautauqua County-Jamestown Airport,Buffalo Niagara International Airport,1,0:09,167.5
+Des Moines International Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:09,295.5
+Greater Rochester International Airport,Washington Dulles International Airport,1,0:09,407.5
+Wilmington International Airport,Charlotte Douglas International Airport,1,0:09,327.0
+Cleveland Hopkins International Airport,Theodore Francis Green State Airport,1,0:09,375.0
+George Bush Intercontinental Houston Airport,San Francisco International Airport,1,0:09,446.0
+General Mitchell International Airport,Newark Liberty International Airport,1,0:09,474.0
+Akron Canton Regional Airport,Hartsfield Jackson Atlanta International Airport,1,0:09,421.0
+Aspen-Pitkin Co/Sardy Field,Denver International Airport,1,0:09,308.0
+Eglin Air Force Base,Charlotte Douglas International Airport,1,0:09,377.5
+Metropolitan Oakland International Airport,Will Rogers World Airport,1,0:09,407.5
+Corpus Christi International Airport,George Bush Intercontinental Houston Airport,1,0:09,288.0
+Midland International Airport,Dallas Fort Worth International Airport,1,0:09,353.0
+John Wayne Airport-Orange County Airport,San Francisco International Airport,1,0:09,467.0
+La Guardia Airport,Cleveland Hopkins International Airport,1,0:09,360.0
+Gallatin Field,Billings Logan International Airport,1,0:09,251.0
+Washington Dulles International Airport,Miami International Airport,1,0:09,407.5
+Chicago O'Hare International Airport,San Antonio International Airport,1,0:09,440.0
+Perry Lefors Field,Clinton Regional Airport,1,0:09,407.5
+General Edward Lawrence Logan International Airport,Los Angeles International Airport,1,0:09,428.0
+McCarran International Airport,Fresno Yosemite International Airport,1,0:09,407.5
+George Bush Intercontinental Houston Airport,General Edward Lawrence Logan International Airport,1,0:10,492.0
+Phoenix Sky Harbor International Airport,Los Angeles International Airport,1,0:10,328.0
+Savannah Hilton Head International Airport,Hartsfield Jackson Atlanta International Airport,1,0:10,159.0
+McCarran International Airport,Phoenix-Mesa-Gateway Airport,1,0:10,373.0
+San Francisco International Airport,Los Angeles International Airport,1,0:10,453.5
+San Luis Valley Regional Bergman Field,Denver International Airport,1,0:10,176.5
+Huron Regional Airport,Joe Foss Field Airport,1,0:10,171.0
+Seattle Tacoma International Airport,Spokane International Airport,1,0:10,407.5
+Washington Dulles International Airport,Lancaster Airport,1,0:10,185.0
+McCarran International Airport,Rogue Valley International Medford Airport,1,0:10,431.0
+Yeager Airport,Charlotte Douglas International Airport,1,0:10,407.5
+Hartsfield Jackson Atlanta International Airport,Indianapolis International Airport,1,0:10,407.5
+Central Wisconsin Airport,General Mitchell International Airport,1,0:10,226.0
+Newark Liberty International Airport,Nantucket Memorial Airport,1,0:10,275.0
+Yampa Valley Airport,Centennial Airport,1,0:10,370.0
+Chicago O'Hare International Airport,Gerald R. Ford International Airport,1,0:10,278.0
+Chicago O'Hare International Airport,Orlando International Airport,1,0:10,407.5
+Chicago O'Hare International Airport,Seattle Tacoma International Airport,1,0:10,422.0
+Orlando International Airport,Pensacola Regional Airport,1,0:10,227.5
+Bradley International Airport,Mount Comfort Airport,1,0:10,361.0
+San Diego International Airport,Los Angeles International Airport,1,0:10,269.0
+Louisville International Standiford Field,Chicago O'Hare International Airport,1,0:10,366.0
+Hartsfield Jackson Atlanta International Airport,Dane County Regional Truax Field,1,0:10,438.0
+George Bush Intercontinental Houston Airport,Midland International Airport,1,0:10,382.0
+San Antonio International Airport,Los Angeles International Airport,1,0:10,422.0
+Chicago O'Hare International Airport,La Guardia Airport,1,0:10,467.0
+George Bush Intercontinental Houston Airport,Orlando International Airport,1,0:10,460.0
+Washington Dulles International Airport,Hartsfield Jackson Atlanta International Airport,1,0:10,390.0
+Great Falls International Airport,Billings Logan International Airport,1,0:10,214.0
+Lambert St Louis International Airport,Hartsfield Jackson Atlanta International Airport,1,0:10,460.0
+Reno Tahoe International Airport,Salt Lake City International Airport,1,0:10,346.0
+Dothan Regional Airport,Northwest Florida Beaches International Airport,1,0:10,407.5
+Charlotte Douglas International Airport,Manchester Airport,1,0:10,469.5
+Cleveland Hopkins International Airport,Syracuse Hancock International Airport,1,0:10,293.0
+Kearney Regional Airport,Eppley Airfield,1,0:10,155.0
+Northwest Florida Beaches International Airport,Pensacola Regional Airport,1,0:10,182.0
+Grand Junction Regional Airport,Centennial Airport,1,0:10,201.0
+Albert J Ellis Airport,Raleigh Durham International Airport,1,0:10,161.5
+Wichita Mid Continent Airport,Dallas Fort Worth International Airport,1,0:10,245.0
+Southwest Florida International Airport,Key West International Airport,1,0:10,231.0
+La Guardia Airport,General Edward Lawrence Logan International Airport,1,0:10,341.0
+Ronald Reagan Washington National Airport,Yeager Airport,1,0:11,233.0
+Lambert St Louis International Airport,Denver International Airport,1,0:11,413.0
+Detroit Metropolitan Wayne County Airport,Memphis International Airport,1,0:11,419.5
+Charlotte Douglas International Airport,Washington Dulles International Airport,1,0:11,306.5
+Dallas Love Field,Albuquerque International Sunport Airport,1,0:11,384.0
+La Guardia Airport,Charlotte Douglas International Airport,1,0:11,368.0
+Idaho Falls Regional Airport,Salt Lake City International Airport,1,0:11,206.0
+Tampa International Airport,General Edward Lawrence Logan International Airport,1,0:11,468.0
+Charlotte Douglas International Airport,Newark Liberty International Airport,1,0:11,407.5
+General Edward Lawrence Logan International Airport,Ronald Reagan Washington National Airport,1,0:11,376.0
+Santa Barbara Municipal Airport,Los Angeles International Airport,1,0:11,241.0
+Hartsfield Jackson Atlanta International Airport,Lehigh Valley International Airport,1,0:11,504.0
+La Guardia Airport,Hartsfield Jackson Atlanta International Airport,1,0:11,390.0
+Ronald Reagan Washington National Airport,Hartsfield Jackson Atlanta International Airport,1,0:11,401.0
+Dallas Love Field,Adams Field,1,0:11,325.0
+Miami International Airport,Charleston Air Force Base-International Airport,1,0:11,365.0
+Chicago O'Hare International Airport,Norfolk International Airport,1,0:11,459.0
+Detroit Metropolitan Wayne County Airport,San Francisco International Airport,1,0:11,441.0
+La Guardia Airport,Norfolk International Airport,1,0:11,348.0
+Denver International Airport,Cherry Capital Airport,1,0:11,458.0
+Ronald Reagan Washington National Airport,La Guardia Airport,1,0:11,345.0
+Kansas City International Airport,Chicago Midway International Airport,1,0:11,407.5
+Lambert St Louis International Airport,Denver International Airport,1,0:11,407.0
+La Guardia Airport,Ronald Reagan Washington National Airport,1,0:11,292.0
+Los Angeles International Airport,San Francisco International Airport,1,0:11,407.5
+Portland International Airport,Sacramento International Airport,1,0:11,408.0
+Hartsfield Jackson Atlanta International Airport,John Wayne Airport-Orange County Airport,1,0:11,439.0
+Midland International Airport,Dallas Love Field,1,0:11,349.5
+Broken Bow Municipal Airport,Kearney Regional Airport,1,0:11,407.5
+Miami International Airport,Cleveland Hopkins International Airport,1,0:11,430.0
+Tucson International Airport,Phoenix Sky Harbor International Airport,1,0:11,228.5
+Pittsburgh International Airport,Ronald Reagan Washington National Airport,1,0:11,407.5
+Detroit Metropolitan Wayne County Airport,Austin Bergstrom International Airport,1,0:11,440.0
+Dallas Fort Worth International Airport,Salt Lake City International Airport,1,0:11,417.5
+Phoenix Sky Harbor International Airport,Bob Hope Airport,1,0:11,397.0
+Chicago O'Hare International Airport,La Guardia Airport,1,0:11,464.5
+Valley International Airport,William P Hobby Airport,1,0:11,407.5
+Dallas Love Field,William P Hobby Airport,1,0:11,407.5
+Adams Field,Chicago O'Hare International Airport,1,0:11,387.0
+Detroit Metropolitan Wayne County Airport,Chicago Midway International Airport,1,0:11,323.5
+McCarran International Airport,San Francisco International Airport,1,0:11,385.0
+Joe Foss Field Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:11,358.0
+Phoenix Sky Harbor International Airport,San Diego International Airport,1,0:11,407.5
+General Edward Lawrence Logan International Airport,La Guardia Airport,1,0:11,332.0
+Ronald Reagan Washington National Airport,General Edward Lawrence Logan International Airport,1,0:11,384.0
+Kansas City International Airport,Dallas Fort Worth International Airport,1,0:11,428.5
+Dallas Fort Worth International Airport,Jacksonville International Airport,1,0:11,503.0
+Dallas Fort Worth International Airport,Savannah Hilton Head International Airport,1,0:11,477.0
+Cleveland Hopkins International Airport,Chicago O'Hare International Airport,1,0:11,337.0
+Norfolk International Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:11,407.5
+Ronald Reagan Washington National Airport,Greenville Spartanburg International Airport,1,0:11,382.0
+William P Hobby Airport,Dallas Love Field,1,0:11,362.5
+La Guardia Airport,Washington Dulles International Airport,1,0:11,288.0
+Mahlon Sweet Field,San Francisco International Airport,1,0:11,426.0
+Charlotte Douglas International Airport,Chicago O'Hare International Airport,1,0:11,428.0
+La Guardia Airport,General Edward Lawrence Logan International Airport,1,0:11,359.0
+Ronald Reagan Washington National Airport,Charlotte Douglas International Airport,1,0:11,371.0
+Louisville International Standiford Field,Lambert St Louis International Airport,1,0:11,404.5
+Long Beach /Daugherty Field/ Airport,Seattle Tacoma International Airport,1,0:11,465.0
+Baltimore/Washington International Thurgood Marshal Airport,Manchester Airport,1,0:11,391.0
+Baltimore/Washington International Thurgood Marshal Airport,Bradley International Airport,1,0:11,391.0
+McCarran International Airport,Phoenix Sky Harbor International Airport,1,0:11,363.0
+Teterboro Airport,Philadelphia International Airport,1,0:11,407.5
+McCarran International Airport,John Wayne Airport-Orange County Airport,1,0:11,290.5
+La Guardia Airport,Chicago O'Hare International Airport,1,0:11,416.0
+Savannah Hilton Head International Airport,Charlotte Douglas International Airport,1,0:11,350.5
+John F Kennedy International Airport,Cleveland Hopkins International Airport,1,0:11,384.0
+Austin Bergstrom International Airport,George Bush Intercontinental Houston Airport,1,0:11,316.0
+Austin Bergstrom International Airport,Denver International Airport,1,0:11,353.0
+Albuquerque International Sunport Airport,Dallas Love Field,1,0:11,475.0
+Ronald Reagan Washington National Airport,Louis Armstrong New Orleans International Airport,1,0:11,398.0
+Dallas Love Field,Kansas City International Airport,1,0:11,407.5
+Reno Tahoe International Airport,Phoenix Sky Harbor International Airport,1,0:11,460.0
+Detroit Metropolitan Wayne County Airport,George Bush Intercontinental Houston Airport,1,0:12,427.0
+Detroit Metropolitan Wayne County Airport,San Antonio International Airport,1,0:12,423.0
+Charlotte Douglas International Airport,Lynchburg Regional Preston Glenn Field,1,0:12,253.0
+Ronald Reagan Washington National Airport,Louisville International Standiford Field,1,0:12,380.0
+Hartsfield Jackson Atlanta International Airport,Norfolk International Airport,1,0:12,476.0
+La Guardia Airport,Pittsburgh International Airport,1,0:12,415.0
+Detroit Metropolitan Wayne County Airport,Evansville Regional Airport,1,0:12,373.0
+Cincinnati Northern Kentucky International Airport,Pittsburgh International Airport,1,0:12,410.0
+Will Rogers World Airport,Denver International Airport,1,0:12,387.0
+Charlotte Douglas International Airport,Port Columbus International Airport,1,0:12,383.5
+Detroit Metropolitan Wayne County Airport,Asheville Regional Airport,1,0:12,383.5
+San Francisco International Airport,Dallas Fort Worth International Airport,1,0:12,505.0
+Hartsfield Jackson Atlanta International Airport,Mobile Regional Airport,1,0:12,389.0
+Hartsfield Jackson Atlanta International Airport,Los Angeles International Airport,1,0:12,388.0
+La Guardia Airport,Louisville International Standiford Field,1,0:12,389.0
+Detroit Metropolitan Wayne County Airport,Kansas City International Airport,1,0:12,422.0
+La Guardia Airport,Gerald R. Ford International Airport,1,0:12,371.5
+James M Cox Dayton International Airport,Chicago O'Hare International Airport,1,0:13,351.5
+Huntsville International Carl T Jones Field,Charlotte Douglas International Airport,1,0:13,407.5
+John F Kennedy International Airport,Orlando International Airport,1,0:13,409.0
+Ronald Reagan Washington National Airport,Memphis International Airport,1,0:13,380.5
+Chicago O'Hare International Airport,Ronald Reagan Washington National Airport,1,0:13,438.0
+Charlotte Douglas International Airport,Daytona Beach International Airport,1,0:13,379.0
+John F Kennedy International Airport,Los Angeles International Airport,1,0:13,439.0
+Charlotte Douglas International Airport,Cleveland Hopkins International Airport,1,0:13,361.0
+Chicago O'Hare International Airport,Syracuse Hancock International Airport,1,0:13,437.0
+Joslin Field Magic Valley Regional Airport,Salt Lake City International Airport,1,0:13,152.0
+Charlotte Douglas International Airport,Raleigh Durham International Airport,1,0:13,295.0
+Cincinnati Northern Kentucky International Airport,Dallas Fort Worth International Airport,1,0:13,381.0
+Detroit Metropolitan Wayne County Airport,Roanoke Regional Woodrum Field,1,0:13,432.5
+Charlotte Douglas International Airport,Dallas Fort Worth International Airport,1,0:13,384.0
+Bismarck Municipal Airport,Joe Foss Field Airport,1,0:13,279.0
+Newark Liberty International Airport,Chicago O'Hare International Airport,1,0:13,415.0
+Detroit Metropolitan Wayne County Airport,Portland International Jetport Airport,1,0:13,455.0
+Phoenix Sky Harbor International Airport,Bob Hope Airport,1,0:13,372.5
+Ronald Reagan Washington National Airport,Dane County Regional Truax Field,1,0:13,412.0
+Robert Gray  Army Air Field Airport,Dallas Fort Worth International Airport,1,0:13,301.0
+Imperial County Airport,San Diego International Airport,1,0:13,171.0
+Charlotte Douglas International Airport,Tampa International Airport,1,0:13,438.0
+Fort Smith Regional Airport,Dallas Fort Worth International Airport,1,0:13,317.0
+Yakima Air Terminal McAllister Field,Spokane International Airport,1,0:13,161.0
+Dallas Love Field,George Bush Intercontinental Houston Airport,1,0:14,341.0
+George Bush Intercontinental Houston Airport,Charlotte Douglas International Airport,1,0:14,468.0
+Yellowstone Regional Airport,Casper-Natrona County International Airport,1,0:14,168.0
+San Diego International Airport,McCarran International Airport,1,0:14,419.5
+Seattle Tacoma International Airport,Yakima Air Terminal McAllister Field,1,0:14,407.5
+Salt Lake City International Airport,Long Beach /Daugherty Field/ Airport,1,0:14,429.0
+Chicago O'Hare International Airport,George Bush Intercontinental Houston Airport,1,0:14,427.5
+Chicago O'Hare International Airport,Sawyer International Airport,1,0:14,378.0
+Chicago O'Hare International Airport,Central Wisconsin Airport,1,0:14,386.0
+Chicago O'Hare International Airport,Louisville International Standiford Field,1,0:14,389.0
+Detroit Metropolitan Wayne County Airport,South Bend Regional Airport,1,0:14,335.0
+Rapid City Regional Airport,Joe Foss Field Airport,1,0:14,260.0
+Chicago O'Hare International Airport,Nashville International Airport,1,0:14,378.0
+Chicago O'Hare International Airport,Springfield Branson National Airport,1,0:14,416.0
+Nashville International Airport,Orlando International Airport,1,0:14,407.5
+George Bush Intercontinental Houston Airport,McGhee Tyson Airport,1,0:14,481.5
+Tallahassee Regional Airport,Charlotte Douglas International Airport,1,0:14,359.0
+Duluth International Airport,General Mitchell International Airport,1,0:14,419.5
+Detroit Metropolitan Wayne County Airport,Richmond International Airport,1,0:15,423.0
+Fort Lauderdale Hollywood International Airport,La Guardia Airport,1,0:15,463.5
+Richmond International Airport,Hartsfield Jackson Atlanta International Airport,1,0:15,398.0
+Chicago O'Hare International Airport,General Edward Lawrence Logan International Airport,1,0:15,407.5
+Cincinnati Northern Kentucky International Airport,Richmond International Airport,1,0:15,424.0
+Reno Tahoe International Airport,San Francisco International Airport,1,0:15,241.0
+John F Kennedy International Airport,Chicago O'Hare International Airport,1,0:15,411.0
+San Diego International Airport,San Francisco International Airport,1,0:15,427.5
+Raleigh Durham International Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:15,407.5
+Chicago O'Hare International Airport,Westchester County Airport,1,0:15,428.0
+San Francisco International Airport,John Wayne Airport-Orange County Airport,1,0:15,441.0
+Seattle Tacoma International Airport,Los Angeles International Airport,1,0:15,427.0
+George Bush Intercontinental Houston Airport,Kansas City International Airport,1,0:15,378.0
+Cincinnati Northern Kentucky International Airport,Newark Liberty International Airport,1,0:15,419.5
+Lambert St Louis International Airport,Detroit Metropolitan Wayne County Airport,1,0:15,443.5
+Gainesville Regional Airport,Charlotte Douglas International Airport,1,0:15,366.0
+Chicago Midway International Airport,Pittsburgh International Airport,1,0:15,407.5
+Coastal Carolina Regional Airport,Raleigh Durham International Airport,1,0:15,167.0
+San Francisco International Airport,Chicago O'Hare International Airport,1,0:15,463.5
+Cincinnati Northern Kentucky International Airport,La Guardia Airport,1,0:15,451.5
+Hartsfield Jackson Atlanta International Airport,Dallas Fort Worth International Airport,1,0:15,391.0
+Dallas Fort Worth International Airport,La Guardia Airport,1,0:15,453.0
+Los Angeles International Airport,Denver International Airport,1,0:15,483.0
+Philadelphia International Airport,Chicago Midway International Airport,1,0:15,393.0
+Cincinnati Northern Kentucky International Airport,Chicago O'Hare International Airport,1,0:15,407.5
+Cincinnati Northern Kentucky International Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:15,439.0
+Austin Bergstrom International Airport,George Bush Intercontinental Houston Airport,1,0:15,198.5
+Los Angeles International Airport,Seattle Tacoma International Airport,1,0:15,465.0
+Laughlin Bullhead International Airport,Lubbock Preston Smith International Airport,1,0:15,427.0
+William P Hobby Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:15,492.0
+Brainerd Lakes Regional Airport,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:15,172.0
+Birmingham-Shuttlesworth International Airport,Charlotte Douglas International Airport,1,0:15,350.5
+Charlotte Douglas International Airport,Lambert St Louis International Airport,1,0:15,395.0
+Detroit Metropolitan Wayne County Airport,Elmira Corning Regional Airport,1,0:15,414.5
+Louisville International Standiford Field,Charlotte Douglas International Airport,1,0:15,407.5
+George Bush Intercontinental Houston Airport,Tulsa International Airport,1,0:15,370.0
+Lambert St Louis International Airport,Dallas Love Field,1,0:15,394.0
+San Luis County Regional Airport,Ontario International Airport,1,0:15,155.0
+Wilmington International Airport,Piedmont Triad International Airport,1,0:15,245.0
+Minneapolis-St Paul International/Wold-Chamberlain Airport,San Francisco International Airport,1,0:15,448.0
+Dallas Love Field,Lambert St Louis International Airport,1,0:15,360.0
+Portland International Airport,Metropolitan Oakland International Airport,1,0:15,407.5
+Southwest Minnesota Regional-Marshall-Ryan Field,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:15,176.0
+Denver International Airport,Jacksonville International Airport,1,0:15,476.0
+Chandler Field,Minneapolis-St Paul International/Wold-Chamberlain Airport,1,0:15,175.5
+John F Kennedy International Airport,Tampa International Airport,1,0:15,404.5
+Detroit Metropolitan Wayne County Airport,La Crosse Municipal Airport,1,0:16,348.0
+Dallas Fort Worth International Airport,Baltimore/Washington International Thurgood Marshal Airport,1,0:16,511.0
