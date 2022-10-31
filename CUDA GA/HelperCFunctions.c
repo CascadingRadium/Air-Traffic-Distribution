@@ -136,3 +136,20 @@ void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 	}
 	file.close();	
 }
+void CopySecTimeDict(std::string &SecTimeDict, int* &host_SectorTimeDict)
+{
+	std::ofstream file(SecTimeDict);
+	for(int i=0;i<MaxPathLen;i++)
+	{
+		std::string line="";
+		for(int j=0;j<SectorTimeDictCols;j++)
+		{
+			line+=(std::to_string(host_SectorTimeDict[i*SectorTimeDictCols+j]));
+			line.push_back(' ');
+		}
+		line.pop_back();
+		line.push_back('\n');
+		file<<line;
+	}
+	file.close();
+}
