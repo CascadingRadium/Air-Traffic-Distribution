@@ -1,11 +1,17 @@
-const fs=require('fs')
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const sleepFunction=async(ms)=>{
-	let x=Date.now()
-	await sleep(ms)
-	let y=Date.now() - x
-	console.log(y)
-	fs.writeFileSync('timeTaken.txt',(y/1000).toString())
+function addMinutes(date, minutes) {
+	return new Date(date.getTime() + minutes*60000);
 }
-sleepFunction(1000)
+const prettifyDate=(date)=>{
+
+	let hours=date.getHours()
+	const minutes=date.getMinutes();
+	let hourString=hours.toString(),minuteString=minutes.toString();
+	if(minutes < 10)
+		minuteString="0" + minuteString
+	return `${hourString}:${minuteString}` 
+
+}
+let d=new Date();
+d.setHours(23,0);
+let startDate=addMinutes(d,60)
+console.log(prettifyDate(startDate))
