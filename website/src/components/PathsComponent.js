@@ -49,7 +49,6 @@ export default function PathTable() {
 	const goToSim=()=>{
 		axios.get(`http://localhost:5000/api/simulator/${value}`)
 			.then(({data})=>{
-				console.log(data)
 			})
 	}
 
@@ -57,12 +56,10 @@ export default function PathTable() {
 	const getPathData=()=>{
 		axios.get("http://localhost:5000/api/get-times")
 			.then(({data})=>{
-				console.log(data.data)
 				setPathData(data.data)
 			})
 	}
 	const rows=pathData.map((item)=>{
-		console.log(item)
 		return createData(item.id,item.sourceAirport,item.destinationAirport,item.startDate,item.endDate,item.aerialTime,item.groundHolding)
 	});
 	return (
@@ -98,7 +95,7 @@ export default function PathTable() {
 		</TableBody>
 		</Table>
 		</TableContainer>
-		<button type='submit' class="btn btn-primary" onClick={goToSim}>Go To Simulator</button><br/>
+		<button type='submit' className="btn btn-primary" onClick={goToSim}>Go To Simulator</button><br/>
 		<div align="center">
 		Speed: <SliderBar/>
 		</div>

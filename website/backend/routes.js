@@ -44,7 +44,7 @@ router.post("/get-paths",async(req,res)=>{
 	let content="";
 	flights.map((flight,id)=>{
 		const startTime=flight.startTime.split(":")
-		const difference=(Number(startTime[0]))*60 + (Number(startTime[1])) + 60
+		const difference=(Number(startTime[0]))*60 + (Number(startTime[1]))
 		const idx=difference
 		const sourceAirport=flight.sourceAirportName
 		const destinationAirport=flight.destinationAirportName
@@ -63,7 +63,6 @@ router.post("/get-paths",async(req,res)=>{
 		let start=Date.now()
 		execSync('./a.out')
 		let timeTaken= Date.now() - start 
-		console.log(timeTaken / 1000)
 		fs.writeFileSync('timeTaken.txt',(timeTaken/1000).toString())
 		res.status(200).json({"data":"Paths generated"})
 	} catch (err) {

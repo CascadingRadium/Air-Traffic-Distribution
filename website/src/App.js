@@ -13,7 +13,7 @@ function App() {
 	const [sourceAirport,setsourceAirport]=useState("")
 	const [destinationAirport,setdestinationAirport]=useState("")
 	const [numberOfFlights,setNumberOfFlights]=useState(1)
-	const [startTime,setStartTime]=useState("")
+	//const [startTime,setStartTime]=useState("")
 	const [mins,setMin]=useState(0)
 	const [hrs,sethrs]=useState(0)
 	const [items,setItems]=useState([])
@@ -30,9 +30,7 @@ function App() {
 	const getStates=()=>{
 		axios.get("http://localhost:5000/api/get-states")
 			.then(({data})=>{
-				//console.log(data.data)
 				const stateToAirportMapping=data.data
-				console.log(stateToAirportMapping)
 				let stateList=Object.keys(stateToAirportMapping)
 				stateList.sort()
 				setStates(stateList)
@@ -42,7 +40,6 @@ function App() {
 				airports.forEach((airport)=>{
 					airportList = [...airportList, ...airport]
 				})
-				console.log(airportList , airportList.length)
 				setsourceAirports(airportList)
 				setdestinationAirports(airportList)
 			})
@@ -51,10 +48,14 @@ function App() {
 
 	const getPathHelper=async(e)=>{
 		e.preventDefault();
+		if(items.length===0)
+		{
+			alert("Please enter the input flights")
+			return ;
+		}
 		setisLoading(true)
 		await axios.post("http://localhost:5000/api/get-paths",items)
 			.then(({data})=>{
-				console.log(data.data)
 				setItems([])
 			})
 		setisLoading(false)
@@ -66,7 +67,6 @@ function App() {
 		e.preventDefault()
 		const formData=new FormData()
 		formData.append('file',file)
-		console.log(formData)
 		setFile()
 		axios.post("http://localhost:5000/api/upload-file",formData)
 			.then(({data})=>{
@@ -107,8 +107,12 @@ function App() {
 			alert("Source airport and destination airport cannot be same")
 			return ;
 		}
+		if(speed-'0'<=2 || speed==='')
+		{
+			alert("Flight Speed cannot be NULL and should be > 2")
+			return ;
+		}
 		let dataList=[];
-		console.log(hrs,mins)
 		let startTime=hrs.toString() + ":"
 		if(mins < 10)
 		{
@@ -118,7 +122,6 @@ function App() {
 		{
 			startTime +=mins.toString()
 		}
-		console.log(startTime)
 		const data={sourceAirportName,destinationAirportName,startTime,speed};
 		for(let i=0;i<numberOfFlights;i++)
 			dataList.push(data)
@@ -234,12 +237,12 @@ function App() {
 		</select>
 		</label>
 		<br/>
-		<button type='submit' class="btn btn-primary" onClick={addFlight}>Add flight</button><br/><br/>
+		<button type='submit' className="btn btn-primary" onClick={addFlight}>Add flight</button><br/><br/>
 		<h3>---------------  OR ----------------</h3>
 		&emsp;
 	<input type='file' onChange={(e)=>setFile(e.target.files[0])}/>
 		&emsp;
-	<button type='submit' class="btn btn-primary" onClick={uploadFile}>Upload File</button>
+	<button type='submit' className="btn btn-primary" onClick={uploadFile}>Upload File</button>
 		</form>
 
 		</div>
