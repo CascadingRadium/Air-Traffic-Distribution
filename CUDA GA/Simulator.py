@@ -41,7 +41,7 @@ for index,line in enumerate(lines):
     SplitLine=line.split(',')
     airports.add(SplitLine[-1])
     airports.add(SplitLine[-2])
-    ActualStartTime=int(SplitLine[-6])
+    ActualStartTime=int(SplitLine[-6])-60
     path=[int(i) for i in SplitLine[:len(SplitLine)-8]]
     MpMSpeed=float(SplitLine[-3])*30.8667
     points=path_maker(path,MpMSpeed,index,SplitLine[-2],SplitLine[-1])

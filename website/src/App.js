@@ -15,7 +15,7 @@ function App() {
 	const [numberOfFlights,setNumberOfFlights]=useState(1)
 	const [startTime,setStartTime]=useState("")
 	const [mins,setMin]=useState(0)
-	const [hrs,sethrs]=useState(1)
+	const [hrs,sethrs]=useState(0)
 	const [items,setItems]=useState([])
 	const [states,setStates]=useState([])
 	const [stateToAirport,setStateToAirport]=useState({})
@@ -70,7 +70,7 @@ function App() {
 		setFile()
 		axios.post("http://localhost:5000/api/upload-file",formData)
 			.then(({data})=>{
-				setItems(items=>[...items,...data.data])
+				setItems(data.data)
 			})
 	}
 	const number_of_flights=()=>{
@@ -108,6 +108,7 @@ function App() {
 			return ;
 		}
 		let dataList=[];
+		console.log(hrs,mins)
 		let startTime=hrs.toString() + ":"
 		if(mins < 10)
 		{
@@ -117,6 +118,7 @@ function App() {
 		{
 			startTime +=mins.toString()
 		}
+		console.log(startTime)
 		const data={sourceAirportName,destinationAirportName,startTime,speed};
 		for(let i=0;i<numberOfFlights;i++)
 			dataList.push(data)
