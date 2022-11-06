@@ -2,7 +2,7 @@ const router = require('express').Router();
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const airportsData = '../src/AirportFileForFrontend.txt'
-const paths='./OutputToFrontend.txt'
+const paths='./OutputFolder/OutputToFrontend.txt'
 const CONVERSION_FACTOR=1000*60;
 var airportSectorMapping={}
 
@@ -61,7 +61,7 @@ router.post("/get-paths",async(req,res)=>{
 		content+=`${sourceSector} ${sourceICAOCode} ${sourceAirportCoordinates[0]} ${sourceAirportCoordinates[1]},${destinationSector} ${destinationICAOCode} ${destinationAirportCoordinates[0]} ${destinationAirportCoordinates[1]},${idx},${speed}\n`
 	})
 	try {
-		fs.writeFileSync('InputFromFrontend.txt', content);
+		fs.writeFileSync('InputFolder/InputFromFrontend.txt', content);
 		let start=Date.now()
 		execSync('./a.out')
 		let timeTaken= Date.now() - start 

@@ -6,12 +6,13 @@ import distinctipy as ds
 import pickle as pk
 import numpy as np
 import pandas as pd
-ConnectedSectorGraph = pk.load(open("ConnectedSectorGraph.pkl", "rb"))
-opfile=open("OutputToFrontend.txt","r")
-fig = plt.figure(pk.load(open("Simulator.pkl","rb")))
-airportCoords = pk.load(open("airportCoordDict.pkl","rb"))
+import sys
+ConnectedSectorGraph = pk.load(open("SimFiles/ConnectedSectorGraph.pkl", "rb"))
+opfile=open("OutputFolder/OutputToFrontend.txt","r")
+fig = plt.figure(pk.load(open("SimFiles/Simulator.pkl","rb")))
+airportCoords = pk.load(open("SimFiles/airportCoordDict.pkl","rb"))
 ax = fig.axes[0]
-SCALE_FACTOR=10
+SCALE_FACTOR=int(sys.argv[1])
 def path_maker(pathFromGA,MpMSpeed,index,Src,Dst):
     PointPath=[airportCoords[Src]]
     Distance=0.0
@@ -41,7 +42,7 @@ for index,line in enumerate(lines):
     SplitLine=line.split(',')
     airports.add(SplitLine[-1])
     airports.add(SplitLine[-2])
-    ActualStartTime=int(SplitLine[-6])-60
+    ActualStartTime=int(SplitLine[-6])
     path=[int(i) for i in SplitLine[:len(SplitLine)-8]]
     MpMSpeed=float(SplitLine[-3])*30.8667
     points=path_maker(path,MpMSpeed,index,SplitLine[-2],SplitLine[-1])

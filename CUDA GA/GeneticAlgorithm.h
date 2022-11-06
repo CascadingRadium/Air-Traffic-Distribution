@@ -18,6 +18,26 @@ struct PairCmp
 	}
 };
 
+typedef struct delayType
+{
+    int X[MaxDelay];
+    int Y[MaxDelay];
+    int size;
+    int p;
+}delayType;
+
+typedef struct slopeData
+{
+    double slopeArray[MaxDelay];
+    int size;
+}slopeData;
+
+typedef struct minPair
+{
+	int minValue;
+	int minIdx;
+}minPair;
+
 typedef struct PathOutput
 {
 	int EstimatedDeparture;
@@ -63,6 +83,10 @@ __device__ double getAngle(double Ax,double Ay, double Bx, double By, double Cx,
 __device__ double euclidianDistance(double Point1X, double Point1Y, double Point2X, double Point2Y);
 __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int thread, GraphNode** device_graph, int* device_arrSizes, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime, double speed, int* device_times,int* TrafficMatrixSum, int AirportIndex,double* device_FitnessArray,int* device_TimeArray);
 __device__ void getPath(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, int seed, AirportCoordinates* &device_SourceCoord, AirportCoordinates* &device_DestCoord, int* SectorTimeDict, int start, int end, int thread, int skip, int StartTime, double speed, int* device_times,int* &TrafficMatrixSum,int Index,double* device_FitnessArray,int* device_TimeArray);
+__device__ int getNewDelay(int* arr,int n);
+__device__ slopeData getSlope(int x1,int y1,int* X,int n,int* Y,int k);
+__device__ delayType getDelay(int* data,int n);
+__device__ minPair minSlope(double* slopeArray,int n);
 __global__ void getInitPopulation(GraphNode** device_graph, int* device_arrSizes, int* device_Paths, int* device_Paths_size, int start, int end, int NumRowsForPathMatrix, int seed, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime, double speed, int* device_times, int* TrafficMatrixSum,int Index, double* device_FitnessArray, int* device_TimeArray);
 __global__ void SelectionKernel(int* Selected, int*SelectionPool, int SelectionSize,double* device_FitnessArray);
 __global__ void CrossoverKernel(int* Selected, int* device_Paths, int* device_Paths_size, int CrossoverSize,int seed,GraphNode** device_graph, int* device_arrSizes,int* device_times, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict,int StartTime,double speed,int* TrafficMatrixSum,int Index,double* device_FitnessArray, int* device_TimeArray, int* ReplacementPool);

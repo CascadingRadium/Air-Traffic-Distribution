@@ -14,7 +14,6 @@
 #define SectorTimeDictCols 2880
 #define RAND_MAX 2147483647
 #define MaxDelay 60
-#define MinDelay 60
 #define ConvergenceCutoff 10
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
@@ -23,21 +22,21 @@ const double RadConvFactorToMultiply=180/PI;
 int main()
 {	
 	/*Input File Name*/
-	std::string InputFileName="InputFromFrontend.txt";
+	std::string InputFileName="InputFolder/InputFromFrontend.txt";
 	/*Frontend Output File Name*/
-	std::string OutputToFrontendFileName="OutputToFrontend.txt";
+	std::string OutputToFrontendFileName="OutputFolder/OutputToFrontend.txt";
 	/*Supplementary Files */
-	std::string GraphFileName="CppGraph.txt";
-	std::string GA_ParametersFileName="GA_Parameters.txt";
+	std::string GraphFileName="InputFolder/CppGraph.txt";
+	std::string GA_ParametersFileName="InputFolder/GA_Parameters.txt";
 	/* GA Parameters*/
 	int PopulationSize;
 	int NumberOfMutations;
 	int NumberOfGenerations;
 	readGA_Params(PopulationSize,NumberOfMutations,NumberOfGenerations,GA_ParametersFileName);
 	/*Metric Files*/
-	std::string TrafficFactorMetricFileName="TrafficFactor.txt";
-	std::string AerGDFileName="AerialTimeGD.txt";
-	std::string SecTimeDict="SectorTimeDict.txt";
+	std::string TrafficFactorMetricFileName="OutputFolder/TrafficFactor.txt";
+	std::string AerGDFileName="OutputFolder/AerialTimeGD.txt";
+	std::string SecTimeDict="OutputFolder/SectorTimeDict.txt";
 	/* Read OD Pairs */
 	std::vector<std::pair<Airport,Airport>> ODPairs;
 	std::vector<int> times;
@@ -383,6 +382,117 @@ __device__ void getPath(GraphNode** device_graph, int* device_arrSizes, int* dev
 	InitPathFitness(device_Paths,device_Paths_size,thread,device_graph,device_arrSizes,device_SourceCoord,device_DestCoord,SectorTimeDict,StartTime,speed,device_times,TrafficMatrixSum,Index,device_FitnessArray,device_TimeArray);
 }
 
+__device__ minPair minSlope(double* slopeArray,int n)
+{
+	int min_element_idx=0;
+	minPair m;
+	int minVal=slopeArray[0];
+	for(int i=1;i <n;i++)
+	{
+		if(slopeArray[i] < slopeArray[min_element_idx])
+		{
+			min_element_idx=i;
+			minVal=slopeArray[i];
+		}
+	}
+	m.minValue=minVal;
+	m.minIdx=min_element_idx;
+	return m;
+}
+
+__device__ delayType getDelay(int* data,int n)
+{
+	delayType ans;
+	int size=0;
+	int p=0;
+	if(n >= 2)
+	{
+		if(data[0] < data[1])
+		{
+			p=1;
+			ans.X[size]=0;
+			ans.Y[size]=data[0];
+			size++;
+		}
+		for(int i=1;i < n - 1;i++)
+		{
+			if((data[i - 1] > data[i]) && (data[i] <= data[i + 1]))
+			{
+				ans.X[size]=i;
+				ans.Y[size]=data[i];
+				size++;
+			}
+		}
+	}
+	ans.size=size;
+	ans.p=p;
+	return ans;
+}
+
+__device__ slopeData getSlope(int x1,int y1,int* X,int n,int* Y,int k)
+{
+	slopeData s;
+	int size=0;
+	for(int i=k;i < n;i++)
+	{
+		double slope=(double) 0;
+		if(X[i] == x1)
+		{
+			s.slopeArray[i-k]=slope;
+		}
+		else
+		{
+			slope=(double) (Y[i] - y1)/(X[i] - x1);
+			s.slopeArray[i-k]=slope;
+		}
+		size++;
+	}
+	s.size=size;
+	return s;
+}
+__device__ int getNewDelay(int* arr,int n)
+{
+	delayType data=getDelay(arr,n);
+	int ans;
+	if(data.p)
+	{
+		slopeData slopeInfo=getSlope(data.X[0],data.Y[0],data.X,data.size,data.Y,1);
+		if(slopeInfo.size == 0)
+			ans=0;
+		else 
+		{
+			minPair m=minSlope(slopeInfo.slopeArray,slopeInfo.size);
+			if(m.minValue > -1)
+				ans=0;
+			else
+				ans=data.X[m.minIdx + 1];
+		}
+	}
+	else
+	{
+		int y1=arr[0];
+		int x1=0;
+		slopeData slopeInfo=getSlope(x1,y1,data.X,data.size,data.Y,0);
+		int xval;
+		if(slopeInfo.size == 0)
+			xval =0;
+		else
+			xval=minSlope(slopeInfo.slopeArray,slopeInfo.size).minIdx;
+		if(data.size > 0)
+			ans = data.X[xval];
+		else 
+		{
+			int min_idx=0;
+			for(int i=1;i < n ;i++)
+			{
+				if(arr[i] < arr[min_idx])
+					min_idx=i;
+			}
+			ans= min_idx;
+		}
+	}
+	return ans;
+}
 __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int thread, GraphNode** device_graph, int* device_arrSizes, AirportCoordinates* device_SourceCoord, AirportCoordinates* device_DestCoord, int* SectorTimeDict, int StartTime, double speed, int* device_times,int* TrafficMatrixSum, int AirportIndex,double* device_FitnessArray,int* device_TimeArray)
 {
 	int i=0;
@@ -441,7 +551,8 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 	int TrafficFactor=0;
 	int delay=0;
 	int bestTime=0;
-	int Fitness=0;
+	int trafficArray[MaxDelay];
+	int trafficArraySize=0;
 	for(delay=0;delay<MaxDelay;delay++)
 	{
 		TrafficFactor=0;
@@ -457,40 +568,12 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 			}
 			time=time+device_times[Loc+i];
 		}
-		Fitness = (MaxDelay-delay)*((*TrafficMatrixSum)-TrafficFactor);
-		if(Fitness>maxFit)
-		{
-			maxFit=Fitness;
-			bestTime=delay;
-		}
+		trafficArray[trafficArraySize++]=TrafficFactor;
 		if(TrafficFactor==0)
 			break;
 	}
-	InnerLoc=(device_Paths[Loc]*SectorTimeDictCols);
-	for(delay=1;delay<MinDelay;delay++)
-	{
-		TrafficFactor=0;
-		int time=device_times[Loc]+StartTime-delay;
-		for(j=StartTime-delay;j<time;j++)
-			TrafficFactor+=SectorTimeDict[InnerLoc+j];	
-		for(i=1;i<device_Paths_size[thread];i++)
-		{
-			InnerLoc=(device_Paths[Loc+i]*SectorTimeDictCols);	
-			for(j=time;j<time+device_times[Loc+i];j++)
-			{
-				TrafficFactor+=SectorTimeDict[InnerLoc+j];	
-			}
-			time=time+device_times[Loc+i];
-		}
-		Fitness = (MinDelay-delay)*((*TrafficMatrixSum)-TrafficFactor)/2;
-		if(Fitness>maxFit)
-		{
-			maxFit=Fitness;
-			bestTime=-1*delay;
-		}
-		if(TrafficFactor==0)
-			break;
-	}
+	bestTime=getNewDelay(trafficArray,trafficArraySize);
+	maxFit=(*TrafficMatrixSum)-trafficArray[bestTime];
 	device_FitnessArray[thread]=((double)maxFit)*StaticCost;
 	device_TimeArray[thread]=bestTime;
 }
