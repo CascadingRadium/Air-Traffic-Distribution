@@ -20,12 +20,12 @@ def path_maker(pathFromGA,MpMSpeed,index,Src,Dst):
         Cur=pathFromGA[SectorIdx]
         Next=pathFromGA[SectorIdx+1]
         PointPath.append(ConnectedSectorGraph.es[ConnectedSectorGraph.get_eid(Cur,Next)]["ConnectingPoint"])
-        Distance+=dst.euclidean(PointPath[-2],PointPath[-1])
+        Distance=Distance+(dst.euclidean(PointPath[-2],PointPath[-1]))
     PointPath.append(airportCoords[Dst])
-    Distance+=dst.euclidean(PointPath[-2],PointPath[-1])
+    Distance=Distance+(dst.euclidean(PointPath[-2],PointPath[-1]))
     res=[]
     color=index
-    DistanceDelta = MpMSpeed
+    DistanceDelta = MpMSpeed*1.2
     PathLine = sp.LineString(PointPath)
     distances = np.arange(0, Distance, DistanceDelta)
     points = [PathLine.interpolate(distance) for distance in distances] + [PathLine.boundary.geoms[1]]
@@ -75,7 +75,7 @@ for i in range(toStop-toStart+1):
         color=TimeDict[CurTime][pointIndex][2]
         mclc.append([pointOne,pointTwo])
         c.append(DistinctColors[color])
-    lc = mc.LineCollection(mclc, colors=c, linewidths=30)
+    lc = mc.LineCollection(mclc, colors=c, linewidths=50)
     toPlotNow.append(lc)
     CurTime+=1
 def StartSim(event):
@@ -102,12 +102,15 @@ def StartSim(event):
             else:
                 time+=f"{CurTime%60}"
             time=plt.text(6000000, 3500000, time, fontsize = 220)
+            lnArr=[]
             for idx in range(plotIndex,min(plotIndex+SCALE_FACTOR,len(toPlotNow))):
-                ax.add_collection(toPlotNow[idx])
+                lnArr.append(ax.add_collection(toPlotNow[idx]))
             plotIndex+=SCALE_FACTOR
             fig.canvas.draw()
+            for ln in lnArr:
+                ln.remove()
             time.remove()
-            plt.pause(0.005)
+            plt.pause(0.05)
 def SimStopper(event):
     global toQuit
     if(event.button == 3):

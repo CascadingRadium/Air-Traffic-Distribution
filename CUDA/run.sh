@@ -1,3 +1,4 @@
 #!/bin/bash
 nvcc GeneticAlgorithm.cu
-time ./a.out
+>OldVersionCheck.txt
+echo 1 >> OldVersionCheck.txt

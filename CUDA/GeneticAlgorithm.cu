@@ -14,7 +14,7 @@
 #define SectorTimeDictCols 2880
 #define RAND_MAX 2147483647
 #define MaxDelay 60
-#define ConvergenceCutoff 10
+#define ConvergenceCutoff 20
 #define PI 3.141592653589793238
 const double RadConvFactorToMultiply=180/PI;
 #include "GeneticAlgorithm.h"
@@ -523,7 +523,7 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 			{
 				curPointX=device_graph[CurSec][j].XCoord;
 				curPointY=device_graph[CurSec][j].YCoord;
-				dist=euclidianDistance(prevPointX,prevPointY,curPointX,curPointY);
+				dist=euclidianDistance(prevPointX,prevPointY,curPointX,curPointY)/1.2;
 				device_times[Loc+i]=ceil(dist/speed);
 				path_length+=dist;
 				AnglePointsX[Index]=curPointX;
@@ -535,7 +535,7 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 
 		}
 	}
-	dist=euclidianDistance(prevPointX,prevPointY,(device_DestCoord+AirportIndex)->X,(device_DestCoord+AirportIndex)->Y);
+	dist=euclidianDistance(prevPointX,prevPointY,(device_DestCoord+AirportIndex)->X,(device_DestCoord+AirportIndex)->Y)/1.2;
 	device_times[Loc+i]=ceil(dist/speed);
 	path_length+=dist;
 	AnglePointsX[Index]=(device_DestCoord+AirportIndex)->X;
@@ -817,14 +817,14 @@ __global__ void getOutput(int* device_Paths, int* device_Paths_size, int NumRows
 			{
 				curPointX=device_graph[CurSec][j].XCoord;
 				curPointY=device_graph[CurSec][j].YCoord;
-				distance+=euclidianDistance(prevPointX,prevPointY,curPointX,curPointY);
+				distance+=(euclidianDistance(prevPointX,prevPointY,curPointX,curPointY)/1.2);
 				prevPointX=curPointX;
 				prevPointY=curPointY;
 				break;
 			}
 		}
 	}
-	distance+=euclidianDistance(prevPointX,prevPointY,(device_DestCoord+index)->X,(device_DestCoord+index)->Y);
+	distance+=(euclidianDistance(prevPointX,prevPointY,(device_DestCoord+index)->X,(device_DestCoord+index)->Y)/1.2);
 	OutputAirTime[index]=ceil(distance/speed);
 	OutputPathsTime[0]=StartTime+time+device_times[Loc];
 	OutputPaths[OutLoc]=device_Paths[Loc];
