@@ -8,8 +8,8 @@ import sys
 
 TEST_DAY=sys.argv[1]
 NumFlights=int(sys.argv[2])
-NumColors=20
-minutes=240
+NumColors=30
+minutes=20
 
 TrafficFactorGA=open("Website/backend/OutputFolder/TrafficFactor.txt")
 MetricsGA=pd.read_csv("Website/backend/OutputFolder/AerialTimeGD.txt")
@@ -31,6 +31,20 @@ if(NumFlights!=-1):
 
 
 realAT=RealMetrics["Aerial Time"]
+realGD=list(RealMetrics["ground_delay"])
+realGD=list(map(lambda x:abs(x),realGD))
+
+q25, q75 = np.percentile(realGD, [25, 75])
+bin_width = 2 * (q75 - q25) * len(realGD) ** (-1/3)
+binsRGD = round((max(realGD) - min(realGD)) / bin_width)
+
+plt.figure(1)
+plt.hist(realGD, range=(min(realGD),max(realGD)),color='b', bins=binsRGD)
+plt.title('Real Ground Delay')
+plt.xlabel('Real Ground Delay')
+plt.ylabel('Frequency')
+plt.savefig(f"OutputImages/RealGroundDelay_{TEST_DAY}.png")
+
 GA_AT=MetricsGA["Aerial Time"]
 GA_GD=MetricsGA["Ground Holding"]
 absDiffAT=[]
@@ -56,7 +70,7 @@ if(bin_width==0):
     bin_width=1
 binsGD = round((max(GA_GD) - min(GA_GD)) / bin_width)
 
-plt.figure(1)
+plt.figure(2)
 plt.hist(absDiffAT, range=(min(absDiffAT),max(absDiffAT)),color='b', bins=binsAT)
 plt.title('Flight Time')
 plt.xlabel('Difference in Flight Time between Real Data and GA Solution in minutes')
@@ -64,7 +78,7 @@ plt.ylabel('Frequency')
 
 plt.savefig(f"OutputImages/AerialTime{TEST_DAY}.png")
 
-plt.figure(2)
+plt.figure(3)
 plt.hist(GA_GD, range=(min(GA_GD),max(GA_GD)),color='r', bins=binsGD)
 plt.title('Delay in takeoff')
 plt.xlabel('Ground Delay in minutes')
@@ -83,6 +97,7 @@ RMSE_AT/=len(GA_AT)
 RMSE_AT=RMSE_AT**(0.5)
 print("The RMSD error for Aerial Time is ",RMSE_AT)
 print("Average Ground Delay is ",sum(GA_GD)/len(GA_GD))
+print("Average Real Ground Delay is ",sum(realGD)/len(realGD))
 
 def getColours(K):
     d=dict()
@@ -197,9 +212,15 @@ def GATraffic(df,minutes,data):
 data=OpToFrontend.readlines()
 x=realTraffic(AirportTrafficDf,minutes)
 y=GATraffic(dayFlights,minutes,data)
+gaSum=0
+realSum=0
 c=0
 for airport in x:
     if y[airport] <= x[airport]:
         c+=1
+    gaSum+=x[airport]
+    realSum+=y[airport]
 print(f"Traffic in GA is better than or equal to real data in {c*100/len(x)} % of the airports")
+print("Real Average Airport Traffic ",realSum/c)
+print("GA Average Airport Traffic ",gaSum/c)
 

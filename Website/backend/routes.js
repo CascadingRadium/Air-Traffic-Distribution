@@ -12,6 +12,8 @@ var stateToAirports={}
 var airportICAOMapping={}
 var airportToXYMapping={}
 const data = fs.readFileSync(airportsData).toString().split("\n");
+if(data[data.length-1]=='')
+	data.pop()
 
 const prettifyDate=(date)=>{
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <vector>
 #include <fstream>
+#include <unordered_map>
 #include "cuda_runtime_api.h"
 #include <cuda_profiler_api.h>
 #include <curand_kernel.h>
@@ -23,30 +24,41 @@ int main()
 {	
 	/*Input File Name*/
 	std::string InputFileName="InputFolder/InputFromFrontend.txt";
+	
 	/*Frontend Output File Name*/
 	std::string OutputToFrontendFileName="OutputFolder/OutputToFrontend.txt";
+	
 	/*Supplementary Files */
 	std::string GraphFileName="InputFolder/CppGraph.txt";
 	std::string GA_ParametersFileName="InputFolder/GA_Parameters.txt";
+	std::string RunwayFileName="InputFolder/AirportRunways.txt";
+	
 	/* GA Parameters*/
 	int PopulationSize;
 	int NumberOfMutations;
 	int NumberOfGenerations;
 	readGA_Params(PopulationSize,NumberOfMutations,NumberOfGenerations,GA_ParametersFileName);
+	
 	/*Metric Files*/
 	std::string TrafficFactorMetricFileName="OutputFolder/TrafficFactor.txt";
 	std::string AerGDFileName="OutputFolder/AerialTimeGD.txt";
 	std::string SecTimeDict="OutputFolder/SectorTimeDict.txt";
+	
 	/* Read OD Pairs */
 	std::vector<std::pair<Airport,Airport>> ODPairs;
 	std::vector<int> times;
 	std::vector<double> speed;
-	int NumSectors=1250;
 	readInput(ODPairs,InputFileName,times,speed);
+	
+	/* Read Runway File*/
+	std::unordered_map<std::string,int> AirportRunways; 
+	readRunways(RunwayFileName,AirportRunways);
+	
+	/* Call CUDA Genetic Algorithm*/
 	int NumODPairs=ODPairs.size();	
 	std::vector<std::pair<std::vector<int>,PathOutput>>Paths(NumODPairs);
 	std::vector<int>TrafficFactorMetric;
-	/* Call CUDA Genetic Algorithm to solve the Congestion Game*/
+	int NumSectors=1250;
 	getPaths(ODPairs,Paths,NumSectors,PopulationSize,NumberOfMutations,NumberOfGenerations,GraphFileName,times,speed,TrafficFactorMetric,SecTimeDict);// Input,Output
 	cudaError_t err = cudaGetLastError();  
 	if (err != cudaSuccess) 

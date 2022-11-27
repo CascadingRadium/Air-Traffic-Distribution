@@ -10,6 +10,7 @@ void readGA_Params(int &PopulationSize, int &NumberOfMutations, int &NumberOfGen
 	NumberOfGenerations=stoi(line);
 	file.close();
 }
+
 void tokenize(std::string &str, char delim, std::vector<std::string> &out)
 {
 	size_t start;
@@ -21,6 +22,21 @@ void tokenize(std::string &str, char delim, std::vector<std::string> &out)
 		out.push_back(s);
 	}
 }
+
+void readRunways(std::string RunwayFileName, std::unordered_map<std::string,int> &AirportRunways)
+{
+	std::fstream file(RunwayFileName);
+	std::vector<std::string> tokens;
+	std::string line="";
+	while(getline(file,line))
+	{
+		tokens.clear();
+		tokenize(line,',',tokens);
+		AirportRunways[tokens[0]]=stoi(tokens[1]);
+	}
+	file.close();
+}
+
 void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std::string OutputFileName, std::vector<int> &TrafficFactorMetric, std::string TrafficFactorMetricFileName, std::string AerGDFileName, int NumODPairs)
 {
 	std::ofstream file(OutputFileName);
@@ -136,6 +152,7 @@ void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 	}
 	file.close();	
 }
+
 void CopySecTimeDict(std::string &SecTimeDict, int* &host_SectorTimeDict)
 {
 	std::ofstream file(SecTimeDict);

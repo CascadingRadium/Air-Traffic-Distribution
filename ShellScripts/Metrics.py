@@ -9,6 +9,7 @@ import copy
 import sys
 TEST_DAY=sys.argv[1]
 NumFlights=int(sys.argv[2])
+print(NumFlights)
 
 ConvexHulls = pk.load(open("../Notebooks/Outputs/ConvexDict.pkl", "rb"))
 m = pk.load(open("../Notebooks/Outputs/M_ConversionMetric.pkl", "rb"))
