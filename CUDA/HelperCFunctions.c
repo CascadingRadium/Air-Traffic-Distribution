@@ -23,25 +23,30 @@ void tokenize(std::string &str, char delim, std::vector<std::string> &out)
 	}
 }
 
-void readRunways(std::string RunwayFileName, std::unordered_map<std::string,int> &AirportRunways)
+void readRunways(std::string RunwayFileName, std::unordered_map<std::string,std::pair<int,int>> &AirportRunways)
 {
 	std::fstream file(RunwayFileName);
 	std::vector<std::string> tokens;
 	std::string line="";
+	int index=0;
 	while(getline(file,line))
 	{
 		tokens.clear();
 		tokenize(line,',',tokens);
-		AirportRunways[tokens[0]]=stoi(tokens[1]);
+		AirportRunways[tokens[0]]={stoi(tokens[1]),index};
+		index++;
 	}
 	file.close();
 }
-
-void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std::string OutputFileName, std::vector<int> &TrafficFactorMetric, std::string TrafficFactorMetricFileName, std::string AerGDFileName, int NumODPairs)
+void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std::string OutputToFrontendFileName, std::string AerGDFileName, int NumODPairs, std::vector<std::vector<int>> &AirspaceTraffic, std::string AirspaceTrafficFileName, std::vector<std::vector<int>> &AirportTraffic, std::string AirportTrafficFileName, std::unordered_map<std::string,std::pair<int,int>> &AirportRunways)
 {
-	std::ofstream file(OutputFileName);
-	std::ofstream TFfile(TrafficFactorMetricFileName);
+	std::vector<std::pair<std::string,std::pair<int,int>>> AirportRunwayVector(AirportRunways.begin(),AirportRunways.end());
+	sort(AirportRunwayVector.begin(),AirportRunwayVector.end(),[](auto &A, auto &B){return A.second.second<B.second.second;});
+	std::ofstream OtoFfile(OutputToFrontendFileName);
 	std::ofstream AerGDfile(AerGDFileName);
+	std::ofstream ASTfile(AirspaceTrafficFileName);
+	std::ofstream APTfile(AirportTrafficFileName);
+	
 	AerGDfile<<"Aerial Time,Ground Holding\n";
 	std::string line="";
 	std::string AerLine="";
@@ -55,41 +60,36 @@ void writeOutput(std::vector<std::pair<std::vector<int>,PathOutput>>&Paths, std:
 		}
 		if(line.length()>0)
 			line.pop_back();
-		line.push_back(',');
-		line+=std::to_string(Paths[i].second.EstimatedDeparture);
-		line.push_back(',');
-		line+=std::to_string(Paths[i].second.GroundHolding);
-		line.push_back(',');
-		line+=std::to_string(Paths[i].second.ActualDeparture);
-		line.push_back(',');
-		line+=std::to_string(Paths[i].second.AerialDelay);
-		line.push_back(',');
-		line+=std::to_string(Paths[i].second.ArrivalTime);
-		line.push_back(',');
-		line+=std::to_string(Paths[i].second.speed);
-		line.push_back(',');
-		line+=Paths[i].second.StartICAO;
-		line.push_back(',');
-		line+=Paths[i].second.EndICAO;
-		AerLine+=std::to_string(Paths[i].second.AerialDelay);
-		AerLine.push_back(',');
-		AerLine+=std::to_string(Paths[i].second.GroundHolding);
-		AerLine.push_back('\n');
+		line+=(","+std::to_string(Paths[i].second.EstimatedDeparture)+","+std::to_string(Paths[i].second.GroundHolding)+","+std::to_string(Paths[i].second.ActualDeparture)+","+std::to_string(Paths[i].second.AerialDelay)+","+std::to_string(Paths[i].second.ArrivalTime)+","+std::to_string(Paths[i].second.speed)+","+Paths[i].second.StartICAO+","+Paths[i].second.EndICAO);
+		AerLine+=(std::to_string(Paths[i].second.AerialDelay)+","+std::to_string(Paths[i].second.GroundHolding)+"\n");
 		AerGDfile<<AerLine;		
 		if(i!=NumODPairs-1)
 			line.push_back('\n');
-		file<<line;
+		OtoFfile<<line;
 	}
-	file.close();
+	OtoFfile.close();
 	AerGDfile.close();
 	line="";
-	for(int i=0;i<TrafficFactorMetric.size();i++)
+	for(int i=0;i<AirspaceTraffic.size();i++)
 	{
-		line+=std::to_string(TrafficFactorMetric[i]);
+		for(int j=0;j<SectorTimeDictCols;j++)
+			line+=(std::to_string(AirspaceTraffic[i][j])+",");
+		line.pop_back();
 		line+="\n";
 	}
-	TFfile<<line;
-	TFfile.close();
+	ASTfile<<line;
+	line="";
+	for(int i=0;i<AirportTraffic.size();i++)
+	{
+		line+=(AirportRunwayVector[i].first+" "+std::to_string(AirportRunwayVector[i].second.first)+" ");
+		for(int j=0;j<SectorTimeDictCols;j++)
+			line+=(std::to_string(AirportTraffic[i][j])+",");
+		line.pop_back();
+		line+="\n";
+	}
+	APTfile<<line;
+	ASTfile.close();
+	APTfile.close();
 }
 
 void readInput(std::vector<std::pair<Airport,Airport>>& ODPairs, std::string InputFileName, std::vector<int>& times, std::vector<double>& speeds)
@@ -151,22 +151,4 @@ void readGraph(std::string GraphFileName,GraphNode* host_graph[], int* arrSizes)
 		VNum++;
 	}
 	file.close();	
-}
-
-void CopySecTimeDict(std::string &SecTimeDict, int* &host_SectorTimeDict)
-{
-	std::ofstream file(SecTimeDict);
-	for(int i=0;i<MaxPathLen;i++)
-	{
-		std::string line="";
-		for(int j=0;j<SectorTimeDictCols;j++)
-		{
-			line+=(std::to_string(host_SectorTimeDict[i*SectorTimeDictCols+j]));
-			line.push_back(' ');
-		}
-		line.pop_back();
-		line.push_back('\n');
-		file<<line;
-	}
-	file.close();
 }

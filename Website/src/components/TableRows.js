@@ -7,21 +7,21 @@ function TableRows({airports,rowsData, deleteTableRows, handleChange}) {
 			return(
 
 				<tr key={index}>
-				<td>
-				{
-					sourceAirport
-				}
-				</td>
-				<td>
-				{
-					destinationAirport
-				}
-				</td>
-				<td>
-				{
-					numberOfFlights
-				}
-				</td>
+					<td>
+					{
+						sourceAirport
+					}
+					</td>
+					<td>
+					{
+						destinationAirport
+					}
+					</td>
+					<td>
+					{
+						numberOfFlights
+					}
+					</td>
 				</tr>
 
 			)

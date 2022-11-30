@@ -138,127 +138,133 @@ function App() {
 
 	return (
 		<>
-		<div className="App">
-		<h1>GPU - Accelerated Genetic Algorithm for Air Traffic Management</h1>
-		<h1>Flight Scheduler and Plan Generator</h1>
-		<form>
-		<div id="source" align="left">
-		<label>
-		Select State:
-		<select onChange={(e)=>setsourceAirports(stateToAirport[e.target.value])}>
-		<option value=""> Select a state </option>
-		{
-			states.map((state)=>(
-				<option key={state} value={state}>{state}</option>
-			))
-		}
-		</select>
-		</label>
-		<br/>
-		<br/>
-		<br/>
-		<label>
-		Select Source Airport:
-		<select onChange={(e)=>setsourceAirport(e.target.value)}>
-		<option value=""> Select an airport </option>
-		{
-			sourceAirports.map((airport,idx)=>(
-				<option key={idx} value={airport}>{airport}</option>
-			))
-		}
-		</select>
-		</label>
-		</div>
-		&emsp;
-		&emsp;
-		&emsp;
-		<div id="destination" align="right">
-		<label>
-		Select State:
-		<select onChange={(e)=>setdestinationAirports(stateToAirport[e.target.value])}>
-		<option value=""> Select a state </option>
-		{
-			states.map((state)=>(
-				<option key={state} value={state}>{state}</option>
-			))
-		}
-		</select>
-		</label>
-		<br/>
-		<br/>
-		<br/>
-		<label>
-		Select Destination Airport:
-		<select onChange={(e)=>setdestinationAirport(e.target.value)}>
-		<option value=""> Select an airport </option>
-		{
-			destinatonAirports.map((airport,idx)=>(
-				<option key={idx} value={airport}>{airport}</option>
-			))
-		}
-		</select>
-		</label> 
-		</div>
-		<br/>
+			<div className="App">
+			<h1>Air Traffic Management using a GPU - Accelerated Genetic Algorithm</h1>
+			<br/><h3>Enter the flight schedule</h3>
+			<br/>
+			<form>
+				<div id="MasterTwo">
+					<div id="source">
+						<p align="center"><h4>Departure Airport</h4></p>
+						<p align="center"> State</p>
+						<p align="center">
+							<select onChange={(e)=>setsourceAirports(stateToAirport[e.target.value])}>
+								<option value=""> Select a state </option>
+									{
+										states.map((state)=>(
+											<option key={state} value={state}>{state}</option>
+										))
+									}
+							</select>
+						</p>
+						<p align="center">Airport Name</p>
+						<p align="center">
+							<select onChange={(e)=>setsourceAirport(e.target.value)}>
+								<option value=""> Select an airport </option>
+									{
+										sourceAirports.map((airport,idx)=>(
+											<option key={idx} value={airport}>{airport}</option>
+										))
+									}
+							</select>
+						</p>
+					</div>
+					<div id="destination" align="right">
+						<p align="center"><h4>Arrival Airport</h4></p>
+						<p align="center">State</p>
+						<p align="center">
+							<select onChange={(e)=>setdestinationAirports(stateToAirport[e.target.value])}>
+								<option value=""> Select a state </option>
+								{
+									states.map((state)=>(
+										<option key={state} value={state}>{state}</option>
+									))
+								}
+							</select>
+						</p>
+						<p align="center"> Airport Name </p>
+						<p align="center">
+							<select onChange={(e)=>setdestinationAirport(e.target.value)}>
+								<option value=""> Select an airport </option>
+								{
+									destinatonAirports.map((airport,idx)=>(
+										<option key={idx} value={airport}>{airport}</option>
+									))
+								}
+							</select>
+						</p>
+					</div>
+				</div>
+				<div id="MasterThree">
+					<div id="Speed">
+					<br/>
+						<p align="center">Cruise Speed in Knots</p>
+						<p align="center">
+							<input type="text" onChange={(e) => setSpeed(e.target.value)} />
+						</p>
+					</div>
+					<div id="NumFlights">
+						<br/>
+						<p align="center">Number of flights</p>
+						<p align="center">
+							<select onChange={(e)=>setNumberOfFlights(e.target.value)}>
+								{
+									number_of_flights().map((airport)=>(
+										<option key={airport} value={airport}>{airport}</option>
+									))
+								}
+								</select>
+						</p>
+					</div>
+					<div id="DepartureTime">
+					<br/>
+						<p align="center">Scheduled Departure Time</p>
+						<p align="center">
+							Hour&emsp;
+							<select onChange={(e)=>sethrs(e.target.value)}>
+							{
+								gethrs().map((state)=>(
+									<option key={state} value={state}>{state}</option>
+								))
+							}
+							</select>
+							&emsp;
+							Minutes&emsp;
+							<select onChange={(e)=>setMin(e.target.value)}>
+								{
+									getmins().map((state)=>(
+										<option key={state} value={state}>{state}</option>
+									))
+								}
+							</select>
+						</p>
+					</div>
+				</div>
+				<p align="center">
+					<button type='submit' className="btn btn-primary" onClick={addFlight}>Add Flight</button>
+				</p>
+				<p align="center">
+					<h3>---------------  OR ----------------</h3>
+				</p>
+				<p align="center">
+					<input type='file' onChange={(e)=>setFile(e.target.files[0])}/>
+					<button type='submit' className="btn btn-primary" onClick={uploadFile}>Upload File</button>
+				</p>
+			</form>
+			</div>
+			<div className='table'>
+			{
+				<>
+				{
+					isLoading?<LoadingButton/>:<button className='btn btn-primary' onClick={getPathHelper}>Execute the CUDA GA module to generate the solution</button>
+				}
+				<br/><br/>
+				<CustomizedTables items={items} deleteEntry={deleteEntry}/>
+				</>
 
-		<label>
-		Number of flights 
-		&emsp;
-	<select onChange={(e)=>setNumberOfFlights(e.target.value)}>
-		{
-			number_of_flights().map((airport)=>(
-				<option key={airport} value={airport}>{airport}</option>
-			))
-		}
-		</select>
-		</label>
-		<br/>
-		&emsp;
-		Speed:
-		<input type="text" onChange={(e) => setSpeed(e.target.value)} /> Knots
-		&emsp;
-	<label>Hour: &emsp;
-	<select onChange={(e)=>sethrs(e.target.value)}>
-		{
-			gethrs().map((state)=>(
-				<option key={state} value={state}>{state}</option>
-			))
-		}
-		</select>
-		</label>
-		&emsp;
-	<label>Minutes: &emsp;
-	<select onChange={(e)=>setMin(e.target.value)}>
-		{
-			getmins().map((state)=>(
-				<option key={state} value={state}>{state}</option>
-			))
-		}
-		</select>
-		</label>
-		<br/>
-		<button type='submit' className="btn btn-primary" onClick={addFlight}>Add flight</button><br/><br/>
-		<h3>---------------  OR ----------------</h3>
-		&emsp;
-	<input type='file' onChange={(e)=>setFile(e.target.files[0])}/>
-		&emsp;
-	<button type='submit' className="btn btn-primary" onClick={uploadFile}>Upload File</button>
-		</form>
-
-		</div>
-		<div className='table'>
-
-		<h1>Flights</h1>
-		{
-			<>
-			{isLoading?<LoadingButton/>:<button className='btn btn-primary' onClick={getPathHelper}>Get Paths</button>}
-			<CustomizedTables items={items} deleteEntry={deleteEntry}/>
-			</>
-
-		}
-		</div>
+			}
+			</div>
 		</>
-
-);
+	);
 }
 export default App;

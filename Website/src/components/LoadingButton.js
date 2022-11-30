@@ -22,7 +22,7 @@ function LoadingButton() {
 		role="status"
 		aria-hidden="true"
 		/>
-		Generating your flights...
+		Generating Solution...
 		</Button>
 		</>
 	);

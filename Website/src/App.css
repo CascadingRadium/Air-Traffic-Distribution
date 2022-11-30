@@ -38,9 +38,15 @@
 }
 
 .table{
-	margin-top: 100px;
+	margin-top: 50px;
 	text-align: center;
 }
+
+#table{
+	margin-top: 50px;
+	text-align: center;
+}
+
 
 .icon{
 	width: 10px;
@@ -49,8 +55,35 @@
 #source{
 	display: inline-block;
 	align-self: flex-start;
+	text-align: center;
 }
 #destination{
 	display: inline-block;
+	align-self: flex-start;
+	text-align: center;
+	padding-left:200px;
 }
-
+#DepartureTime{
+	display: inline-block;
+	align-self: flex-start;
+	text-align: center;
+	padding-left:200px;
+}
+#NumFlights{
+	display: inline-block;
+	align-self: flex-start;
+	text-align: center;
+	padding-left:200px;
+}
+#Speed{
+	display: inline-block;
+	align-self: flex-start;
+	text-align: center;
+}
+#MasterThree{
+	text-align: center;
+}
+.TableCenterAlign{
+	display: block;
+	text-align: center;
+}

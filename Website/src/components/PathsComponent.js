@@ -10,7 +10,6 @@ import Paper from '../../node_modules/@mui/material/Paper'
 import '../App.css'
 import { useEffect ,useState} from 'react';
 import axios from 'axios';
-import SliderBar from './Slider';
 import { useGlobalState } from '../states';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -64,41 +63,41 @@ export default function PathTable() {
 	});
 	return (
 		<>
-		<h1 align="center">Flights Generated</h1>
+		<h1 align="center">Solution Generated</h1>
 		<TableContainer component={Paper}>
 		<Table sx={{ minWidth: 900 }} aria-label="customized table">
 		<TableHead>
 		<TableRow>
-		<StyledTableCell>Flight ID</StyledTableCell>
-		<StyledTableCell>Source Airport</StyledTableCell>
-		<StyledTableCell>Destination Airport</StyledTableCell>
-		<StyledTableCell>Departure Time</StyledTableCell>
-		<StyledTableCell>Arrival Time</StyledTableCell>
-		<StyledTableCell>Aerial Time</StyledTableCell>
-		<StyledTableCell>Ground Holding</StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Flight ID</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Departure Airport</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Arrival Airport</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Actual Departure Time</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Arrival Time</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Aerial Time in minutes</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Flight Delay in minutes</span></StyledTableCell>
 		</TableRow>
 		</TableHead>
 		<TableBody>
 		{
 			rows.map((row,idx) => (
 				<StyledTableRow key={idx}>
-				<StyledTableCell>{idx}</StyledTableCell>
-				<StyledTableCell>{row.sourceAirport}</StyledTableCell>
-				<StyledTableCell>{row.destinationAirport}</StyledTableCell>
-				<StyledTableCell>{row.startDate}</StyledTableCell>
-				<StyledTableCell>{row.endDate}</StyledTableCell>
-				<StyledTableCell>{row.aerialTime}</StyledTableCell>
-				<StyledTableCell>{row.groundHolding}</StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{idx}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.sourceAirport}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.destinationAirport}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.startDate}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.endDate}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.aerialTime}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.groundHolding}</span></StyledTableCell>
 				</StyledTableRow>
 			))
 		}
 		</TableBody>
 		</Table>
 		</TableContainer>
-		<button type='submit' className="btn btn-primary" onClick={goToSim}>Go To Simulator</button><br/>
-		<div align="center">
-		Speed: <SliderBar/>
-		</div>
+		<br/>
+		<p align="center">
+			<button type='submit' className="btn btn-primary" onClick={goToSim}>Run the Simulator</button><br/>
+		</p>
 		</>
 
 	);

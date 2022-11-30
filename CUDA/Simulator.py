@@ -12,7 +12,6 @@ opfile=open("OutputFolder/OutputToFrontend.txt","r")
 fig = plt.figure(pk.load(open("SimFiles/Simulator.pkl","rb")))
 airportCoords = pk.load(open("SimFiles/airportCoordDict.pkl","rb"))
 ax = fig.axes[0]
-SCALE_FACTOR=int(sys.argv[1])
 def path_maker(pathFromGA,MpMSpeed,index,Src,Dst):
     PointPath=[airportCoords[Src]]
     Distance=0.0
@@ -85,10 +84,10 @@ def StartSim(event):
     if(not Started and event.button == 1):
         Started=True
         title="Hour Minutes";
-        plt.text(6000000,3650000,title,fontsize = 120)
+        plt.text(6000000,3450000,title,fontsize = 120)
         CurTime=toStart
         plotIndex=0
-        for CurTime in range(toStart,toStop+1,SCALE_FACTOR):
+        for CurTime in range(toStart,toStop+1):
             if(toQuit):
                 plt.close()
                 break
@@ -101,15 +100,12 @@ def StartSim(event):
                 time+=f"0{CurTime%60}"
             else:
                 time+=f"{CurTime%60}"
-            time=plt.text(6000000, 3500000, time, fontsize = 220)
-            lnArr=[]
-            for idx in range(plotIndex,min(plotIndex+SCALE_FACTOR,len(toPlotNow))):
-                lnArr.append(ax.add_collection(toPlotNow[idx]))
-            plotIndex+=SCALE_FACTOR
+            time=plt.text(6000000, 3350000, time, fontsize = 220)
+            ax.add_collection(toPlotNow[plotIndex])
             fig.canvas.draw()
-            for ln in lnArr:
-                ln.remove()
+            toPlotNow[plotIndex].remove()
             time.remove()
+            plotIndex+=1
             plt.pause(0.05)
 def SimStopper(event):
     global toQuit

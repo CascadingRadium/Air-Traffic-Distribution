@@ -46,22 +46,22 @@ export default function CustomizedTables({items,deleteEntry}) {
 		<Table sx={{ minWidth: 700 }} aria-label="customized table">
 		<TableHead>
 		<TableRow>
-		<StyledTableCell>Flight ID</StyledTableCell>
-		<StyledTableCell>Source Airport</StyledTableCell>
-		<StyledTableCell>Destination Airport</StyledTableCell>
-		<StyledTableCell>Start Time</StyledTableCell>
-		<StyledTableCell>Speed</StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Flight ID</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Departure Airport</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Arrival Airport</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Scheduled Departure Time</span></StyledTableCell>
+		<StyledTableCell><span className="TableCenterAlign">Cruise Speed (Knots)</span></StyledTableCell>
 		</TableRow>
 		</TableHead>
 		<TableBody>
 		{
 			rows.map((row,idx) => (
 				<StyledTableRow key={idx}>
-				<StyledTableCell>{idx}</StyledTableCell>
-				<StyledTableCell>{row.source}</StyledTableCell>
-				<StyledTableCell>{row.destination}</StyledTableCell>
-				<StyledTableCell>{row.startTime}</StyledTableCell>
-				<StyledTableCell>{row.speed}</StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{idx}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.source}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.destination}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.startTime}</span></StyledTableCell>
+				<StyledTableCell><span className="TableCenterAlign">{row.speed}</span></StyledTableCell>
 				</StyledTableRow>
 			))
 		}
