@@ -30,3 +30,4 @@ yarn-error.log*
 /Notebooks/MetricFiles/DayWiseInput
 /CUDA/OldVersionCheck.txt
 /CUDA/TestFile.txt
+/ShellScripts/FreshRepo.txt
