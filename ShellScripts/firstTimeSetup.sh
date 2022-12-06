@@ -8,6 +8,7 @@ pip install shapely
 pip install distinctipy
 pip install numpy
 pip install pandas
+pip install PyQt5
 cd ../Website/backend
 npm i
 cd ..

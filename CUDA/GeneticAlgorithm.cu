@@ -608,7 +608,7 @@ __device__ void InitPathFitness(int* device_Paths, int* device_Paths_size, int t
 				}
 				time=time+device_times[Loc+i];
 			}
-			trafficArray[trafficArraySize++]=(TrafficFactor+(SourceAirportTraffic+DestAirportTraffic));
+			trafficArray[trafficArraySize++]=(TrafficFactor);
 			if(TrafficFactor==0)
 				break;
 		}
