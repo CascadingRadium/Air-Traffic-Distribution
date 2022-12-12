@@ -50,7 +50,7 @@ Capstone project done as a part of the requirements for the bachelors degree in 
 <li>Python (Version > 3.8).</li>
 <li>Git and Git LFS  <code>sudo apt-get install git git-lfs</code> </li> 
 </ul>
-<p align="justified"> To execute the project, one needs to run the shell script “runWebsite.sh” provided in the root. The shell script will perform a first-time setup and launch the website. The user can input or upload a flight schedule, execute the algorithm to obtain the solution, and simulate the same using the buttons provided.</p>  
+<p align="justify"> To execute the project, one needs to run the shell script “runWebsite.sh” provided in the root. The shell script will perform a first-time setup and launch the website. The user can input or upload a flight schedule, execute the algorithm to obtain the solution, and simulate the same using the buttons provided.</p>  
 
 ```
 chmod +x runWebsite.sh
