@@ -58,5 +58,9 @@ chmod +x runWebsite.sh
 ```
 
 The video below shows the website in use:
-![](ReadmeGifs/maybe.mp4)
 
+https://user-images.githubusercontent.com/53022689/207081997-caba21ec-5c32-49b5-b5d3-af1a7a801299.mp4
+
+The simulator is built using Python and the gifs presented below show the traffic being distributed for various test scenarios given as input.
+
+<img src="https://user-images.githubusercontent.com/53022689/207095647-37317714-6522-4509-bda4-5aab50383b83.gif" width="250" height="250"/>
