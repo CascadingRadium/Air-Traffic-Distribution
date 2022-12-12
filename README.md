@@ -53,14 +53,17 @@
 <p align="justify"> To execute the project, one needs to run the shell script “runWebsite.sh” provided in the root. The shell script will perform a first-time setup and launch the website. The user can input or upload a flight schedule, execute the algorithm to obtain the solution, and simulate the same using the buttons provided.</p>  
 
 ```
-chmod +x runWebsite.sh
+sudo chmod +x runWebsite.sh
 ./runWebsite.sh
 ```
 
 The video below shows the website in use:
 
 https://user-images.githubusercontent.com/53022689/207081997-caba21ec-5c32-49b5-b5d3-af1a7a801299.mp4
-
-The simulator is built using Python and the gifs presented below show the traffic being distributed for various test scenarios given as input.
-
-<img src="https://user-images.githubusercontent.com/53022689/207095647-37317714-6522-4509-bda4-5aab50383b83.gif" width="250" height="250"/>
+<p align ="justify">
+The simulator is built using Python and the gifs presented below show the traffic being distributed for various test scenarios given as input. Each aircraft is represented by a unique colour and the airports are shown in blue. The airplanes are observed to be spread out and seperated by large distances mid-air, with queues being formed near the airports, similar to how it happens in reality.</p>
+<p float="left">
+  <img src="https://user-images.githubusercontent.com/53022689/207095647-37317714-6522-4509-bda4-5aab50383b83.gif" width="45%" height="auto"/>
+  <img src="https://user-images.githubusercontent.com/53022689/207126706-019f56b0-9610-4611-aecb-658b4a193f96.gif" width="45%" height="auto"/>
+  <img src="https://user-images.githubusercontent.com/53022689/207129635-0408aa0c-4143-4372-8050-c11ab8d3ea89.gif" width="45%" height="auto"/>
+</p>
