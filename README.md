@@ -57,5 +57,6 @@ chmod +x runWebsite.sh
 ./runWebsite.sh
 ```
 
-The gif below shows the website in use:
+The video below shows the website in use:
+![](ReadmeGifs/maybe.mp4)
 
