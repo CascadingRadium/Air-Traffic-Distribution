@@ -6,7 +6,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/CascadingRadium/Air-Traffic-Distribution)
 <img src="https://developer.nvidia.com/favicon.ico" align ='right' width ='50'>
 <h1> Air Traffic Distribution </h1>
-Capstone project done as a part of the requirements for the bachelors degree in CS at PES University (2019 - 23) guided by Dr. Preethi P.
+<p align="justify">Capstone project done as a part of the requirements for the bachelors degree in CS at PES University (2019 - 23) guided by Dr. Preethi P.</p>
 <p>
   <h3 align="center"> Contributors </h3> 
   <table align="center">
@@ -41,7 +41,7 @@ Capstone project done as a part of the requirements for the bachelors degree in 
 <li>Hence, the output the dispatcher receives will be each flight’s actual departure time, which considers flight delays, and the optimal route for each aeroplane. We develop an interactive website that the dispatcher can use to enter/upload the schedule and execute the algorithm at the click of a button. Finally, we developed a python simulator which shows each aircraft’s position along its path over time.</li>
 </ul>
 <h2 align="center">System Requirements, Execution and Evaluation</h2>
-<p align="justified"> The following set of requirements must be satisfied by the execution environment before the repository is cloned.</p>
+<p align="justify"> The following set of requirements must be satisfied by the execution environment before the repository is cloned.</p>
 <ul align="justify">
 <li>Linux based OS (Windows/WSL not supported).</li>
 <li>CUDA enabled GPU.<a href="https://developer.nvidia.com/cuda-gpus"> Check if your GPU is CUDA enabled.</a></li>
