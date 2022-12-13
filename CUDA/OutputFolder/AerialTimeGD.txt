@@ -1,5 +1,0 @@
-Aerial Time,Ground Holding
-38,0
-38,8
-40,3
-40,1

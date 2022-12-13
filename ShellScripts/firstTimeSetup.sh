@@ -9,6 +9,7 @@ pip install distinctipy
 pip install numpy
 pip install pandas
 pip install PyQt5
+python3 GenSimPk.py
 cd ../Website/backend
 npm i
 cd ..

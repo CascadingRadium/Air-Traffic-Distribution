@@ -103,7 +103,7 @@ def StartSim(event):
             time=plt.text(6000000, 3350000, time, fontsize = 220)
             ax.add_collection(toPlotNow[plotIndex])
             fig.canvas.draw()
-            plt.pause(0.05)
+            plt.pause(0.1)
             toPlotNow[plotIndex].remove()
             time.remove()
             plotIndex+=1
