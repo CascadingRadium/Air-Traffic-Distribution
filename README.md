@@ -64,10 +64,10 @@ https://user-images.githubusercontent.com/53022689/207081997-caba21ec-5c32-49b5-
 The simulator is built using Python and the gifs presented below show the traffic being distributed for various test scenarios given as input. Each aircraft is represented by a unique colour and the airports are shown in blue. The airplanes are observed to be spread out and seperated by large distances mid-air, with queues being formed near the airports, similar to how it happens in reality.
 </p>
 <p float="left">
-  <img src="https://user-images.githubusercontent.com/53022689/207158071-161ee8f7-e478-4caf-8b03-4c2d8d62280b.gif" width="40%" height="auto"/>
-  <img src="https://user-images.githubusercontent.com/53022689/207126706-019f56b0-9610-4611-aecb-658b4a193f96.gif" width="58%" height="auto"/>
-  <img src="https://user-images.githubusercontent.com/53022689/207129635-0408aa0c-4143-4372-8050-c11ab8d3ea89.gif" width="46%" height="auto"/>
-  <img src="https://user-images.githubusercontent.com/53022689/207155181-85df6c9c-66c8-4623-863e-1c117c7bba0b.gif" width="52%" height="auto"/>
+  <img src="Demo/SimDemo1.gif" width="40%" height="auto"/>
+  <img src="Demo/SimDemo2.gif" width="58%" height="auto"/>
+  <img src="Demo/SimDemo3.gif" width="46%" height="auto"/>
+  <img src="Demo/SimDemo4.gif" width="52%" height="auto"/>
 </p>
 
 <p align="justify"> 
