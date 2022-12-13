@@ -71,7 +71,7 @@ The simulator is built using Python and the gifs presented below show the traffi
 </p>
 
 <p align="justify"> 
-To evaluate the project, one needs to run the shell script “runEvaluator.sh” provided in the root. The shell script will generate a flight schedule to be uploaded to the website. This schedule is taken from ASDI data for August 16 - 19, 2013. The schedule is taken for a particular date in that interval. One can follow the on-screen prompts to get numerical values for our solution's benefit over the existing Air Traffic Management system currently deployed in the USA. 
+To evaluate the project, one needs to run the shell script “runEvaluator.sh” provided in the root. The shell script will generate a flight schedule to be uploaded to the website. This schedule is taken from ASDI data for August 16 - 19, 2013. The schedule is taken for a particular date in that interval. One can follow the on-screen prompts to get numerical values for our solution’s benefit over the existing Air Traffic Management system currently deployed in the USA. The relevant charts and heatmaps are also generated in the OutputImages folder. We have executed the code with the input flight schedules taken from the tested dates and have presented the output in the Results Folder.  
 </p>  
 
 ```
