@@ -1,0 +1,62 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Air Traffic Management Using a GPU-Accelerated Genetic
+  Algorithm
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - given-names: Rahul
+    family-names: Rampure
+    email: rahulrampure@hotmail.com
+    affiliation: PES University
+    orcid: 'https://orcid.org/0000-0003-0050-6442'
+  - given-names: Raghav
+    family-names: Tiruvallur
+    email: rtiruvallur@gmail.com
+    affiliation: PES University
+  - given-names: Vybhav
+    family-names: Acharya
+    email: vybhavacharya@yahoo.com
+    affiliation: PES University
+  - given-names: Shashank
+    family-names: Navad
+    email: shashanknavad@gmail.com
+    affiliation: PES University
+  - given-names: Preethi
+    family-names: P
+    email: preethip@pes.edu
+    affiliation: PES University
+identifiers:
+  - type: doi
+    value: 10.2478/ttj-2023-0021
+repository-code: >-
+  https://github.com/CascadingRadium/Air-Traffic-Distribution
+abstract: >-
+  Air traffic management is becoming highly complex with the
+  rapid increase in the number of commercial and cargo
+  flights,leading to increased traffic congestion and flight
+  delays. To mitigate these issues, we present a flight path
+  generation system thatdistributes the aeroplanes across
+  the airspace and imparts minimal delays to the flight if
+  required, thus ensuring that the aircraft followsthe
+  shortest route wherein it encounters the least amount of
+  traffic. We develop a parallel genetic algorithm in CUDA-C
+  with a novelfitness function allowing the system to reach
+  an optimal solution where the air traffic density is
+  minimised. The proposed algorithmwas tested on one day’s
+  domestic flight schedule and achieved an 18% reduction in
+  traffic density, with the flight times and delaysremaining
+  proportional to the data observed in the existing air
+  traffic management system.
+keywords:
+  - Genetic Algorithm
+  - Air Traffic Management
+  - CUDA
+  - Spectral Clustering
+license: MIT
+commit: 7fea8f5
+version: '5.0'
+date-released: '2022-12-13'
