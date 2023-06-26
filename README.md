@@ -81,3 +81,15 @@ sudo chmod +x runEvaluator.sh
 [DATE OPTION] = [2013-08-16 | 2013-08-17 | 2013-08-18 | 2013-08-19]  // Date to evaluate for
 [NUMBER OF FLIGHTS OPTION] = [-1 | X]  // -1 for the complete flight schedule or X for a truncated schedule with X flights  
 ```
+<h2 align="center">Cite our work</h2>
+<p align="justify"> 
+Published in <a href = "https://doi.org/10.2478/ttj-2023-0021">Transport and Telecommunication Journal, Vol. 24, Issue 3 (June 2023)</a>. To cite our work, use the following </p>  
+
+  ```
+  Rampure,R.,Tiruvallur,R.,Acharya,V.,Navad,S. & Preethi,P.(2023).
+  Air Traffic Management Using a GPU-Accelerated Genetic Algorithm.
+  Transport and Telecommunication Journal,24(3) 266-277.
+  https://doi.org/10.2478/ttj-2023-0021
+  ```
+
+
