@@ -34,11 +34,11 @@
 </p>
 <h2 align="center">Abstract</h2>
 <ul align="justify">
-<li>The idea presented here is a Genetic Algorithm developed in CUDA and C that allows a flight dispatcher to obtain a flight plan using a flight schedule, which is a list of prospective flights with each flight’s departure and arrival airports, scheduled departure time, and cruise speed.</li>
-<li>The algorithm then generates paths for each of these flights so that the airplane encounters the least amount of mid-air traffic along its route, reducing air traffic density. We do so by considering the time-varying position of the plane and ensuring that the number of other aircraft near it remains minimal throughout its flight.</li>
-<li>The algorithm considers adding a minimal delay to the departure of an aircraft as well, since doing so would allow for a shorter route with lesser en-route traffic and compares the benefit of this method to a longer route, which avoids most of the traffic.</li> 
-<li>We add a constraint to the algorithm according to which the departure and arrival airports must have at least one runway available for the aeroplane to use at the time of departure and arrival, respectively, effectively performing an aircraft-to-runway mapping at the airports.</li>
-<li>Hence, the output the dispatcher receives will be each flight’s actual departure time, which considers flight delays, and the optimal route for each aeroplane. We develop an interactive website that the dispatcher can use to enter/upload the schedule and execute the algorithm at the click of a button. Finally, we developed a python simulator that shows each aircraft’s position along its path over time.</li>
+<li>This proposal introduces a Genetic Algorithm implemented in CUDA and C that enables a flight dispatcher to generate flight plans based on a schedule containing prospective flights. The schedule includes details such as departure and arrival airports, scheduled departure time, and cruise speed for each flight.</li>
+<li>By utilizing this algorithm, flight paths are generated for each aircraft with the goal of minimizing mid-air traffic, thereby reducing air traffic congestion. The algorithm takes into account the dynamic position of the airplane over time and ensures that the number of nearby aircraft remains minimal throughout the flight.</li>
+<li>Additionally, the algorithm considers the possibility of introducing slight delays to aircraft departures. This strategy aims to create shorter routes with less en-route traffic. A comparison is made between the benefits of this approach and longer routes that avoid most of the traffic.</li>
+<li>A constraint is imposed on the algorithm, requiring that both the departure and arrival airports have at least one available runway for the aircraft to use at the specified times. This constraint effectively establishes a mapping between aircraft and runways at the respective airports.</li>
+<li>Consequently, the flight dispatcher receives the actual departure times for each flight, accounting for any delays, as well as the optimal routes for each aircraft. To facilitate this process, an interactive website has been developed, allowing the dispatcher to input/upload the schedule and execute the algorithm with a simple click. Furthermore, a Python simulator has been created to visualize the aircraft positions along their paths over time.</li>
 </ul>
 <h2 align="center">System Requirements, Execution and Evaluation</h2>
 <p align="justify"> The following set of requirements must be satisfied by the execution environment before the repository is cloned.</p>
@@ -61,7 +61,7 @@ The video below shows the website in use:
 
 https://user-images.githubusercontent.com/53022689/207081997-caba21ec-5c32-49b5-b5d3-af1a7a801299.mp4
 <p align ="justify">
-The simulator is built using Python and the gifs presented below show the traffic being distributed for various test scenarios given as input. Each aircraft is represented by a unique colour and the airports are shown in blue. The airplanes are observed to be spread out and seperated by large distances mid-air, with queues being formed near the airports, similar to how it happens in reality.
+The Python-based simulator generates visual representations of traffic distribution for different test scenarios. The accompanying GIFs below illustrate these scenarios. Each aircraft is assigned a distinct color, while the airports are depicted in blue. The GIFs reveal that the airplanes are dispersed throughout the airspace, maintaining significant distances between each other. Notably, queues of aircraft can be observed forming near the airports, replicating real-world situations.
 </p>
 <p float="left">
   <img src="Demo/SimDemo1.gif" width="40%" height="auto"/>
@@ -71,7 +71,7 @@ The simulator is built using Python and the gifs presented below show the traffi
 </p>
 
 <p align="justify"> 
-To evaluate the project, one needs to run the shell script “runEvaluator.sh” provided in the root. The shell script will generate a flight schedule to be uploaded to the website. This schedule is taken from ASDI data for August 16 - 19, 2013. The schedule is taken for a particular date in that interval. One can follow the on-screen prompts to get numerical values for our solution’s benefit over the existing Air Traffic Management system currently deployed in the USA. The relevant charts and heatmaps are also generated in the OutputImages folder. We have executed the code with the input flight schedules taken from the tested dates and have presented the output in the Results Folder.  
+In order to evaluate the project, the provided shell script "runEvaluator.sh" should be executed from the root directory. This script generates a flight schedule that can be uploaded to the project's website. The flight schedule is derived from ASDI (Aircraft Situation Display to Industry) data, specifically for the period of August 16-19, 2013. The script prompts the user for input and provides numerical values indicating the benefits of the project's solution compared to the existing Air Traffic Management system currently deployed in the USA. Additionally, relevant charts and heatmaps are generated and stored in the OutputImages folder. The execution of the code has been performed using flight schedules obtained from the tested dates, and the corresponding output can be found in the Results Folder.
 </p>  
 
 ```
